@@ -10,17 +10,23 @@ import { Logo } from './Logo';
 import { User, Mail, Lock, Globe, GraduationCap, Briefcase } from 'lucide-react';
 import { authService } from '../services/api';
 import { VerificationScreen } from './auth/VerificationScreen';
+import { useToast } from '../contexts/ToastContext';
 
 interface RegisterScreenProps {
   onSwitch: () => void;
+  onVerifySuccess?: () => void;
 }
 
-export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onSwitch }) => {
+export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onSwitch, onVerifySuccess }) => {
   const { t, language, setLanguage } = useLanguage();
+  const { showToast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const [showVerification, setShowVerification] = useState(false);
   const [registeredUserId, setRegisteredUserId] = useState<number | null>(null);
+
+  // Registration step: 'role' or 'info'
+  const [step, setStep] = useState<'role' | 'info'>('role');
 
   // Default to Student (4)
   const [roleId, setRoleId] = useState<number>(4);
@@ -28,14 +34,12 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onSwitch }) => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
-    gender: '',
     email: '',
     phone: '',
-    nationality: '',
     password: '',
     confirmPassword: '',
   });
-  
+
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const validate = () => {
@@ -45,8 +49,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onSwitch }) => {
 
     if (!formData.firstName) newErrors.firstName = t.required;
     if (!formData.lastName) newErrors.lastName = t.required;
-    if (!formData.gender) newErrors.gender = t.required;
-    
+
     if (!formData.email) {
       newErrors.email = t.required;
     } else if (!emailRegex.test(formData.email)) {
@@ -59,12 +62,11 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onSwitch }) => {
       newErrors.phone = "Must start with 5 and be 9 digits";
     }
 
-    if (!formData.nationality) newErrors.nationality = t.required;
     if (!formData.password) newErrors.password = t.required;
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = t.passwordsNoMatch;
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -74,28 +76,47 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onSwitch }) => {
     if (!validate()) return;
 
     const apiData = {
-        ...formData,
-        phone: `+966${formData.phone}`,
-        role_id: roleId // Include selected role
+      first_name: formData.firstName,
+      last_name: formData.lastName,
+      email: formData.email,
+      phone_number: `+966${formData.phone}`,
+      password: formData.password,
+      role_id: roleId
     };
 
     setIsLoading(true);
     try {
       const response = await authService.register(apiData);
       // Assuming register response contains user object with id
-      const userId = response.user?.id || response.data?.id;
-      
+      const userId = response.user?.id || response.data?.id || response.user?.data?.id;
+
       if (userId) {
-          setRegisteredUserId(userId);
-          setShowVerification(true);
+        setRegisteredUserId(userId);
+        setShowVerification(true);
+        showToast(language === 'ar' ? "تم إرسال رمز التحقق" : "Verification code sent", 'success');
       } else {
-          // Fallback if no user ID returned but success (edge case)
-          alert(t.successRegister);
-          onSwitch(); // Go to login
+        // Fallback if no user ID returned but success (edge case)
+        showToast(t.successRegister || "Registration successful", 'success');
+        onSwitch(); // Go to login
       }
     } catch (error: any) {
       console.error(error);
-      alert(error.message || "Registration failed. Please try again.");
+      if (error.status === 422 && error.errors) {
+        setErrors(prev => ({
+          ...prev,
+          ...Object.keys(error.errors).reduce((acc: any, key) => {
+            // Map common backend field names to frontend state names if different
+            let field = key;
+            if (key === 'phone_number') field = 'phone';
+            if (key === 'first_name') field = 'firstName';
+            if (key === 'last_name') field = 'lastName';
+            acc[field] = error.errors[key][0];
+            return acc;
+          }, {})
+        }));
+      } else {
+        showToast(error.message || "Registration failed. Please try again.", 'error');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -113,13 +134,13 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onSwitch }) => {
   };
 
   if (showVerification && registeredUserId) {
-      return <VerificationScreen userId={registeredUserId} onSuccess={onSwitch} />;
+    return <VerificationScreen userId={registeredUserId} onSuccess={onVerifySuccess || onSwitch} />;
   }
 
   return (
     <div className="w-full max-w-lg space-y-6 bg-surface p-8 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 my-4">
-       <div className="flex justify-end">
-        <button 
+      <div className="flex justify-end">
+        <button
           onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
           className="flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-primary transition-colors"
         >
@@ -130,116 +151,153 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onSwitch }) => {
 
       <Logo className="scale-90" />
 
-      <div className="text-center">
-        <h2 className="mt-2 text-3xl font-bold tracking-tight text-text">
-          {t.registerTitle}
-        </h2>
-        <p className="mt-2 text-sm text-slate-500">
-          {t.registerSubtitle}
-        </p>
-      </div>
+      {step === 'role' ? (
+        <div className="space-y-6">
+          <div className="text-center">
+            <h2 className="mt-2 text-3xl font-bold tracking-tight text-text">
+              {language === 'ar' ? 'اختر نوع الحساب' : 'Choose Account Type'}
+            </h2>
+            <p className="mt-2 text-sm text-slate-500">
+              {language === 'ar' ? 'ابدأ باختيار دورك في المنصة' : 'Start by selecting your role on the platform'}
+            </p>
+          </div>
 
-      {/* Role Selection */}
-      <div className="grid grid-cols-2 gap-4 mt-6">
-          <div 
+          <div className="grid grid-cols-1 gap-4 mt-6">
+            <div
               onClick={() => setRoleId(4)}
-              className={`cursor-pointer p-4 rounded-xl border-2 flex flex-col items-center justify-center gap-2 transition-all ${roleId === 4 ? 'border-primary bg-primary/5 text-primary' : 'border-slate-100 bg-white text-slate-500 hover:border-slate-200'}`}
-          >
-              <GraduationCap size={24} />
-              <span className="font-bold text-sm">{language === 'ar' ? 'طالب' : 'Student'}</span>
-          </div>
-          <div 
+              className={`cursor-pointer p-6 rounded-2xl border-2 flex items-center gap-4 transition-all ${roleId === 4 ? 'border-primary bg-primary/5' : 'border-slate-100 bg-white hover:border-slate-200'}`}
+            >
+              <div className={`p-3 rounded-xl ${roleId === 4 ? 'bg-primary text-white' : 'bg-slate-100 text-slate-500'}`}>
+                <GraduationCap size={28} />
+              </div>
+              <div className="flex-1">
+                <p className={`font-bold text-lg ${roleId === 4 ? 'text-primary' : 'text-text'}`}>
+                  {language === 'ar' ? 'طالب' : 'Student'}
+                </p>
+                <p className="text-xs text-slate-500 mt-1">
+                  {language === 'ar' ? 'تعلم وطور مهاراتك مع نخبة من المعلمين' : 'Learn and develop your skills with elite teachers'}
+                </p>
+              </div>
+            </div>
+
+            <div
               onClick={() => setRoleId(3)}
-              className={`cursor-pointer p-4 rounded-xl border-2 flex flex-col items-center justify-center gap-2 transition-all ${roleId === 3 ? 'border-primary bg-primary/5 text-primary' : 'border-slate-100 bg-white text-slate-500 hover:border-slate-200'}`}
-          >
-              <Briefcase size={24} />
-              <span className="font-bold text-sm">{language === 'ar' ? 'معلم' : 'Teacher'}</span>
+              className={`cursor-pointer p-6 rounded-2xl border-2 flex items-center gap-4 transition-all ${roleId === 3 ? 'border-primary bg-primary/5' : 'border-slate-100 bg-white hover:border-slate-200'}`}
+            >
+              <div className={`p-3 rounded-xl ${roleId === 3 ? 'bg-primary text-white' : 'bg-slate-100 text-slate-500'}`}>
+                <Briefcase size={28} />
+              </div>
+              <div className="flex-1">
+                <p className={`font-bold text-lg ${roleId === 3 ? 'text-primary' : 'text-text'}`}>
+                  {language === 'ar' ? 'معلم / معهد' : 'Teacher / Institute'}
+                </p>
+                <p className="text-xs text-slate-500 mt-1">
+                  {language === 'ar' ? 'كن جزءاً من منصتنا التعليمية وقدم دوراتك' : 'Be part of our education platform and offer your courses'}
+                </p>
+              </div>
+            </div>
           </div>
-      </div>
 
-      <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Input
-            label={t.firstName}
-            placeholder={t.phName}
-            icon={<User size={18} />}
-            value={formData.firstName}
-            onChange={(e) => handleChange('firstName', e.target.value)}
-            error={errors.firstName}
-          />
-          <Input
-            label={t.lastName}
-            placeholder={t.phName}
-            icon={<User size={18} />}
-            value={formData.lastName}
-            onChange={(e) => handleChange('lastName', e.target.value)}
-            error={errors.lastName}
-          />
+          {roleId === 3 && (
+            <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl animate-fade-in">
+              <p className="text-sm text-blue-700 leading-relaxed">
+                {language === 'ar'
+                  ? 'يمكنك التسجيل كمعلم مستقل، مدرب لغات، مدرب دورات، أو كمعهد / مركز تدريب يقدم دورات مهنية عبر منصتنا.'
+                  : 'You can register as a private teacher, language instructor, course trainer, or as a training institute/center offering professional courses through our platform.'}
+              </p>
+            </div>
+          )}
+
+          <div className="pt-4">
+            <Button onClick={() => setStep('info')} className="w-full py-4 text-lg shadow-lg shadow-primary/20">
+              {language === 'ar' ? 'متابعة' : 'Continue'}
+            </Button>
+          </div>
         </div>
+      ) : (
+        <>
+          <div className="text-center">
+            <div className="flex items-center justify-between mb-2">
+              <button onClick={() => setStep('role')} className="text-sm text-slate-500 hover:text-primary flex items-center gap-1">
+                {language === 'ar' ? '← العودة' : '← Back'}
+              </button>
+              <span className="text-xs font-bold text-primary uppercase tracking-wider">
+                {roleId === 4 ? (language === 'ar' ? 'تسجيل طالب' : 'Student Registration') : (language === 'ar' ? 'تسجيل معلم' : 'Teacher Registration')}
+              </span>
+            </div>
+            <h2 className="text-3xl font-bold tracking-tight text-text">
+              {t.registerTitle}
+            </h2>
+            <p className="mt-2 text-sm text-slate-500">
+              {t.registerSubtitle}
+            </p>
+          </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-           <Select
-            label={t.gender}
-            options={[
-              { value: '', label: language === 'en' ? 'Select Gender' : 'اختر الجنس' },
-              { value: 'male', label: t.genderMale },
-              { value: 'female', label: t.genderFemale }
-            ]}
-            value={formData.gender}
-            onChange={(e) => handleChange('gender', e.target.value)}
-            error={errors.gender}
-          />
-           <CountrySelect
-            label={t.nationality}
-            value={formData.nationality}
-            onChange={(val) => handleChange('nationality', val)}
-            error={errors.nationality}
-          />
-        </div>
+          <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Input
+                label={t.firstName}
+                placeholder={t.phName}
+                icon={<User size={18} />}
+                value={formData.firstName}
+                onChange={(e) => handleChange('firstName', e.target.value)}
+                error={errors.firstName}
+              />
+              <Input
+                label={t.lastName}
+                placeholder={t.phName}
+                icon={<User size={18} />}
+                value={formData.lastName}
+                onChange={(e) => handleChange('lastName', e.target.value)}
+                error={errors.lastName}
+              />
+            </div>
 
-        <Input
-          label={t.email}
-          placeholder={t.phEmail}
-          icon={<Mail size={18} />}
-          value={formData.email}
-          onChange={(e) => handleChange('email', e.target.value)}
-          error={errors.email}
-        />
+            <Input
+              label={t.email}
+              placeholder={t.phEmail}
+              icon={<Mail size={18} />}
+              value={formData.email}
+              onChange={(e) => handleChange('email', e.target.value)}
+              error={errors.email}
+            />
 
-        <PhoneInput
-          label={t.phone}
-          value={formData.phone}
-          onChangeText={(text) => handleChange('phone', text)}
-          error={errors.phone}
-        />
+            <PhoneInput
+              label={t.phone}
+              value={formData.phone}
+              onChangeText={(text) => handleChange('phone', text)}
+              error={errors.phone}
+            />
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Input
-            label={t.password}
-            type="password"
-            placeholder={t.phPassword}
-            icon={<Lock size={18} />}
-            value={formData.password}
-            onChange={(e) => handleChange('password', e.target.value)}
-            error={errors.password}
-          />
-          <Input
-            label={t.confirmPassword}
-            type="password"
-            placeholder={t.phPassword}
-            icon={<Lock size={18} />}
-            value={formData.confirmPassword}
-            onChange={(e) => handleChange('confirmPassword', e.target.value)}
-            error={errors.confirmPassword}
-          />
-        </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Input
+                label={t.password}
+                type="password"
+                placeholder={t.phPassword}
+                icon={<Lock size={18} />}
+                value={formData.password}
+                onChange={(e) => handleChange('password', e.target.value)}
+                error={errors.password}
+              />
+              <Input
+                label={t.confirmPassword}
+                type="password"
+                placeholder={t.phPassword}
+                icon={<Lock size={18} />}
+                value={formData.confirmPassword}
+                onChange={(e) => handleChange('confirmPassword', e.target.value)}
+                error={errors.confirmPassword}
+              />
+            </div>
 
-        <div className="pt-4">
-          <Button type="submit" className="w-full shadow-lg shadow-primary/20" isLoading={isLoading}>
-            {t.registerBtn}
-          </Button>
-        </div>
-      </form>
+            <div className="pt-4">
+              <Button type="submit" className="w-full shadow-lg shadow-primary/20" isLoading={isLoading}>
+                {t.registerBtn}
+              </Button>
+            </div>
+          </form>
+        </>
+      )}
 
       <div className="text-center text-sm pb-2">
         <span className="text-slate-500">{t.haveAccount} </span>

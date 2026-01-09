@@ -8,6 +8,7 @@ import { PayoutsTab } from './admin/PayoutsTab';
 import { VerificationsTab } from './admin/VerificationsTab';
 import { BookingsTab } from './admin/BookingsTab';
 import { AdminDisputesTab } from './admin/DisputesTab';
+import { CoursesTab } from './admin/CoursesTab';
 import { SettingsTab } from './dashboard/SettingsTab';
 import { AdminOverviewTab } from './admin/AdminOverviewTab';
 import { Menu } from 'lucide-react';
@@ -27,6 +28,8 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ data
         return <AdminOverviewTab />;
       case 'users':
         return <UsersTab />;
+      case 'courses':
+        return <CoursesTab />;
       case 'bookings':
         return <BookingsTab />;
       case 'education':
@@ -46,9 +49,9 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ data
 
   return (
     <div className="min-h-screen bg-slate-50 flex font-sans">
-      <AdminSidebar 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
+      <AdminSidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
         onLogout={onLogout}
         isOpen={sidebarOpen}
         setIsOpen={setSidebarOpen}
@@ -57,15 +60,15 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ data
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Mobile Header */}
         <header className="lg:hidden bg-white border-b border-slate-200 p-4 flex items-center gap-4">
-            <button onClick={() => setSidebarOpen(true)} className="text-slate-600">
-                <Menu size={24} />
-            </button>
-            <h1 className="font-bold text-lg">Admin Dashboard</h1>
+          <button onClick={() => setSidebarOpen(true)} className="text-slate-600">
+            <Menu size={24} />
+          </button>
+          <h1 className="font-bold text-lg">Admin Dashboard</h1>
         </header>
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-            {renderContent()}
+          {renderContent()}
         </main>
       </div>
     </div>

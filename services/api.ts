@@ -30,15 +30,64 @@ export const tokenService = {
   isAuthenticated: () => !!localStorage.getItem(TOKEN_KEY),
 };
 
-import { 
-  WalletResponse, StudentPaymentMethod, AuthResponse, ReferenceItem, 
+export class ApiErrorHandler {
+  private static messageMap: Record<string, string> = {
+    "The provided credentials are incorrect.": "Email or password incorrect",
+    "The email has already been taken.": "Email already registered",
+    "The phone number has already been taken.": "Phone already registered",
+    "Invalid phone number format. Must be a valid KSA phone number.": "Invalid phone format",
+    "Phone number already registered.": "Phone already registered",
+    "Phone number already in use by another account.": "Phone in use",
+    "The new password confirmation does not match.": "Passwords don't match",
+    "Unauthenticated.": "Please log in",
+    "Token has expired or is invalid.": "Session expired",
+    "Invalid verification code.": "Code incorrect or expired",
+    "The profile photo must not be greater than 4MB.": "Image too large"
+  };
+
+  static getFriendlyMessage(message: string): string {
+    return this.messageMap[message] || message;
+  }
+
+  static async handleResponse(response: Response) {
+    if (response.ok) return await response.json();
+
+    let data;
+    try {
+      const text = await response.text();
+      data = JSON.parse(text);
+    } catch (e) {
+      if (response.status >= 500) {
+        throw new Error("Server error. Try later.");
+      }
+      throw new Error("An unexpected error occurred");
+    }
+
+    if (response.status === 401) {
+      window.dispatchEvent(new Event(AUTH_SESSION_EXPIRED));
+      throw new Error(this.getFriendlyMessage(data.message || "Session expired"));
+    }
+
+    if (response.status === 422) {
+      const error: any = new Error(this.getFriendlyMessage(data.message || "Validation failed"));
+      error.status = 422;
+      error.errors = data.errors;
+      throw error;
+    }
+
+    throw new Error(this.getFriendlyMessage(data.message || data.error || "API Request Failed"));
+  }
+}
+
+import {
+  WalletResponse, StudentPaymentMethod, AuthResponse, ReferenceItem,
   TeacherSubject, TeacherSubjectDetail, BankReference, BankAccount, UserData, TeacherProfile,
   BookingPayload, PaymentPayload, Course, Session, Booking, Certificate,
   CourseCategory, CoursePayload, AvailableTime, AvailabilityPayload,
   AdminUser, AdminTeacher, AdminBooking, AdminDispute, PayoutRequest, Service
 } from '../types';
 
-export type { 
+export type {
   AuthResponse, UserData, TeacherProfile, TeacherSubject, TeacherSubjectDetail,
   BookingPayload, PaymentPayload, Booking, Session, Certificate,
   Course, CourseCategory, CoursePayload, AvailableTime, AvailabilityPayload,
@@ -49,39 +98,39 @@ export type {
 export const AUTH_SESSION_EXPIRED = 'auth:session-expired';
 
 const extractArray = (response: any): any[] => {
-    if (!response) return [];
-    let rawData = response;
-    
-    if (response.data) {
-        rawData = response.data;
-        if (rawData.data && Array.isArray(rawData.data)) {
-            rawData = rawData.data;
-        }
-    }
-    
-    if (Array.isArray(rawData)) {
-        if (rawData.length > 0 && Array.isArray(rawData[0])) {
-            return rawData.flat(Infinity);
-        }
-        return rawData;
-    }
+  if (!response) return [];
+  let rawData = response;
 
-    if (response.education_levels && Array.isArray(response.education_levels)) return response.education_levels;
-    if (response.classes && Array.isArray(response.classes)) return response.classes;
-    if (response.subject && Array.isArray(response.subject)) return response.subject; 
-    if (response.subjects && Array.isArray(response.subjects)) return response.subjects;
-    
-    return [];
+  if (response.data) {
+    rawData = response.data;
+    if (rawData.data && Array.isArray(rawData.data)) {
+      rawData = rawData.data;
+    }
+  }
+
+  if (Array.isArray(rawData)) {
+    if (rawData.length > 0 && Array.isArray(rawData[0])) {
+      return rawData.flat(Infinity);
+    }
+    return rawData;
+  }
+
+  if (response.education_levels && Array.isArray(response.education_levels)) return response.education_levels;
+  if (response.classes && Array.isArray(response.classes)) return response.classes;
+  if (response.subject && Array.isArray(response.subject)) return response.subject;
+  if (response.subjects && Array.isArray(response.subjects)) return response.subjects;
+
+  return [];
 };
 
 const fetchWithAuth = async (endpoint: string, options: RequestInit = {}) => {
   const token = tokenService.getToken();
-  
+
   const headers: HeadersInit = {
     'Accept': 'application/json',
     'ngrok-skip-browser-warning': 'true',
     'Bypass-Tunnel-Reminder': 'true',
-    'cf-nnt': '1', 
+    'cf-nnt': '1',
     'X-Requested-With': 'XMLHttpRequest',
     'Cache-Control': 'no-cache',
     ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
@@ -89,47 +138,87 @@ const fetchWithAuth = async (endpoint: string, options: RequestInit = {}) => {
   };
 
   if (!(options.body instanceof FormData)) {
-      (headers as any)['Content-Type'] = 'application/json';
+    (headers as any)['Content-Type'] = 'application/json';
   }
 
   const fullUrl = `${API_BASE_URL}${endpoint}`;
-  
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
   try {
-      const response = await fetch(fullUrl, { ...options, headers });
-      
-      if (response.status === 401) {
-          window.dispatchEvent(new Event(AUTH_SESSION_EXPIRED));
-          throw new Error("Session expired. Please login again.");
-      }
+    const response = await fetch(fullUrl, {
+      ...options,
+      headers,
+      signal: controller.signal
+    });
 
-      const text = await response.text();
-      
-      if (text.trim().startsWith('<!DOCTYPE html>') || text.trim().startsWith('<html')) {
-          throw new Error("The API returned HTML. Cloudflare or a firewall might be blocking the request.");
-      }
+    clearTimeout(timeoutId);
 
-      let data;
-      try {
-          data = JSON.parse(text);
-      } catch (e) {
-          throw new Error("Invalid Server Response (JSON Expected)");
-      }
+    // Check for HTML response (Cloudflare/Firewall)
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('text/html')) {
+      throw new Error("The API returned HTML. Cloudflare or a firewall might be blocking the request.");
+    }
 
-      if (!response.ok && data.data?.session_status !== 'waiting_for_teacher') {
-        const error: any = new Error(data.message || data.error || "API Request Failed");
-        error.status = response.status;
-        error.errors = data.errors;
-        error.original = data;
-        throw error;
-      }
-
-      return data;
+    return await ApiErrorHandler.handleResponse(response);
   } catch (error: any) {
-      if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
-           throw new Error(`Network Connection Failed: ${API_BASE_URL}`);
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error("Connection timeout. Try again.");
+    }
+    if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
+      // Check if navigator is offline
+      if (!navigator.onLine) {
+        throw new Error("No internet. Check connection and retry.");
       }
-      throw error;
+      throw new Error(`Network Connection Failed: ${API_BASE_URL}`);
+    }
+    throw error;
   }
+};
+
+export const fetchWithProgress = (endpoint: string, options: { method?: string, body: FormData, onProgress: (pct: number) => void }) => {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    const fullUrl = `${API_BASE_URL}${endpoint}`;
+    const token = tokenService.getToken();
+
+    xhr.open(options.method || 'POST', fullUrl);
+    xhr.setRequestHeader('Accept', 'application/json');
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    if (token) {
+      xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+    }
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) {
+        const percentComplete = (e.loaded / e.total) * 100;
+        options.onProgress(Math.round(percentComplete));
+      }
+    };
+
+    xhr.onload = async () => {
+      if (xhr.status === 401) {
+        window.dispatchEvent(new Event(AUTH_SESSION_EXPIRED));
+        return reject(new Error("Session expired"));
+      }
+
+      try {
+        const data = JSON.parse(xhr.responseText);
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve(data);
+        } else {
+          reject(new Error(data.message || "Upload failed"));
+        }
+      } catch (e) {
+        reject(new Error("Invalid server response"));
+      }
+    };
+
+    xhr.onerror = () => reject(new Error("Network Error"));
+    xhr.send(options.body);
+  });
 };
 
 export const authService = {
@@ -163,10 +252,10 @@ export const teacherService = {
   getEducationLevels: () => fetchWithAuth('/teacher/education-levels').then(extractArray),
   getClassesByLevel: (levelId: number) => fetchWithAuth(`/teacher/classes/${levelId}`).then(extractArray),
   getSubjectsByClass: (classId: number) => fetchWithAuth(`/teacher/subjectsClasses/${classId}`).then(extractArray),
-  getServicesList: () => fetchWithAuth('/teacher/services').then(extractArray), 
+  getServicesList: () => fetchWithAuth('/teacher/services').then(extractArray),
   updateInfo: (data: any) => fetchWithAuth('/teacher/info', { method: 'POST', body: JSON.stringify(data) }),
   addSubjects: (subject_ids: number[]) => fetchWithAuth('/teacher/subjects', { method: 'POST', body: JSON.stringify({ subjects_id: subject_ids }) }),
-  getSubjects: () => fetchWithAuth('/teacher/subjects').then(extractArray), 
+  getSubjects: () => fetchWithAuth('/teacher/subjects').then(extractArray),
   deleteSubject: (id: number) => fetchWithAuth(`/teacher/subjects/${id}`, { method: 'DELETE' }),
   getAvailability: () => fetchWithAuth('/teacher/availability').then(extractArray),
   saveAvailability: (payload: AvailabilityPayload) => fetchWithAuth('/teacher/availability', { method: 'POST', body: JSON.stringify(payload) }),
@@ -175,10 +264,10 @@ export const teacherService = {
   createCourse: (data: FormData) => fetchWithAuth('/teacher/courses', { method: 'POST', body: data }),
   updateCourse: (id: number, data: any) => fetchWithAuth(`/teacher/courses/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteCourse: (id: number) => fetchWithAuth(`/teacher/courses/${id}`, { method: 'DELETE' }),
-  getTeacherSessions: () => fetchWithAuth('/teacher/sessions').then(extractArray), 
+  getTeacherSessions: () => fetchWithAuth('/teacher/sessions').then(extractArray),
   startSession: (id: number) => fetchWithAuth(`/teacher/sessions/${id}/start`, { method: 'POST' }),
   endSession: (id: number) => fetchWithAuth(`/teacher/sessions/${id}/end`, { method: 'POST' }),
-  getWallet: () => fetchWithAuth('/teacher/wallet').then(res => res.data || res), 
+  getWallet: () => fetchWithAuth('/teacher/wallet').then(res => res.data || res),
   getBankAccounts: () => fetchWithAuth('/teacher/payment-methods').then(extractArray),
   withdraw: (data: { amount: number, payment_method_id?: number }) => fetchWithAuth('/teacher/wallet/withdraw', { method: 'POST', body: JSON.stringify(data) }),
   cancelWithdrawal: (id: number) => fetchWithAuth(`/teacher/wallet/withdrawals/${id}`, { method: 'DELETE' }),
@@ -195,12 +284,12 @@ export const studentService = {
   getClasses: (levelId: number) => fetchWithAuth(`/classes?education_level_id=${levelId}`).then(extractArray),
   getReferenceSubjects: (classId: number) => fetchWithAuth(`/subjects?class_id=${classId}`).then(extractArray),
   getTeachers: (filters: any = {}) => {
-      const query = new URLSearchParams(filters).toString();
-      return fetchWithAuth(`/student/teachers?${query}`).then(extractArray);
+    const query = new URLSearchParams(filters).toString();
+    return fetchWithAuth(`/student/teachers?${query}`).then(extractArray);
   },
   getCourses: (filters: any = {}) => {
-      const query = new URLSearchParams(filters).toString();
-      return fetchWithAuth(`/student/courses?${query}`).then(extractArray);
+    const query = new URLSearchParams(filters).toString();
+    return fetchWithAuth(`/student/courses?${query}`).then(extractArray);
   },
   createBooking: (data: BookingPayload) => fetchWithAuth('/student/booking', { method: 'POST', body: JSON.stringify(data) }),
   getBookings: () => fetchWithAuth('/student/booking').then(extractArray),
@@ -213,14 +302,14 @@ export const studentService = {
   deletePaymentMethod: (id: number) => fetchWithAuth(`/student/payment-methods/${id}`, { method: 'DELETE' }),
   getCertificates: () => fetchWithAuth('/student/certificates').then(extractArray),
   downloadInvoice: (id: number) => {
-      const token = tokenService.getToken();
-      const url = `${API_BASE_URL}/student/booking/${id}/invoice?token=${token}`;
-      window.open(url, '_blank');
+    const token = tokenService.getToken();
+    const url = `${API_BASE_URL}/student/booking/${id}/invoice?token=${token}`;
+    window.open(url, '_blank');
   },
   downloadCertificate: (id: number) => {
-      const token = tokenService.getToken();
-      const url = `${API_BASE_URL}/student/certificates/${id}/download?token=${token}`;
-      window.open(url, '_blank');
+    const token = tokenService.getToken();
+    const url = `${API_BASE_URL}/student/certificates/${id}/download?token=${token}`;
+    window.open(url, '_blank');
   },
 };
 
@@ -239,12 +328,58 @@ export const adminService = {
   getDisputes: () => fetchWithAuth('/admin/disputes').then(extractArray),
   getPayouts: () => fetchWithAuth('/admin/payout-requests').then(extractArray),
   approvePayout: (id: number, receipt: File) => {
-      const formData = new FormData();
-      formData.append('receipt', receipt);
-      return fetchWithAuth(`/admin/payout-requests/${id}/approve`, { method: 'POST', body: formData });
+    const formData = new FormData();
+    formData.append('receipt', receipt);
+    return fetchWithAuth(`/admin/payout-requests/${id}/approve`, { method: 'POST', body: formData });
   },
   rejectPayout: (id: number, reason: string) => fetchWithAuth(`/admin/payout-requests/${id}/reject`, { method: 'POST', body: JSON.stringify({ reason }) }),
   getServices: () => fetchWithAuth('/admin/services').then(extractArray),
+
+  // Course Management
+  getCourses: (filters: any = {}) => {
+    const query = new URLSearchParams(filters).toString();
+    return fetchWithAuth(`/admin/courses?${query}`);
+  },
+  getCourseDetails: (id: number) => fetchWithAuth(`/admin/courses/${id}`),
+  approveCourse: (id: number) => fetchWithAuth(`/admin/courses/${id}/approve`, { method: 'PUT' }),
+  rejectCourse: (id: number, reason: string) => fetchWithAuth(`/admin/courses/${id}/reject`, { method: 'PUT', body: JSON.stringify({ rejection_reason: reason }) }),
+  updateCourseStatus: (id: number, status: number) => fetchWithAuth(`/admin/courses/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) }),
+  deleteCourse: (id: number) => fetchWithAuth(`/admin/courses/${id}`, { method: 'DELETE' }),
+  getPendingCourses: () => fetchWithAuth('/admin/courses/pending-approval'),
+  featureCourse: (id: number, isFeatured: boolean) => fetchWithAuth(`/admin/courses/${id}/feature`, { method: 'PUT', body: JSON.stringify({ is_featured: isFeatured }) }),
+
+  // Education Levels
+  getEducationLevels: (filters: any = {}) => {
+    const query = new URLSearchParams(filters).toString();
+    return fetchWithAuth(`/admin/education-levels?${query}`);
+  },
+  createEducationLevel: (data: any) => fetchWithAuth('/admin/education-levels', { method: 'POST', body: JSON.stringify(data) }),
+  getEducationLevelDetails: (id: number) => fetchWithAuth(`/admin/education-levels/${id}`),
+  updateEducationLevel: (id: number, data: any) => fetchWithAuth(`/admin/education-levels/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteEducationLevel: (id: number, force = false) => fetchWithAuth(`/admin/education-levels/${id}${force ? '/force' : ''}`, { method: 'DELETE' }),
+  restoreEducationLevel: (id: number) => fetchWithAuth(`/admin/education-levels/${id}/restore`, { method: 'POST' }),
+
+  // Classes
+  getClasses: (filters: any = {}) => {
+    const query = new URLSearchParams(filters).toString();
+    return fetchWithAuth(`/admin/classes?${query}`);
+  },
+  createClass: (data: any) => fetchWithAuth('/admin/classes', { method: 'POST', body: JSON.stringify(data) }),
+  getClassDetails: (id: number) => fetchWithAuth(`/admin/classes/${id}`),
+  updateClass: (id: number, data: any) => fetchWithAuth(`/admin/classes/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteClass: (id: number, force = false) => fetchWithAuth(`/admin/classes/${id}${force ? '/force' : ''}`, { method: 'DELETE' }),
+  restoreClass: (id: number) => fetchWithAuth(`/admin/classes/${id}/restore`, { method: 'POST' }),
+
+  // Subjects
+  getSubjects: (filters: any = {}) => {
+    const query = new URLSearchParams(filters).toString();
+    return fetchWithAuth(`/admin/subjects?${query}`);
+  },
+  createSubject: (data: any) => fetchWithAuth('/admin/subjects', { method: 'POST', body: JSON.stringify(data) }),
+  getSubjectDetails: (id: number) => fetchWithAuth(`/admin/subjects/${id}`),
+  updateSubject: (id: number, data: any) => fetchWithAuth(`/admin/subjects/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteSubject: (id: number, force = false) => fetchWithAuth(`/admin/subjects/${id}${force ? '/force' : ''}`, { method: 'DELETE' }),
+  restoreSubject: (id: number) => fetchWithAuth(`/admin/subjects/${id}/restore`, { method: 'POST' }),
 };
 
 export const referenceService = {
@@ -254,8 +389,8 @@ export const referenceService = {
 };
 
 export const getStorageUrl = (path: string | null | undefined) => {
-    if (!path) return '';
-    if (path.startsWith('http')) return path;
-    const baseUrl = API_BASE_URL.replace(/\/api\/?$/, '');
-    return `${baseUrl}/storage/${path.replace(/^\//, '')}`;
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  const baseUrl = API_BASE_URL.replace(/\/api\/?$/, '');
+  return `${baseUrl}/storage/${path.replace(/^\//, '')}`;
 };

@@ -8,6 +8,7 @@ import { Mail, Lock, Globe, AlertCircle, Settings, Save, ShieldCheck } from 'luc
 import { authService, AuthResponse, API_BASE_URL, setApiUrl, resetApiUrl } from '../services/api';
 import { ForgotPasswordScreen } from './auth/ForgotPasswordScreen';
 import { useFcm } from '../hooks/useFcm';
+import { useToast } from '../contexts/ToastContext';
 
 interface LoginScreenProps {
   onSwitch: () => void;
@@ -16,6 +17,7 @@ interface LoginScreenProps {
 
 export const LoginScreen: React.FC<LoginScreenProps> = ({ onSwitch, onLoginSuccess }) => {
   const { t, language, setLanguage } = useLanguage();
+  const { showToast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
@@ -67,26 +69,26 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onSwitch, onLoginSucce
 
       const response = await authService.login(payload);
       onLoginSuccess(response);
+      showToast(t.loginSuccess || "Login successful", 'success');
     } catch (error: any) {
       console.error("Login Error Catch:", error);
 
-      // Robust error message extraction
-      let errorMsg = "Login failed.";
-      if (typeof error === 'string') {
-        errorMsg = error;
-      } else if (error.message) {
-        errorMsg = error.message;
-      } else if (error.error) {
-        errorMsg = error.error;
-      } else if (error.original && typeof error.original === 'object') {
-        errorMsg = error.original.message || error.original.error || JSON.stringify(error.original);
-      } else if (typeof error === 'object') {
-        errorMsg = JSON.stringify(error);
-      }
+      if (error.status === 422 && error.errors) {
+        setErrors(prev => ({
+          ...prev,
+          ...Object.keys(error.errors).reduce((acc: any, key) => {
+            acc[key] = error.errors[key][0];
+            return acc;
+          }, {})
+        }));
+      } else {
+        const errorMsg = error.message || "Login failed.";
+        setApiError(errorMsg);
+        showToast(errorMsg, 'error');
 
-      setApiError(errorMsg);
-      if (errorMsg.includes('Network') || errorMsg.includes('HTML')) {
-        setShowSettings(true);
+        if (errorMsg.includes('Network') || errorMsg.includes('HTML')) {
+          setShowSettings(true);
+        }
       }
     } finally {
       setIsLoading(false);

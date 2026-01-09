@@ -8,20 +8,29 @@ interface PhoneInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   onChangeText: (text: string) => void;
 }
 
-export const PhoneInput: React.FC<PhoneInputProps> = ({ 
-  label, 
-  error, 
-  value, 
+export const PhoneInput: React.FC<PhoneInputProps> = ({
+  label,
+  error,
+  value,
   onChangeText,
-  className = '', 
-  ...props 
+  className = '',
+  ...props
 }) => {
   const { direction } = useLanguage();
-  
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Only allow numbers
-    const val = e.target.value.replace(/\D/g, '');
-    onChangeText(val);
+    let val = e.target.value.replace(/\D/g, '');
+
+    // Auto-normalize if user pastes variations
+    if (val.startsWith('9665') && val.length >= 12) {
+      val = val.substring(3); // Remove 966
+    } else if (val.startsWith('05') && val.length === 10) {
+      val = val.substring(1); // Remove leading 0
+    } else if (val.startsWith('5') && val.length > 9) {
+      val = val.substring(0, 9); // Limit to 9 digits
+    }
+
+    onChangeText(val.substring(0, 9));
   };
 
   return (
@@ -29,12 +38,12 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
       <label className="block text-sm font-medium text-text mb-1">
         {label}
       </label>
-      <div className="relative flex" dir="ltr"> 
+      <div className="relative flex" dir="ltr">
         {/* Fixed Country Code - Always LTR for number layout */}
         <div className="flex items-center justify-center rounded-l-lg border border-r-0 border-slate-200 bg-slate-100 px-3 text-slate-600 font-semibold">
           <span className="mr-1">🇸🇦</span> +966
         </div>
-        
+
         <input
           {...props}
           value={value}

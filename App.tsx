@@ -27,80 +27,80 @@ const AppContent = () => {
 
   useEffect(() => {
     const syncToken = async () => {
-        if (userData && tokenService.isAuthenticated() && userData.user.role) {
-            if (permission === 'granted') {
-                try {
-                    const token = await getFcmToken();
-                    if (token) {
-                        if (userData.user.role === 'student') {
-                            await studentService.saveFcmToken(token);
-                        } else if (userData.user.role === 'teacher') {
-                            await teacherService.saveFcmToken(token);
-                        }
-                    }
-                } catch (err) {
-                    console.error("[App] Token sync failed:", err);
-                }
+      if (userData && tokenService.isAuthenticated() && userData.user.role) {
+        if (permission === 'granted') {
+          try {
+            const token = await getFcmToken();
+            if (token) {
+              if (userData.user.role === 'student') {
+                await studentService.saveFcmToken(token);
+              } else if (userData.user.role === 'teacher') {
+                await teacherService.saveFcmToken(token);
+              }
             }
+          } catch (err) {
+            console.error("[App] Token sync failed:", err);
+          }
         }
+      }
     };
     const timer = setTimeout(syncToken, 3000);
     return () => clearTimeout(timer);
   }, [userData, permission]);
 
   const processUserObject = (userObj: any, token: string): AuthResponse | null => {
-      if (!userObj) return null;
-      
-      const rid = Number(userObj.role_id !== undefined ? userObj.role_id : userObj.roleId);
-      
-      if (isNaN(rid)) {
-           console.error("Auth Failed: role_id is not a number:", userObj);
-           return null;
-      }
+    if (!userObj) return null;
 
-      let finalRole: string;
-      switch(rid) {
-        case 1: finalRole = 'admin'; break;
-        case 3: finalRole = 'teacher'; break;
-        case 4: finalRole = 'student'; break;
-        default:
-          console.error(`CRITICAL: Unknown Role ID '${rid}'.`);
-          return null;
-      }
-      
-      return { user: { role: finalRole, data: userObj }, token };
+    const rid = Number(userObj.role_id !== undefined ? userObj.role_id : userObj.roleId);
+
+    if (isNaN(rid)) {
+      console.error("Auth Failed: role_id is not a number:", userObj);
+      return null;
+    }
+
+    let finalRole: string;
+    switch (rid) {
+      case 1: finalRole = 'admin'; break;
+      case 3: finalRole = 'teacher'; break;
+      case 4: finalRole = 'student'; break;
+      default:
+        console.error(`CRITICAL: Unknown Role ID '${rid}'.`);
+        return null;
+    }
+
+    return { user: { role: finalRole, data: userObj }, token };
   };
 
   const initAuth = async () => {
     setIsLoading(true);
     setAuthError(null);
     const token = tokenService.getToken();
-    
+
     if (!token) {
       setIsLoading(false);
       setCurrentScreen('website');
       return;
     }
-    
+
     const cached = localStorage.getItem(USER_DATA_KEY);
     if (cached) {
-        try {
-            const cachedData = JSON.parse(cached);
-            if (cachedData && cachedData.user) {
-                setUserData(cachedData);
-                setCurrentScreen('dashboard');
-            }
-        } catch(e) { localStorage.removeItem(USER_DATA_KEY); }
+      try {
+        const cachedData = JSON.parse(cached);
+        if (cachedData && cachedData.user) {
+          setUserData(cachedData);
+          setCurrentScreen('dashboard');
+        }
+      } catch (e) { localStorage.removeItem(USER_DATA_KEY); }
     }
 
     try {
       const response = await authService.getProfile();
-      
+
       const candidates = [
-        response.user?.data,      
-        response.data,            
-        response.user,            
-        response                  
+        response.user?.data,
+        response.data,
+        response.user,
+        response
       ];
 
       const isValidUser = (obj: any) => obj && (obj.role_id !== undefined || obj.roleId !== undefined);
@@ -110,11 +110,11 @@ const AppContent = () => {
         if (!userData) throw new Error("Invalid Profile Data: Server response was malformed.");
         return;
       }
-      
+
       const processedData = processUserObject(finalUserObj, token);
-      
+
       if (!processedData) {
-          throw new Error("Invalid Role ID in fetched data");
+        throw new Error("Invalid Role ID in fetched data");
       }
 
       setUserData(processedData);
@@ -123,14 +123,14 @@ const AppContent = () => {
 
     } catch (error: any) {
       if (error.status === 401 || error.message?.includes('expired')) {
-          tokenService.removeToken();
-          localStorage.removeItem(USER_DATA_KEY);
-          setUserData(null);
-          setCurrentScreen('login');
+        tokenService.removeToken();
+        localStorage.removeItem(USER_DATA_KEY);
+        setUserData(null);
+        setCurrentScreen('login');
       } else {
-          if (!userData && !localStorage.getItem(USER_DATA_KEY)) {
-             setAuthError(error.message); 
-          }
+        if (!userData && !localStorage.getItem(USER_DATA_KEY)) {
+          setAuthError(error.message);
+        }
       }
     } finally {
       setIsLoading(false);
@@ -140,10 +140,10 @@ const AppContent = () => {
   useEffect(() => {
     initAuth();
     const handleSessionExpired = () => {
-        setUserData(null);
-        tokenService.removeToken();
-        localStorage.removeItem(USER_DATA_KEY);
-        setCurrentScreen('login'); 
+      setUserData(null);
+      tokenService.removeToken();
+      localStorage.removeItem(USER_DATA_KEY);
+      setCurrentScreen('login');
     };
     window.addEventListener(AUTH_SESSION_EXPIRED, handleSessionExpired);
     return () => window.removeEventListener(AUTH_SESSION_EXPIRED, handleSessionExpired);
@@ -151,9 +151,9 @@ const AppContent = () => {
 
   const handleLoginSuccess = (data: AuthResponse) => {
     if (data.token) {
-        tokenService.setToken(data.token);
+      tokenService.setToken(data.token);
     } else {
-        return; 
+      return;
     }
 
     const rawUser = data.user as any;
@@ -161,48 +161,48 @@ const AppContent = () => {
     let roleName: string;
 
     if (rawUser && rawUser.data && typeof rawUser.data === 'object') {
-        userObj = rawUser.data;
-        roleName = rawUser.role;
+      userObj = rawUser.data;
+      roleName = rawUser.role;
     } else {
-        userObj = rawUser as UserData;
-        roleName = (rawUser as any)?.role || '';
+      userObj = rawUser as UserData;
+      roleName = (rawUser as any)?.role || '';
     }
 
     if (!roleName && userObj) {
-         if (Number(userObj.role_id) === 3) roleName = 'teacher';
-         else if (Number(userObj.role_id) === 4) roleName = 'student';
-         else if (Number(userObj.role_id) === 1) roleName = 'admin';
+      if (Number(userObj.role_id) === 3) roleName = 'teacher';
+      else if (Number(userObj.role_id) === 4) roleName = 'student';
+      else if (Number(userObj.role_id) === 1) roleName = 'admin';
     }
 
     if (userObj && roleName) {
-        const normalizedData: AuthResponse = { 
-            user: { role: roleName, data: userObj }, 
-            token: data.token
-        };
-        setUserData(normalizedData);
-        localStorage.setItem(USER_DATA_KEY, JSON.stringify(normalizedData));
-        setCurrentScreen('dashboard');
+      const normalizedData: AuthResponse = {
+        user: { role: roleName, data: userObj },
+        token: data.token
+      };
+      setUserData(normalizedData);
+      localStorage.setItem(USER_DATA_KEY, JSON.stringify(normalizedData));
+      setCurrentScreen('dashboard');
     } else {
-        initAuth();
+      initAuth();
     }
   };
 
   const handleLogout = () => {
-    authService.logout().catch(() => {});
+    authService.logout().catch(() => { });
     setUserData(null);
     localStorage.removeItem(USER_DATA_KEY);
     tokenService.removeToken();
     setCurrentScreen('website');
     setAuthError(null);
   };
-  
+
   const renderDashboard = () => {
     if (!userData || !userData.user.role) {
       handleLogout();
       return null;
     }
-    
-    switch(userData.user.role) {
+
+    switch (userData.user.role) {
       case 'admin': return <AdminDashboardScreen data={userData} onLogout={handleLogout} />;
       case 'student': return <StudentDashboardScreen data={userData} onLogout={handleLogout} />;
       case 'teacher': return <TeacherDashboardScreen data={userData} onLogout={handleLogout} />;
@@ -215,8 +215,8 @@ const AppContent = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 gap-4">
-         <Loader2 className="animate-spin text-primary h-12 w-12" />
-         <p className="text-slate-500 font-medium animate-pulse">Initializing Application...</p>
+        <Loader2 className="animate-spin text-primary h-12 w-12" />
+        <p className="text-slate-500 font-medium animate-pulse">Initializing Application...</p>
       </div>
     );
   }
@@ -242,14 +242,17 @@ const AppContent = () => {
       {currentScreen === 'website' && <HomePage onLoginClick={() => setCurrentScreen('login')} onRegisterClick={() => setCurrentScreen('register')} />}
       {currentScreen === 'login' && (
         <div className="flex items-center justify-center min-h-screen p-4 bg-slate-50 relative">
-           <LoginScreen onSwitch={() => setCurrentScreen('register')} onLoginSuccess={handleLoginSuccess} />
-           <button onClick={() => setCurrentScreen('website')} className="absolute top-4 left-4 text-sm text-slate-500 hover:text-primary font-medium">← Back</button>
+          <LoginScreen onSwitch={() => setCurrentScreen('register')} onLoginSuccess={handleLoginSuccess} />
+          <button onClick={() => setCurrentScreen('website')} className="absolute top-4 left-4 text-sm text-slate-500 hover:text-primary font-medium">← Back</button>
         </div>
       )}
       {currentScreen === 'register' && (
         <div className="flex items-center justify-center min-h-screen p-4 bg-slate-50 relative">
-          <RegisterScreen onSwitch={() => setCurrentScreen('login')} />
-           <button onClick={() => setCurrentScreen('website')} className="absolute top-4 left-4 text-sm text-slate-500 hover:text-primary font-medium">← Back</button>
+          <RegisterScreen
+            onSwitch={() => setCurrentScreen('login')}
+            onVerifySuccess={() => initAuth()}
+          />
+          <button onClick={() => setCurrentScreen('website')} className="absolute top-4 left-4 text-sm text-slate-500 hover:text-primary font-medium">← Back</button>
         </div>
       )}
       {currentScreen === 'dashboard' && renderDashboard()}

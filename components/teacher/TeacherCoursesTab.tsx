@@ -6,7 +6,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Modal } from '../ui/Modal';
 import { Select } from '../ui/Select';
-import { teacherService, referenceService, Course, CourseCategory, getStorageUrl, UserData } from '../../services/api';
+import { teacherService, referenceService, Course, CourseCategory, getStorageUrl, UserData, fetchWithProgress } from '../../services/api';
 
 interface TeacherCoursesTabProps {
     user?: UserData;
@@ -21,6 +21,7 @@ export const TeacherCoursesTab: React.FC<TeacherCoursesTabProps> = ({ user }) =>
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+    const [uploadProgress, setUploadProgress] = useState<number | null>(null);
 
     // Editing state
     const [editingId, setEditingId] = useState<number | null>(null);
@@ -35,12 +36,12 @@ export const TeacherCoursesTab: React.FC<TeacherCoursesTabProps> = ({ user }) =>
         course_type: 'single',
         status: 'published'
     });
-    
+
     // Cover Image State
     const [coverImage, setCoverImage] = useState<File | null>(null);
 
     // Slots Builder State
-    const [slots, setSlots] = useState<{day: string, time: string}[]>([]);
+    const [slots, setSlots] = useState<{ day: string, time: string }[]>([]);
     const [currentSlot, setCurrentSlot] = useState({ day: 'Sunday', time: '' });
 
     // Map day names to numbers (1 = Sunday)
@@ -92,9 +93,9 @@ export const TeacherCoursesTab: React.FC<TeacherCoursesTabProps> = ({ user }) =>
             course_type: course.course_type,
             status: course.status
         });
-        
+
         // Parse slots if available
-        const loadedSlots: {day: string, time: string}[] = [];
+        const loadedSlots: { day: string, time: string }[] = [];
         if (course.slots && Array.isArray(course.slots)) {
             course.slots.forEach(s => {
                 loadedSlots.push({ day: s.day, time: s.time });
@@ -116,7 +117,7 @@ export const TeacherCoursesTab: React.FC<TeacherCoursesTabProps> = ({ user }) =>
 
     const handleSubmit = async () => {
         setError(null);
-        if(!formData.name || !formData.price || !formData.category_id) {
+        if (!formData.name || !formData.price || !formData.category_id) {
             alert("Please fill all required fields");
             return;
         }
@@ -126,7 +127,7 @@ export const TeacherCoursesTab: React.FC<TeacherCoursesTabProps> = ({ user }) =>
             // Group slots by Day Number
             const groupedSlots: { day: number, times: string[] }[] = [];
             const dayGroups: Record<number, string[]> = {};
-            
+
             slots.forEach(slot => {
                 const dayNum = dayMap[slot.day];
                 if (!dayGroups[dayNum]) dayGroups[dayNum] = [];
@@ -156,7 +157,7 @@ export const TeacherCoursesTab: React.FC<TeacherCoursesTabProps> = ({ user }) =>
                 payload.append('category_id', formData.category_id);
                 payload.append('course_type', formData.course_type);
                 payload.append('status', formData.status);
-                
+
                 if (coverImage) payload.append('cover_image', coverImage);
 
                 groupedSlots.forEach((group, index) => {
@@ -166,18 +167,23 @@ export const TeacherCoursesTab: React.FC<TeacherCoursesTabProps> = ({ user }) =>
                     });
                 });
 
-                await teacherService.createCourse(payload);
+                await fetchWithProgress('/teacher/courses', {
+                    method: 'POST',
+                    body: payload,
+                    onProgress: (pct) => setUploadProgress(pct)
+                });
             }
-            
+
             alert(editingId ? "Course updated!" : "Course created!");
             setModalOpen(false);
             resetForm();
             await loadData();
-        } catch(e: any) {
+        } catch (e: any) {
             console.error(e);
             setError(e.message || "Operation failed. Check your inputs.");
         } finally {
             setSubmitting(false);
+            setUploadProgress(null);
         }
     };
 
@@ -187,13 +193,13 @@ export const TeacherCoursesTab: React.FC<TeacherCoursesTabProps> = ({ user }) =>
         try {
             const response = await teacherService.deleteCourse(id);
             if (response && response.success === false) {
-                 alert(response.message || "Failed to delete course");
+                alert(response.message || "Failed to delete course");
             } else {
                 await loadData();
                 setConfirmDeleteId(null);
             }
-        } catch(e: any) { 
-            alert(e.message || "Failed to delete"); 
+        } catch (e: any) {
+            alert(e.message || "Failed to delete");
         } finally {
             setLoading(false);
         }
@@ -214,67 +220,68 @@ export const TeacherCoursesTab: React.FC<TeacherCoursesTabProps> = ({ user }) =>
 
             {courses.length === 0 ? (
                 <div className="text-center py-16 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                     <BookOpen className="mx-auto h-12 w-12 text-slate-300 mb-4" />
-                     <p className="text-slate-500">You haven't created any courses yet.</p>
+                    <BookOpen className="mx-auto h-12 w-12 text-slate-300 mb-4" />
+                    <p className="text-slate-500">You haven't created any courses yet.</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {courses.map(course => {
                         const isConfirming = confirmDeleteId === course.id;
-                        
-                        return (
-                        <div key={course.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow flex flex-col">
-                            <div className="h-32 bg-slate-100 flex items-center justify-center text-slate-300 overflow-hidden relative">
-                                {course.cover_image ? (
-                                    <img src={getStorageUrl(course.cover_image)} alt={course.name} className="w-full h-full object-cover" />
-                                ) : (
-                                    <BookOpen size={40} />
-                                )}
-                                <div className="absolute top-2 right-2 flex gap-2">
-                                    <button onClick={() => handleEdit(course)} className="p-2 bg-white/90 backdrop-blur-sm rounded-full text-blue-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm">
-                                        <Edit size={16} />
-                                    </button>
-                                </div>
-                            </div>
-                            <div className="p-5 flex-1 flex flex-col">
-                                <div className="flex justify-between items-start mb-2">
-                                    <h3 className="font-bold text-lg text-slate-900 line-clamp-1">{course.name}</h3>
-                                    <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${course.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}`}>
-                                        {course.status}
-                                    </span>
-                                </div>
-                                <p className="text-xs text-slate-400 mb-3 flex items-center gap-1">
-                                    <Layers size={10}/> {language === 'ar' ? (course.category?.name_ar || 'تصنيف') : (course.category?.name_en || 'Category')}
-                                </p>
-                                <p className="text-sm text-slate-500 mb-4 line-clamp-2">{course.description}</p>
-                                
-                                <div className="mt-auto">
-                                    <div className="flex items-center gap-4 text-xs text-slate-400 mb-4">
-                                         <span className="flex items-center gap-1"><Clock size={14} /> {course.duration_hours} Hrs</span>
-                                         <span className="flex items-center gap-1"><Calendar size={14} /> {course.created_at.split('T')[0]}</span>
-                                    </div>
 
-                                    <div className="flex items-center justify-between pt-4 border-t border-slate-50">
-                                        <span className="text-lg font-bold text-primary">{course.price} <span className="text-xs font-normal text-slate-400">{t.sar}</span></span>
-                                        
-                                        <div className="flex items-center">
-                                            {isConfirming ? (
-                                                <div className="flex gap-1 animate-fade-in items-center">
-                                                    <span className="text-[9px] font-bold text-red-600 uppercase mr-1">{language === 'ar' ? 'حذف؟' : 'Del?'}</span>
-                                                    <button onClick={() => handleDelete(course.id)} className="h-8 w-8 bg-red-500 text-white rounded-lg flex items-center justify-center hover:bg-red-600 shadow-sm"><Check size={14}/></button>
-                                                    <button onClick={() => setConfirmDeleteId(null)} className="h-8 w-8 bg-slate-100 text-slate-500 rounded-lg flex items-center justify-center hover:bg-slate-200 transition-colors" title="No"><X size={14}/></button>
-                                                </div>
-                                            ) : (
-                                                <button onClick={() => setConfirmDeleteId(course.id)} className="text-slate-300 hover:text-red-500 transition-colors p-2 rounded-full hover:bg-red-50">
-                                                    <Trash2 size={18} />
-                                                </button>
-                                            )}
+                        return (
+                            <div key={course.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow flex flex-col">
+                                <div className="h-32 bg-slate-100 flex items-center justify-center text-slate-300 overflow-hidden relative">
+                                    {course.cover_image ? (
+                                        <img src={getStorageUrl(course.cover_image)} alt={course.name} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <BookOpen size={40} />
+                                    )}
+                                    <div className="absolute top-2 right-2 flex gap-2">
+                                        <button onClick={() => handleEdit(course)} className="p-2 bg-white/90 backdrop-blur-sm rounded-full text-blue-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm">
+                                            <Edit size={16} />
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="p-5 flex-1 flex flex-col">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <h3 className="font-bold text-lg text-slate-900 line-clamp-1">{course.name}</h3>
+                                        <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${course.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}`}>
+                                            {course.status}
+                                        </span>
+                                    </div>
+                                    <p className="text-xs text-slate-400 mb-3 flex items-center gap-1">
+                                        <Layers size={10} /> {language === 'ar' ? (course.category?.name_ar || 'تصنيف') : (course.category?.name_en || 'Category')}
+                                    </p>
+                                    <p className="text-sm text-slate-500 mb-4 line-clamp-2">{course.description}</p>
+
+                                    <div className="mt-auto">
+                                        <div className="flex items-center gap-4 text-xs text-slate-400 mb-4">
+                                            <span className="flex items-center gap-1"><Clock size={14} /> {course.duration_hours} Hrs</span>
+                                            <span className="flex items-center gap-1"><Calendar size={14} /> {course.created_at.split('T')[0]}</span>
+                                        </div>
+
+                                        <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+                                            <span className="text-lg font-bold text-primary">{course.price} <span className="text-xs font-normal text-slate-400">{t.sar}</span></span>
+
+                                            <div className="flex items-center">
+                                                {isConfirming ? (
+                                                    <div className="flex gap-1 animate-fade-in items-center">
+                                                        <span className="text-[9px] font-bold text-red-600 uppercase mr-1">{language === 'ar' ? 'حذف؟' : 'Del?'}</span>
+                                                        <button onClick={() => handleDelete(course.id)} className="h-8 w-8 bg-red-500 text-white rounded-lg flex items-center justify-center hover:bg-red-600 shadow-sm"><Check size={14} /></button>
+                                                        <button onClick={() => setConfirmDeleteId(null)} className="h-8 w-8 bg-slate-100 text-slate-500 rounded-lg flex items-center justify-center hover:bg-slate-200 transition-colors" title="No"><X size={14} /></button>
+                                                    </div>
+                                                ) : (
+                                                    <button onClick={() => setConfirmDeleteId(course.id)} className="text-slate-300 hover:text-red-500 transition-colors p-2 rounded-full hover:bg-red-50">
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    )})}
+                        )
+                    })}
                 </div>
             )}
 
@@ -287,19 +294,19 @@ export const TeacherCoursesTab: React.FC<TeacherCoursesTabProps> = ({ user }) =>
                         </div>
                     )}
 
-                    <Input 
-                        label="Course Title" 
-                        value={formData.name} 
-                        onChange={(e) => setFormData({...formData, name: e.target.value})} 
+                    <Input
+                        label="Course Title"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         placeholder="e.g. Advanced Mathematics"
                     />
-                    
+
                     {!editingId && (
                         <div className="mb-4 w-full">
                             <label className="block text-sm font-medium text-slate-700 mb-1">Cover Image</label>
                             <div className="border border-slate-200 rounded-lg p-3 bg-slate-50 flex items-center justify-between">
-                                <input 
-                                    type="file" 
+                                <input
+                                    type="file"
                                     accept="image/*"
                                     onChange={(e) => setCoverImage(e.target.files?.[0] || null)}
                                     className="text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
@@ -311,48 +318,48 @@ export const TeacherCoursesTab: React.FC<TeacherCoursesTabProps> = ({ user }) =>
 
                     <div className="mb-4 w-full">
                         <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
-                        <textarea 
+                        <textarea
                             className="w-full rounded-lg border border-slate-200 p-3 h-24 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                             value={formData.description}
-                            onChange={(e) => setFormData({...formData, description: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                         />
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
-                        <Select 
+                        <Select
                             label="Category"
-                            options={[{value: '', label: '-- Select --'}, ...categories.map(c => ({ value: String(c.id), label: language === 'ar' ? c.name_ar : c.name_en }))]}
+                            options={[{ value: '', label: '-- Select --' }, ...categories.map(c => ({ value: String(c.id), label: language === 'ar' ? c.name_ar : c.name_en }))]}
                             value={formData.category_id}
-                            onChange={(e) => setFormData({...formData, category_id: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
                         />
-                        <Select 
+                        <Select
                             label="Course Type"
-                            options={[{value: 'single', label: 'Single'}, {value: 'package', label: 'Package'}, {value: 'subscription', label: 'Subscription'}]}
+                            options={[{ value: 'single', label: 'Single' }, { value: 'package', label: 'Package' }, { value: 'subscription', label: 'Subscription' }]}
                             value={formData.course_type}
-                            onChange={(e) => setFormData({...formData, course_type: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, course_type: e.target.value })}
                         />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                        <Input 
-                            label="Price (SAR)" 
-                            type="number" 
-                            value={formData.price} 
-                            onChange={(e) => setFormData({...formData, price: e.target.value})} 
+                        <Input
+                            label="Price (SAR)"
+                            type="number"
+                            value={formData.price}
+                            onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                         />
-                        <Input 
-                            label="Total Hours" 
-                            type="number" 
-                            value={formData.duration_hours} 
-                            onChange={(e) => setFormData({...formData, duration_hours: e.target.value})} 
+                        <Input
+                            label="Total Hours"
+                            type="number"
+                            value={formData.duration_hours}
+                            onChange={(e) => setFormData({ ...formData, duration_hours: e.target.value })}
                         />
                     </div>
 
-                    <Select 
+                    <Select
                         label="Status"
-                        options={[{value: 'published', label: 'Published'}, {value: 'draft', label: 'Draft'}]}
+                        options={[{ value: 'published', label: 'Published' }, { value: 'draft', label: 'Draft' }]}
                         value={formData.status}
-                        onChange={(e) => setFormData({...formData, status: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                     />
 
                     {/* Schedule Builder */}
@@ -360,26 +367,26 @@ export const TeacherCoursesTab: React.FC<TeacherCoursesTabProps> = ({ user }) =>
                         <h4 className="font-bold text-sm text-slate-700 mb-3">Course Schedule Slots</h4>
                         <div className="flex gap-2 mb-3">
                             <div className="flex-1">
-                                <Select 
+                                <Select
                                     label=""
                                     options={days.map(d => ({ value: d, label: d }))}
                                     value={currentSlot.day}
-                                    onChange={(e) => setCurrentSlot({...currentSlot, day: e.target.value})}
+                                    onChange={(e) => setCurrentSlot({ ...currentSlot, day: e.target.value })}
                                     className="mb-0"
                                 />
                             </div>
                             <div className="flex-1">
-                                <Input 
-                                    label="" 
-                                    type="time" 
+                                <Input
+                                    label=""
+                                    type="time"
                                     value={currentSlot.time}
-                                    onChange={(e) => setCurrentSlot({...currentSlot, time: e.target.value})}
+                                    onChange={(e) => setCurrentSlot({ ...currentSlot, time: e.target.value })}
                                     className="mb-0"
                                 />
                             </div>
                             <Button size="sm" onClick={handleAddSlot} disabled={!currentSlot.time}>Add</Button>
                         </div>
-                        
+
                         <div className="space-y-2">
                             {slots.map((s, idx) => (
                                 <div key={idx} className="flex justify-between items-center bg-white p-2 rounded border border-slate-200 text-sm">
@@ -393,9 +400,19 @@ export const TeacherCoursesTab: React.FC<TeacherCoursesTabProps> = ({ user }) =>
                         </div>
                     </div>
 
+                    {uploadProgress !== null && (
+                        <div className="w-full bg-slate-100 rounded-full h-2 mb-4 overflow-hidden">
+                            <div
+                                className="bg-primary h-full transition-all duration-300"
+                                style={{ width: `${uploadProgress}%` }}
+                            ></div>
+                            <p className="text-[10px] text-slate-500 mt-1 text-center font-bold">Uploading: {uploadProgress}%</p>
+                        </div>
+                    )}
+
                     <div className="pt-2">
                         <Button className="w-full h-12" onClick={handleSubmit} isLoading={submitting}>
-                            {editingId ? "Update Course" : "Create Course"}
+                            {editingId ? "Update Course" : (uploadProgress !== null ? "Uploading..." : "Create Course")}
                         </Button>
                     </div>
                 </div>

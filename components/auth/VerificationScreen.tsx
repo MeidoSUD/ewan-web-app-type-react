@@ -6,6 +6,7 @@ import { Input } from '../ui/Input';
 import { Logo } from '../Logo';
 import { authService, tokenService } from '../../services/api';
 import { CheckCircle, AlertCircle } from 'lucide-react';
+import { useToast } from '../../contexts/ToastContext';
 
 interface VerificationScreenProps {
   userId: number;
@@ -14,26 +15,41 @@ interface VerificationScreenProps {
 
 export const VerificationScreen: React.FC<VerificationScreenProps> = ({ userId, onSuccess }) => {
   const { t, language } = useLanguage();
+  const { showToast } = useToast();
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [timer, setTimer] = useState(0);
+
+  React.useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [timer]);
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!code) return;
-    
+
     setLoading(true);
     setError(null);
     try {
       const response = await authService.verifyCode({ user_id: userId, code });
       if (response.token) {
-          tokenService.setToken(response.token);
+        tokenService.setToken(response.token);
       }
-      setSuccess("Verification successful!");
+      showToast("Verification successful!", 'success');
       setTimeout(onSuccess, 1500);
     } catch (err: any) {
-      setError(err.message || "Verification failed. Invalid code.");
+      const msg = err.message || "Verification failed. Invalid code.";
+      setError(msg);
+      showToast(msg, 'error');
+      setCode(''); // Clear inputs on wrong code
     } finally {
       setLoading(false);
     }
@@ -43,10 +59,10 @@ export const VerificationScreen: React.FC<VerificationScreenProps> = ({ userId, 
     setLoading(true);
     try {
       await authService.resendCode({ user_id: userId });
-      setSuccess("Code resent successfully!");
-      setTimeout(() => setSuccess(null), 3000);
+      showToast("Code resent successfully!", 'success');
+      setTimer(30);
     } catch (err: any) {
-      setError(err.message || "Failed to resend code.");
+      showToast(err.message || "Failed to resend code.", 'error');
     } finally {
       setLoading(false);
     }
@@ -60,7 +76,7 @@ export const VerificationScreen: React.FC<VerificationScreenProps> = ({ userId, 
           {language === 'ar' ? 'تفعيل الحساب' : 'Verify Account'}
         </h2>
         <p className="mt-2 text-sm text-slate-500">
-          {language === 'ar' 
+          {language === 'ar'
             ? 'أدخل رمز التحقق المرسل إلى هاتفك'
             : 'Enter the verification code sent to your phone'}
         </p>
@@ -68,14 +84,14 @@ export const VerificationScreen: React.FC<VerificationScreenProps> = ({ userId, 
 
       <form className="mt-8 space-y-6" onSubmit={handleVerify}>
         {error && (
-            <div className="p-3 bg-red-50 text-red-700 text-sm rounded-lg flex items-center gap-2">
-                <AlertCircle size={16} /> {error}
-            </div>
+          <div className="p-3 bg-red-50 text-red-700 text-sm rounded-lg flex items-center gap-2">
+            <AlertCircle size={16} /> {error}
+          </div>
         )}
         {success && (
-            <div className="p-3 bg-green-50 text-green-700 text-sm rounded-lg flex items-center gap-2">
-                <CheckCircle size={16} /> {success}
-            </div>
+          <div className="p-3 bg-green-50 text-green-700 text-sm rounded-lg flex items-center gap-2">
+            <CheckCircle size={16} /> {success}
+          </div>
         )}
 
         <Input
@@ -91,13 +107,15 @@ export const VerificationScreen: React.FC<VerificationScreenProps> = ({ userId, 
         </Button>
 
         <div className="text-center">
-          <button 
-            type="button" 
-            onClick={handleResend} 
-            className="text-sm text-primary hover:underline font-medium"
-            disabled={loading}
+          <button
+            type="button"
+            onClick={handleResend}
+            className={`text-sm font-medium ${timer > 0 ? 'text-slate-400 cursor-not-allowed' : 'text-primary hover:underline'}`}
+            disabled={loading || timer > 0}
           >
-            {language === 'ar' ? 'إعادة إرسال الرمز' : 'Resend Code'}
+            {language === 'ar'
+              ? (timer > 0 ? `إعادة الإرسال خلال ${timer} ثانية` : 'إعادة إرسال الرمز')
+              : (timer > 0 ? `Resend in ${timer}s` : 'Resend Code')}
           </button>
         </div>
       </form>
