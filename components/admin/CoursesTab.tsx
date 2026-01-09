@@ -100,9 +100,9 @@ export const CoursesTab: React.FC = () => {
     };
 
     const filteredCourses = courses.filter(course => {
-        const title = course.title.toLowerCase();
-        const teacher = `${course.teacher?.first_name} ${course.teacher?.last_name}`.toLowerCase();
-        const term = searchTerm.toLowerCase();
+        const title = (course.title ?? '').toLowerCase();
+        const teacher = `${course.teacher?.first_name ?? ''} ${course.teacher?.last_name ?? ''}`.toLowerCase();
+        const term = (searchTerm ?? '').toLowerCase();
         const matchesSearch = title.includes(term) || teacher.includes(term);
         const matchesStatus = filterStatus === 'all' || course.approval_status === filterStatus;
         return matchesSearch && matchesStatus;
@@ -191,7 +191,7 @@ export const CoursesTab: React.FC = () => {
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${course.approval_status === 'approved' ? 'bg-green-100 text-green-700' :
-                                                course.approval_status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
+                                            course.approval_status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
                                             }`}>
                                             {course.approval_status}
                                         </span>
@@ -303,7 +303,7 @@ export const CoursesTab: React.FC = () => {
                             <div className="p-3 bg-slate-50 rounded-xl">
                                 <span className="block text-xs text-slate-400 mb-1">Approval</span>
                                 <span className={`font-bold capitalize ${selectedCourse.approval_status === 'approved' ? 'text-green-600' :
-                                        selectedCourse.approval_status === 'rejected' ? 'text-red-600' : 'text-amber-600'
+                                    selectedCourse.approval_status === 'rejected' ? 'text-red-600' : 'text-amber-600'
                                     }`}>
                                     {selectedCourse.approval_status}
                                 </span>

@@ -48,7 +48,7 @@ export const PayoutsTab: React.FC = () => {
 
     const handleSubmitAction = async () => {
         if (!selectedPayout || !actionType) return;
-        
+
         setActionLoading(true);
         try {
             if (actionType === 'approve') {
@@ -68,12 +68,12 @@ export const PayoutsTab: React.FC = () => {
                 await adminService.rejectPayout(selectedPayout.id, rejectReason);
                 alert("Payout rejected.");
             }
-            
+
             // Cleanup and Refresh
             setSelectedPayout(null);
             setActionType(null);
             fetchPayouts();
-        } catch(e: any) {
+        } catch (e: any) {
             console.error(e);
             alert(e.message || "Action failed.");
         } finally {
@@ -82,8 +82,8 @@ export const PayoutsTab: React.FC = () => {
     };
 
     const filteredPayouts = payouts.filter(payout => {
-        const userName = payout.user?.name || '';
-        const matchTeacher = !filterTeacher || userName.toLowerCase().includes(filterTeacher.toLowerCase());
+        const userName = payout.user?.name ?? '';
+        const matchTeacher = !filterTeacher || userName.toLowerCase().includes((filterTeacher ?? '').toLowerCase());
         const matchDate = !filterDate || (payout.created_at && payout.created_at.startsWith(filterDate));
         const matchStatus = !filterStatus || payout.status === filterStatus;
         return matchTeacher && matchDate && matchStatus;
@@ -105,8 +105,8 @@ export const PayoutsTab: React.FC = () => {
             <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-end">
                 <div className="w-full md:w-1/3">
                     <label className="text-xs font-bold text-slate-500 mb-1 block">Teacher</label>
-                    <input 
-                        type="text" 
+                    <input
+                        type="text"
                         className="w-full p-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-primary"
                         placeholder="Search teacher..."
                         value={filterTeacher}
@@ -115,8 +115,8 @@ export const PayoutsTab: React.FC = () => {
                 </div>
                 <div className="w-full md:w-1/4">
                     <label className="text-xs font-bold text-slate-500 mb-1 block">Date</label>
-                    <input 
-                        type="date" 
+                    <input
+                        type="date"
                         className="w-full p-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-primary"
                         value={filterDate}
                         onChange={(e) => setFilterDate(e.target.value)}
@@ -124,7 +124,7 @@ export const PayoutsTab: React.FC = () => {
                 </div>
                 <div className="w-full md:w-1/4">
                     <label className="text-xs font-bold text-slate-500 mb-1 block">Status</label>
-                    <select 
+                    <select
                         className="w-full p-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-primary bg-white"
                         value={filterStatus}
                         onChange={(e) => setFilterStatus(e.target.value)}
@@ -135,7 +135,7 @@ export const PayoutsTab: React.FC = () => {
                         <option value="rejected">Rejected</option>
                     </select>
                 </div>
-                <button 
+                <button
                     onClick={clearFilters}
                     className="p-2 text-slate-400 hover:text-red-500 transition-colors"
                     title="Clear Filters"
@@ -201,9 +201,9 @@ export const PayoutsTab: React.FC = () => {
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-2">Upload Transfer Receipt</label>
                             <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center bg-slate-50 hover:bg-white transition-colors relative cursor-pointer">
-                                <input 
-                                    type="file" 
-                                    accept="image/*,.pdf" 
+                                <input
+                                    type="file"
+                                    accept="image/*,.pdf"
                                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                     onChange={(e) => setReceiptFile(e.target.files?.[0] || null)}
                                 />
@@ -214,7 +214,7 @@ export const PayoutsTab: React.FC = () => {
                     ) : (
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-2">Rejection Reason</label>
-                            <textarea 
+                            <textarea
                                 className="w-full p-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-red-200 focus:border-red-500 outline-none"
                                 rows={4}
                                 placeholder="Explain why this request is being rejected..."
@@ -226,7 +226,7 @@ export const PayoutsTab: React.FC = () => {
 
                     <div className="flex gap-3 pt-2">
                         <Button variant="outline" className="flex-1" onClick={() => setSelectedPayout(null)}>Cancel</Button>
-                        <Button 
+                        <Button
                             className={`flex-1 ${actionType === 'approve' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}`}
                             onClick={handleSubmitAction}
                             isLoading={actionLoading}

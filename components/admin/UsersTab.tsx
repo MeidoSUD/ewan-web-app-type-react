@@ -11,7 +11,7 @@ export const UsersTab: React.FC = () => {
     const [users, setUsers] = useState<AdminUser[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    
+
     // Action State
     const [openMenuId, setOpenMenuId] = useState<number | null>(null);
     const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
@@ -39,7 +39,7 @@ export const UsersTab: React.FC = () => {
             setUsers(users.filter(u => u.id !== id));
             setOpenMenuId(null);
             setSelectedUser(null);
-        } catch(e: any) { alert("Failed to delete user"); }
+        } catch (e: any) { alert("Failed to delete user"); }
     };
 
     const handleSuspend = async (id: number) => {
@@ -49,7 +49,7 @@ export const UsersTab: React.FC = () => {
             alert("User suspended successfully");
             fetchUsers();
             setOpenMenuId(null);
-        } catch(e: any) { alert("Failed to suspend user"); }
+        } catch (e: any) { alert("Failed to suspend user"); }
     };
 
     const handleActivate = async (id: number) => {
@@ -58,7 +58,7 @@ export const UsersTab: React.FC = () => {
             alert("User activated successfully");
             fetchUsers();
             setOpenMenuId(null);
-        } catch(e: any) { alert("Failed to activate user"); }
+        } catch (e: any) { alert("Failed to activate user"); }
     };
 
     const handleResetPassword = async (id: number) => {
@@ -67,17 +67,17 @@ export const UsersTab: React.FC = () => {
             await adminService.resetUserPassword(id);
             alert("Password reset successfully");
             setOpenMenuId(null);
-        } catch(e: any) { alert("Failed to reset password"); }
+        } catch (e: any) { alert("Failed to reset password"); }
     };
 
     const filteredUsers = users.filter(user => {
-        const full = `${user.first_name} ${user.last_name}`.toLowerCase();
-        const term = searchTerm.toLowerCase();
-        return full.includes(term) || user.email.toLowerCase().includes(term);
+        const full = `${user.first_name ?? ''} ${user.last_name ?? ''}`.toLowerCase();
+        const term = (searchTerm ?? '').toLowerCase();
+        return full.includes(term) || (user.email ?? '').toLowerCase().includes(term);
     });
 
     const getRoleIcon = (roleId: number) => {
-        switch(roleId) {
+        switch (roleId) {
             case 1: return <Shield size={16} className="text-purple-600" />;
             case 3: return <User size={16} className="text-blue-600" />;
             default: return <GraduationCap size={16} className="text-green-600" />;
@@ -95,7 +95,7 @@ export const UsersTab: React.FC = () => {
             <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
                 <div className="relative mb-4">
                     <Search className={`absolute top-1/2 -translate-y-1/2 text-slate-400 ${direction === 'rtl' ? 'right-3' : 'left-3'}`} size={20} />
-                    <input 
+                    <input
                         type="text"
                         placeholder={t.searchPlaceholder}
                         value={searchTerm}
@@ -130,26 +130,25 @@ export const UsersTab: React.FC = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${
-                                            user.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                                        }`}>
+                                        <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${user.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                                            }`}>
                                             {user.is_active ? 'Active' : 'Disabled'}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-right relative">
-                                        <button 
+                                        <button
                                             onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === user.id ? null : user.id); }}
                                             className="text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-100"
                                         >
                                             <MoreVertical size={18} />
                                         </button>
-                                        
+
                                         {openMenuId === user.id && (
                                             <div className={`absolute z-20 w-48 bg-white rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 py-1 ${direction === 'rtl' ? 'left-8' : 'right-8'} top-8`}>
                                                 <button onClick={(e) => { e.stopPropagation(); setSelectedUser(user); }} className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-slate-700">
                                                     <Eye size={16} /> View Details
                                                 </button>
-                                                
+
                                                 {user.is_active ? (
                                                     <button onClick={(e) => { e.stopPropagation(); handleSuspend(user.id); }} className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-orange-600">
                                                         <Ban size={16} /> Suspend User
@@ -159,11 +158,11 @@ export const UsersTab: React.FC = () => {
                                                         <CheckCircle size={16} /> Activate User
                                                     </button>
                                                 )}
-                                                
+
                                                 <button onClick={(e) => { e.stopPropagation(); handleResetPassword(user.id); }} className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-blue-600">
                                                     <Key size={16} /> Reset Password
                                                 </button>
-                                                
+
                                                 <div className="border-t border-slate-100 my-1"></div>
                                                 <button onClick={(e) => { e.stopPropagation(); handleDelete(user.id); }} className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-red-600">
                                                     <Trash2 size={16} /> Delete
@@ -189,7 +188,7 @@ export const UsersTab: React.FC = () => {
                             <h3 className="text-xl font-bold">{selectedUser.first_name} {selectedUser.last_name}</h3>
                             <p className="text-slate-500">{selectedUser.email}</p>
                         </div>
-                        
+
                         <div className="grid grid-cols-2 gap-4 text-sm">
                             <div className="p-3 bg-slate-50 rounded">
                                 <span className="block text-xs text-slate-400">Phone</span>
