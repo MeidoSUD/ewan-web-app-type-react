@@ -11,7 +11,7 @@ export const VerificationsTab: React.FC = () => {
     const [services, setServices] = useState<Service[]>([]);
     const [loading, setLoading] = useState(true);
     const [verifyingId, setVerifyingId] = useState<number | null>(null);
-    
+
     // Details Modal State
     const [selectedTeacher, setSelectedTeacher] = useState<AdminTeacher | null>(null);
     const [detailsLoading, setDetailsLoading] = useState(false);
@@ -55,41 +55,41 @@ export const VerificationsTab: React.FC = () => {
     const handleVerify = async (userId: number) => {
         // INSTANT ACTION - NO CONFIRMATION
         if (verifyingId === userId) return;
-        
+
         setVerifyingId(userId);
         console.log(`[VerificationsTab] Verify Button Clicked for:`, userId);
-        
+
         try {
             const response = await adminService.verifyUser(userId);
             console.log("[VerificationsTab] Verification API Success:", response);
 
             // Optimistic Update
             setTeachers(prev => prev.map(t => t.id === userId ? { ...t, verified: true } : t));
-            
+
             if (selectedTeacher?.id === userId) {
                 setSelectedTeacher(prev => prev ? { ...prev, verified: true } : null);
             }
-            
+
             // Re-fetch to ensure sync with server
             fetchData();
-        } catch(e: any) { 
+        } catch (e: any) {
             console.error("[VerificationsTab] Verification Failed:", e);
-            alert(e.message || "Verification failed");
+            alert(e.message || t.error);
         } finally {
             setVerifyingId(null);
         }
     };
 
     const handleReject = async (userId: number) => {
-        if (!confirm("Are you sure you want to reject this teacher?")) return;
+        if (!confirm(t.confirmAction)) return;
         try {
             await adminService.rejectUser(userId);
-            alert("Teacher rejected.");
+            alert(t.confirmRejection);
             fetchData();
             if (selectedTeacher?.id === userId) setSelectedTeacher(null);
-        } catch(e: any) {
+        } catch (e: any) {
             console.error(e);
-            alert(e.message || "Rejection failed");
+            alert(e.message || t.rejectCourse);
         }
     }
 
@@ -98,27 +98,27 @@ export const VerificationsTab: React.FC = () => {
     };
 
     const getServiceName = (serviceId?: number | null) => {
-        if (!serviceId) return "N/A";
+        if (!serviceId) return t.na;
         const service = services.find(s => s.id === serviceId);
-        return service ? (language === 'ar' ? service.name_ar : service.name_en) : `Service #${serviceId}`;
+        return service ? (language === 'ar' ? service.name_ar : service.name_en) : `${t.subject} #${serviceId}`;
     };
 
     if (loading) return <div className="flex justify-center p-12"><Loader2 className="animate-spin text-primary" /></div>;
 
     return (
         <div className="space-y-6 animate-fade-in print:hidden">
-            <h2 className="text-2xl font-bold text-slate-900">{t.verifications} / Teacher Management</h2>
+            <h2 className="text-2xl font-bold text-slate-900">{t.verifications} / {t.teacherManagement}</h2>
 
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                 <table className="w-full text-left text-sm">
                     <thead className="bg-slate-50 border-b border-slate-200">
                         <tr>
-                            <th className="px-6 py-4 font-bold text-slate-700">Name</th>
-                            <th className="px-6 py-4 font-bold text-slate-700">Contact</th>
-                            <th className="px-6 py-4 font-bold text-slate-700">Requested Service</th>
-                            <th className="px-6 py-4 font-bold text-slate-700">Certificate</th>
-                            <th className="px-6 py-4 font-bold text-slate-700">Status</th>
-                            <th className="px-6 py-4 font-bold text-slate-700 text-right">Actions</th>
+                            <th className="px-6 py-4 font-bold text-slate-700">{t.name}</th>
+                            <th className="px-6 py-4 font-bold text-slate-700">{t.contact}</th>
+                            <th className="px-6 py-4 font-bold text-slate-700">{t.requestedService}</th>
+                            <th className="px-6 py-4 font-bold text-slate-700">{t.certificate}</th>
+                            <th className="px-6 py-4 font-bold text-slate-700">{t.status}</th>
+                            <th className="px-6 py-4 font-bold text-slate-700 text-right">{t.actions}</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -128,7 +128,7 @@ export const VerificationsTab: React.FC = () => {
                                     <div className="flex items-center gap-3">
                                         <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 overflow-hidden">
                                             {teacher.profile_photo ? (
-                                                <img src={getStorageUrl(teacher.profile_photo)} className="h-full w-full object-cover" alt="profile"/>
+                                                <img src={getStorageUrl(teacher.profile_photo)} className="h-full w-full object-cover" alt="profile" />
                                             ) : (
                                                 teacher.first_name.charAt(0)
                                             )}
@@ -150,48 +150,48 @@ export const VerificationsTab: React.FC = () => {
                                 </td>
                                 <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                                     {teacher.certificate ? (
-                                        <a 
-                                            href={getStorageUrl(teacher.certificate)} 
-                                            target="_blank" 
+                                        <a
+                                            href={getStorageUrl(teacher.certificate)}
+                                            target="_blank"
                                             rel="noreferrer"
                                             className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium hover:bg-blue-100"
                                         >
-                                            <FileText size={14} /> View
+                                            <FileText size={14} /> {t.view}
                                         </a>
                                     ) : (
-                                        <span className="text-slate-400 text-xs italic">No file</span>
+                                        <span className="text-slate-400 text-xs italic">{t.noFile}</span>
                                     )}
                                 </td>
                                 <td className="px-6 py-4">
                                     {teacher.verified ? (
                                         <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold uppercase flex items-center w-fit gap-1">
-                                            <CheckCircle size={12} /> Verified
+                                            <CheckCircle size={12} /> {t.verified}
                                         </span>
                                     ) : (
                                         <span className="bg-amber-100 text-amber-700 px-2 py-1 rounded text-xs font-bold uppercase flex items-center w-fit gap-1">
-                                            Pending
+                                            {t.pending}
                                         </span>
                                     )}
                                 </td>
                                 <td className="px-6 py-4 text-right">
                                     {!teacher.verified && (
-                                        <Button 
-                                            size="sm" 
+                                        <Button
+                                            size="sm"
                                             isLoading={verifyingId === teacher.id}
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 e.preventDefault();
                                                 handleVerify(teacher.id);
-                                            }} 
+                                            }}
                                             className="bg-green-600 hover:bg-green-700 h-8 text-xs px-3 shadow-sm z-10 relative"
                                         >
-                                            Verify
+                                            {t.verify}
                                         </Button>
                                     )}
                                     {teacher.verified && (
-                                        <Button 
-                                            variant="outline" 
-                                            size="sm" 
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 e.preventDefault();
@@ -199,7 +199,7 @@ export const VerificationsTab: React.FC = () => {
                                             }}
                                             className="h-8 text-xs"
                                         >
-                                            Details
+                                            {t.details}
                                         </Button>
                                     )}
                                 </td>
@@ -210,12 +210,12 @@ export const VerificationsTab: React.FC = () => {
             </div>
 
             {/* Teacher Details Modal */}
-            <Modal isOpen={!!selectedTeacher} onClose={() => setSelectedTeacher(null)} title="Teacher Details">
+            <Modal isOpen={!!selectedTeacher} onClose={() => setSelectedTeacher(null)} title={t.details}>
                 {selectedTeacher && (
                     <div className="space-y-6">
                         {/* Print Header */}
                         <div className="hidden print:block text-center mb-8">
-                            <h1 className="text-2xl font-bold">Teacher Profile</h1>
+                            <h1 className="text-2xl font-bold">{t.teacherProfile}</h1>
                             <p>Ewan Geniuses Platform</p>
                         </div>
 
@@ -234,10 +234,10 @@ export const VerificationsTab: React.FC = () => {
                                 <p className="text-slate-500">{selectedTeacher.email}</p>
                                 <div className="flex gap-2 mt-2">
                                     <span className={`text-xs px-2 py-1 rounded font-bold uppercase ${selectedTeacher.verified ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
-                                        {selectedTeacher.verified ? 'Verified' : 'Unverified'}
+                                        {selectedTeacher.verified ? t.verified : t.unverified}
                                     </span>
                                     <span className={`text-xs px-2 py-1 rounded font-bold uppercase ${selectedTeacher.is_active ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'}`}>
-                                        {selectedTeacher.is_active ? 'Active' : 'Inactive'}
+                                        {selectedTeacher.is_active ? t.active : t.banned.replace('محظور', 'غير نشط')}
                                     </span>
                                 </div>
                             </div>
@@ -245,16 +245,16 @@ export const VerificationsTab: React.FC = () => {
 
                         <div className="grid grid-cols-2 gap-4 text-sm">
                             <div className="p-3 bg-slate-50 rounded-lg">
-                                <span className="block text-xs text-slate-400">Requested Service</span>
+                                <span className="block text-xs text-slate-400">{t.requestedService}</span>
                                 <span className="font-medium text-slate-800">{getServiceName(selectedTeacher.service_id)}</span>
                             </div>
                             <div className="p-3 bg-slate-50 rounded-lg">
-                                <span className="block text-xs text-slate-400">Phone</span>
+                                <span className="block text-xs text-slate-400">{t.phone}</span>
                                 <span className="font-medium text-slate-800" dir="ltr">{selectedTeacher.phone_number}</span>
                             </div>
                             <div className="p-3 bg-slate-50 rounded-lg">
-                                <span className="block text-xs text-slate-400">Gender</span>
-                                <span className="font-medium text-slate-800 capitalize">{selectedTeacher.gender || 'N/A'}</span>
+                                <span className="block text-xs text-slate-400">{t.gender}</span>
+                                <span className="font-medium text-slate-800 capitalize">{selectedTeacher.gender === 'male' ? t.genderMale : selectedTeacher.gender === 'female' ? t.genderFemale : t.na}</span>
                             </div>
                             <div className="p-3 bg-slate-50 rounded-lg">
                                 <span className="block text-xs text-slate-400">ID</span>
@@ -265,18 +265,18 @@ export const VerificationsTab: React.FC = () => {
                         {selectedTeacher.certificate && (
                             <div className="border border-slate-200 rounded-xl p-4">
                                 <h4 className="font-bold text-slate-900 mb-2 flex items-center gap-2">
-                                    <FileText size={18} /> Academic Certificate
+                                    <FileText size={18} /> {t.academicCertificate}
                                 </h4>
                                 <div className="bg-slate-100 rounded-lg p-2 flex justify-center mb-3">
-                                    <img 
-                                        src={getStorageUrl(selectedTeacher.certificate)} 
-                                        alt="Certificate" 
+                                    <img
+                                        src={getStorageUrl(selectedTeacher.certificate)}
+                                        alt="Certificate"
                                         className="max-h-60 object-contain"
                                     />
                                 </div>
-                                <Button 
-                                    variant="outline" 
-                                    className="w-full" 
+                                <Button
+                                    variant="outline"
+                                    className="w-full"
                                     onClick={() => {
                                         const link = document.createElement('a');
                                         link.href = getStorageUrl(selectedTeacher.certificate || '');
@@ -285,7 +285,7 @@ export const VerificationsTab: React.FC = () => {
                                         link.click();
                                     }}
                                 >
-                                    <Download size={16} className="mr-2" /> Download Certificate
+                                    <Download size={16} className="mr-2" /> {t.downloadCertificate}
                                 </Button>
                             </div>
                         )}
@@ -293,24 +293,24 @@ export const VerificationsTab: React.FC = () => {
                         {!selectedTeacher.verified && (
                             <div className="flex gap-3">
                                 <Button variant="outline" className="flex-1 text-red-600 border-red-200 hover:bg-red-50" onClick={() => handleReject(selectedTeacher.id)}>
-                                    <XCircle size={18} className="mr-2" /> Reject
+                                    <XCircle size={18} className="mr-2" /> {t.reject}
                                 </Button>
-                                <Button 
-                                    className="flex-1 bg-green-600 hover:bg-green-700" 
+                                <Button
+                                    className="flex-1 bg-green-600 hover:bg-green-700"
                                     onClick={() => handleVerify(selectedTeacher.id)}
                                     isLoading={verifyingId === selectedTeacher.id}
                                 >
-                                    <CheckCircle size={18} className="mr-2" /> Verify Teacher
+                                    <CheckCircle size={18} className="mr-2" /> {t.verifyTeacher}
                                 </Button>
                             </div>
                         )}
 
                         <div className="pt-4 border-t border-slate-100 flex gap-3 print:hidden">
                             <Button variant="outline" onClick={handlePrint} className="flex-1">
-                                <Printer size={18} className="mr-2" /> Print / Save PDF
+                                <Printer size={18} className="mr-2" /> {t.printPdf}
                             </Button>
                             <Button variant="outline" onClick={() => setSelectedTeacher(null)} className="flex-1">
-                                Close
+                                {t.close}
                             </Button>
                         </div>
                     </div>

@@ -26,18 +26,18 @@ export const AdminOverviewTab: React.FC = () => {
     if (loading) return <div className="flex justify-center p-12"><Loader2 className="animate-spin text-primary" /></div>;
 
     const cards = [
-        { title: 'Total Users', value: stats?.total_users || '0', icon: Users, color: 'bg-blue-500' },
-        { title: 'Active Teachers', value: stats?.active_teachers || '0', icon: UserCheck, color: 'bg-green-500' },
-        { title: 'Total Bookings', value: stats?.total_bookings || '0', icon: BookOpen, color: 'bg-purple-500' },
-        { title: 'Revenue', value: `${stats?.total_revenue || '0'} SAR`, icon: DollarSign, color: 'bg-orange-500' },
+        { title: t.totalUsers, value: stats?.users || '0', icon: Users, color: 'bg-blue-500' },
+        { title: t.activeTeachers, value: stats?.teachers || '0', icon: UserCheck, color: 'bg-green-500' },
+        { title: t.totalBookings, value: stats?.bookings || '0', icon: BookOpen, color: 'bg-purple-500' },
+        { title: t.revenue, value: `${stats?.revenue || '0'} ${t.sar}`, icon: DollarSign, color: 'bg-orange-500' },
     ];
 
     return (
         <div className="space-y-8 animate-fade-in">
             <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-slate-900">{t.dashboard} Overview</h2>
+                <h2 className="text-2xl font-bold text-slate-900">{t.overview}</h2>
                 <div className="text-sm text-slate-500 bg-white px-4 py-2 rounded-lg border border-slate-200">
-                    Last updated: {new Date().toLocaleTimeString()}
+                    {t.lastUpdated}: {new Date().toLocaleTimeString()}
                 </div>
             </div>
 
@@ -60,13 +60,13 @@ export const AdminOverviewTab: React.FC = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-                    <h3 className="font-bold text-slate-900 mb-6">User Distribution</h3>
+                    <h3 className="font-bold text-slate-900 mb-6">{t.userDistribution}</h3>
                     <div className="h-64 flex items-center justify-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
-                        <p className="text-slate-400">Charts integration coming soon</p>
+                        <p className="text-slate-400">{t.chartComingSoon}</p>
                     </div>
                 </div>
                 <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-                    <h3 className="font-bold text-slate-900 mb-6">Recent Activity</h3>
+                    <h3 className="font-bold text-slate-900 mb-6">{t.recentActivity}</h3>
                     <div className="space-y-4">
                         {[1, 2, 3, 4].map(i => (
                             <div key={i} className="flex items-center gap-4 p-3 hover:bg-slate-50 rounded-lg transition-colors border-b border-slate-50 last:border-0">
@@ -74,10 +74,10 @@ export const AdminOverviewTab: React.FC = () => {
                                     <Users size={20} />
                                 </div>
                                 <div className="flex-1">
-                                    <p className="text-sm font-semibold text-slate-900">New user registration</p>
-                                    <p className="text-xs text-slate-500">Student joined the platform</p>
+                                    <p className="text-sm font-semibold text-slate-900">{t.newRegistration}</p>
+                                    <p className="text-xs text-slate-500">{t.studentJoined}</p>
                                 </div>
-                                <span className="text-xs text-slate-400">2m ago</span>
+                                <span className="text-xs text-slate-400">2{t.minutes} {t.ago}</span>
                             </div>
                         ))}
                     </div>

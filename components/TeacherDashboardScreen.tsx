@@ -25,7 +25,7 @@ export const TeacherDashboardScreen: React.FC<TeacherDashboardScreenProps> = ({ 
   const [activeTab, setActiveTab] = useState('overview');
   const [showDebug, setShowDebug] = useState(false);
   const [isUpdatingType, setIsUpdatingType] = useState(false);
-  const { language } = useLanguage();
+  const { t, language } = useLanguage();
 
   const user = data.user.data;
 
@@ -69,12 +69,10 @@ export const TeacherDashboardScreen: React.FC<TeacherDashboardScreenProps> = ({ 
         <div className="max-w-4xl w-full space-y-8 bg-white p-10 rounded-3xl shadow-xl border border-slate-100 animate-fade-in">
           <div className="text-center space-y-4">
             <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">
-              {language === 'ar' ? 'أكمل ملفك الشخصي' : 'Complete Your Profile'}
+              {t.completeProfile}
             </h1>
             <p className="text-lg text-slate-500 max-w-2xl mx-auto">
-              {language === 'ar'
-                ? 'مرحباً بك في إيوان! يرجى إخبارنا كيف ترغب في تقديم خدماتك عبر المنصة.'
-                : 'Welcome to Ewan! Please tell us how you would like to offer your services on the platform.'}
+              {t.welcomeToEwan}
             </p>
           </div>
 
@@ -88,15 +86,13 @@ export const TeacherDashboardScreen: React.FC<TeacherDashboardScreenProps> = ({ 
                 <User size={32} />
               </div>
               <h3 className="text-2xl font-bold text-slate-900 mb-3">
-                {language === 'ar' ? 'معلم مستقل' : 'Individual Teacher'}
+                {t.individualTeacher}
               </h3>
               <p className="text-slate-500 leading-relaxed">
-                {language === 'ar'
-                  ? 'سجل كمعلم مستقل يقدم دروساً خصوصية أو دورات تدريبية بشكل فردي.'
-                  : 'Register as an independent teacher providing private lessons or training courses individually.'}
+                {t.individualTeacherDesc}
               </p>
               <div className="mt-6 flex items-center text-primary font-bold">
-                {language === 'ar' ? 'اختر هذا النوع' : 'Select this type'} <ArrowRight size={18} className="ml-2 group-hover:translate-x-1 transition-transform" />
+                {t.selectThisType} <ArrowRight size={18} className="ml-2 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
 
@@ -109,25 +105,21 @@ export const TeacherDashboardScreen: React.FC<TeacherDashboardScreenProps> = ({ 
                 <Briefcase size={32} />
               </div>
               <h3 className="text-2xl font-bold text-slate-900 mb-3">
-                {language === 'ar' ? 'معهد / مركز تدريب' : 'Institute / Training Center'}
+                {t.trainingInstitute}
               </h3>
               <p className="text-slate-500 leading-relaxed">
-                {language === 'ar'
-                  ? 'سجل كمركز تدريب معتمد، معهد لغات، أو مؤسسة تعليمية تدير عدة معلمين.'
-                  : 'Register as a certified training center, language institute, or educational institution managing multiple teachers.'}
+                {t.trainingInstituteDesc}
               </p>
               <div className="mt-6 flex items-center text-blue-600 font-bold">
-                {language === 'ar' ? 'اختر هذا النوع' : 'Select this type'} <ArrowRight size={18} className="ml-2 group-hover:translate-x-1 transition-transform" />
+                {t.selectThisType} <ArrowRight size={18} className="ml-2 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
           </div>
 
-          {isUpdatingType && (
-            <div className="flex flex-col items-center gap-3 py-4">
-              <Loader2 className="animate-spin text-primary h-8 w-8" />
-              <p className="text-slate-500 font-medium">Updating... Please wait</p>
-            </div>
-          )}
+          <div className="flex flex-col items-center gap-3 py-4">
+            <span className="animate-spin text-primary h-8 w-8 border-4 border-t-transparent rounded-full" />
+            <p className="text-slate-500 font-medium">{t.updating}</p>
+          </div>
         </div>
       </div>
     );

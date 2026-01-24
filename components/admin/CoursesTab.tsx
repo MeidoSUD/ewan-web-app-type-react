@@ -45,8 +45,8 @@ export const CoursesTab: React.FC = () => {
     const fetchCourses = async () => {
         setLoading(true);
         try {
-            const response = await adminService.getCourses();
-            setCourses(Array.isArray(response.data) ? response.data : []);
+            const data = await adminService.getCourses();
+            setCourses(data);
         } catch (e) {
             console.error(e);
         } finally {
@@ -59,18 +59,18 @@ export const CoursesTab: React.FC = () => {
             await adminService.approveCourse(id);
             setCourses(courses.map(c => c.id === id ? { ...c, approval_status: 'approved' } : c));
             setOpenMenuId(null);
-        } catch (e) { alert("Failed to approve course"); }
+        } catch (e) { alert(t.error); }
     };
 
     const handleReject = async (id: number) => {
-        if (!rejectionReason) return alert("Please provide a reason");
+        if (!rejectionReason) return alert(t.provideReason);
         try {
             await adminService.rejectCourse(id, rejectionReason);
             setCourses(courses.map(c => c.id === id ? { ...c, approval_status: 'rejected' } : c));
             setShowRejectionModal(false);
             setRejectionReason('');
             setOpenMenuId(null);
-        } catch (e) { alert("Failed to reject course"); }
+        } catch (e) { alert(t.error); }
     };
 
     const handleToggleStatus = async (id: number, currentStatus: number) => {
@@ -79,7 +79,7 @@ export const CoursesTab: React.FC = () => {
             await adminService.updateCourseStatus(id, newStatus);
             setCourses(courses.map(c => c.id === id ? { ...c, status: newStatus } : c));
             setOpenMenuId(null);
-        } catch (e) { alert("Failed to update status"); }
+        } catch (e) { alert(t.error); }
     };
 
     const handleToggleFeatured = async (id: number, currentFeatured: boolean) => {
@@ -87,16 +87,16 @@ export const CoursesTab: React.FC = () => {
             await adminService.featureCourse(id, !currentFeatured);
             setCourses(courses.map(c => c.id === id ? { ...c, is_featured: !currentFeatured } : c));
             setOpenMenuId(null);
-        } catch (e) { alert("Failed to update featured status"); }
+        } catch (e) { alert(t.error); }
     };
 
     const handleDelete = async (id: number) => {
-        if (!confirm("Are you sure you want to delete this course?")) return;
+        if (!confirm(t.confirmAction)) return;
         try {
             await adminService.deleteCourse(id);
             setCourses(courses.filter(c => c.id !== id));
             setOpenMenuId(null);
-        } catch (e) { alert("Failed to delete course. It may have active enrollments."); }
+        } catch (e) { alert(t.error); }
     };
 
     const filteredCourses = courses.filter(course => {
@@ -113,7 +113,7 @@ export const CoursesTab: React.FC = () => {
     return (
         <div className="space-y-6 animate-fade-in" onClick={() => setOpenMenuId(null)}>
             <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-slate-900">Manage Courses</h2>
+                <h2 className="text-2xl font-bold text-slate-900">{t.manageCourses}</h2>
             </div>
 
             <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
@@ -122,7 +122,7 @@ export const CoursesTab: React.FC = () => {
                         <Search className={`absolute top-1/2 -translate-y-1/2 text-slate-400 ${direction === 'rtl' ? 'right-3' : 'left-3'}`} size={20} />
                         <input
                             type="text"
-                            placeholder="Search courses or teachers..."
+                            placeholder={t.phSearchCourses}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className={`w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:border-primary ${direction === 'rtl' ? 'pr-10 pl-4' : ''}`}
@@ -135,10 +135,10 @@ export const CoursesTab: React.FC = () => {
                             onChange={(e) => setFilterStatus(e.target.value)}
                             className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
                         >
-                            <option value="all">All Status</option>
-                            <option value="approved">Approved</option>
-                            <option value="pending">Pending</option>
-                            <option value="rejected">Rejected</option>
+                            <option value="all">{t.allStatus}</option>
+                            <option value="approved">{t.approve}</option>
+                            <option value="pending">{t.pending}</option>
+                            <option value="rejected">{t.reject}</option>
                         </select>
                     </div>
                 </div>
@@ -147,12 +147,12 @@ export const CoursesTab: React.FC = () => {
                     <table className="w-full text-left text-sm">
                         <thead className="bg-slate-50 border-b border-slate-200">
                             <tr>
-                                <th className="px-6 py-3 font-semibold text-slate-700">Course</th>
-                                <th className="px-6 py-3 font-semibold text-slate-700">Teacher</th>
-                                <th className="px-6 py-3 font-semibold text-slate-700">Category</th>
-                                <th className="px-6 py-3 font-semibold text-slate-700">Price</th>
-                                <th className="px-6 py-3 font-semibold text-slate-700">Approval</th>
-                                <th className="px-6 py-3 font-semibold text-slate-700">Status</th>
+                                <th className="px-6 py-3 font-semibold text-slate-700">{t.course}</th>
+                                <th className="px-6 py-3 font-semibold text-slate-700">{t.teacher}</th>
+                                <th className="px-6 py-3 font-semibold text-slate-700">{t.category}</th>
+                                <th className="px-6 py-3 font-semibold text-slate-700">{t.priceRange.split(' ')[0]}</th>
+                                <th className="px-6 py-3 font-semibold text-slate-700">{t.approve}</th>
+                                <th className="px-6 py-3 font-semibold text-slate-700">{t.status}</th>
                                 <th className="px-6 py-3 font-semibold text-slate-700 text-right">{t.actions}</th>
                             </tr>
                         </thead>
@@ -174,31 +174,31 @@ export const CoursesTab: React.FC = () => {
                                                 <div className="font-bold text-slate-900 line-clamp-1">{course.title}</div>
                                                 {course.is_featured && (
                                                     <div className="flex items-center gap-1 text-[10px] text-amber-600 font-bold uppercase">
-                                                        <Star size={10} fill="currentColor" /> Featured
+                                                        <Star size={10} fill="currentColor" /> {t.featured}
                                                     </div>
                                                 )}
                                             </div>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 text-slate-600">
-                                        {course.teacher ? `${course.teacher.first_name} ${course.teacher.last_name}` : 'Unknown'}
+                                        {course.teacher ? `${course.teacher.first_name} ${course.teacher.last_name}` : t.unknown}
                                     </td>
                                     <td className="px-6 py-4 text-slate-600">
-                                        {course.category?.name || 'N/A'}
+                                        {course.category?.name || t.na}
                                     </td>
                                     <td className="px-6 py-4 font-bold text-primary">
-                                        {course.price} SAR
+                                        {course.price} {t.sar}
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${course.approval_status === 'approved' ? 'bg-green-100 text-green-700' :
                                             course.approval_status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
                                             }`}>
-                                            {course.approval_status}
+                                            {course.approval_status === 'approved' ? t.approve : course.approval_status === 'rejected' ? t.reject : t.pending}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className={`h-2 w-2 rounded-full inline-block mr-2 ${course.status === 1 ? 'bg-green-500' : 'bg-slate-300'}`}></span>
-                                        {course.status === 1 ? 'Active' : 'Inactive'}
+                                        {course.status === 1 ? t.activeStatus : t.inactiveStatus}
                                     </td>
                                     <td className="px-6 py-4 text-right relative">
                                         <button
@@ -211,32 +211,32 @@ export const CoursesTab: React.FC = () => {
                                         {openMenuId === course.id && (
                                             <div className={`absolute z-20 w-48 bg-white rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 py-1 ${direction === 'rtl' ? 'left-8' : 'right-8'} top-8`}>
                                                 <button onClick={(e) => { e.stopPropagation(); setSelectedCourse(course); }} className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-slate-700">
-                                                    <Eye size={16} /> View Details
+                                                    <Eye size={16} /> {t.viewDetails}
                                                 </button>
 
                                                 {course.approval_status !== 'approved' && (
                                                     <button onClick={(e) => { e.stopPropagation(); handleApprove(course.id); }} className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-green-600">
-                                                        <CheckCircle size={16} /> Approve
+                                                        <CheckCircle size={16} /> {t.approve}
                                                     </button>
                                                 )}
 
                                                 {course.approval_status !== 'rejected' && (
                                                     <button onClick={(e) => { e.stopPropagation(); setShowRejectionModal(true); setOpenMenuId(course.id); }} className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-amber-600">
-                                                        <XCircle size={16} /> Reject
+                                                        <XCircle size={16} /> {t.reject}
                                                     </button>
                                                 )}
 
                                                 <button onClick={(e) => { e.stopPropagation(); handleToggleStatus(course.id, course.status); }} className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-blue-600">
-                                                    <Filter size={16} /> {course.status === 1 ? 'Deactivate' : 'Activate'}
+                                                    <Filter size={16} /> {course.status === 1 ? t.deactivate : t.activate}
                                                 </button>
 
                                                 <button onClick={(e) => { e.stopPropagation(); handleToggleFeatured(course.id, course.is_featured); }} className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-amber-500">
-                                                    <Star size={16} /> {course.is_featured ? 'Remove Featured' : 'Mark Featured'}
+                                                    <Star size={16} /> {course.is_featured ? t.removeFeatured : t.markFeatured}
                                                 </button>
 
                                                 <div className="border-t border-slate-100 my-1"></div>
                                                 <button onClick={(e) => { e.stopPropagation(); handleDelete(course.id); }} className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-red-600">
-                                                    <Trash2 size={16} /> Delete
+                                                    <Trash2 size={16} /> {t.delete}
                                                 </button>
                                             </div>
                                         )}
@@ -249,24 +249,24 @@ export const CoursesTab: React.FC = () => {
             </div>
 
             {/* Rejection Modal */}
-            <Modal isOpen={showRejectionModal} onClose={() => setShowRejectionModal(false)} title="Reject Course">
+            <Modal isOpen={showRejectionModal} onClose={() => setShowRejectionModal(false)} title={t.rejectCourse}>
                 <div className="space-y-4">
-                    <p className="text-sm text-slate-500">Please provide a reason for rejecting this course. The teacher will be notified.</p>
+                    <p className="text-sm text-slate-500">{t.rejectionReasonLabel}</p>
                     <textarea
                         value={rejectionReason}
                         onChange={(e) => setRejectionReason(e.target.value)}
-                        placeholder="e.g. Inappropriate content, poor image quality..."
+                        placeholder={t.phRejectionReason}
                         className="w-full h-32 p-3 rounded-lg border border-slate-200 focus:outline-none focus:border-primary resize-none"
                     />
                     <div className="flex gap-2">
-                        <Button variant="outline" className="flex-1" onClick={() => setShowRejectionModal(false)}>Cancel</Button>
-                        <Button className="flex-1 bg-red-600 hover:bg-red-700" onClick={() => openMenuId && handleReject(openMenuId)}>Confirm Rejection</Button>
+                        <Button variant="outline" className="flex-1" onClick={() => setShowRejectionModal(false)}>{t.cancel}</Button>
+                        <Button className="flex-1 bg-red-600 hover:bg-red-700" onClick={() => openMenuId && handleReject(openMenuId)}>{t.confirmRejection}</Button>
                     </div>
                 </div>
             </Modal>
 
             {/* Course Details Modal */}
-            <Modal isOpen={!!selectedCourse} onClose={() => setSelectedCourse(null)} title="Course Details">
+            <Modal isOpen={!!selectedCourse} onClose={() => setSelectedCourse(null)} title={t.details}>
                 {selectedCourse && (
                     <div className="space-y-6">
                         <div className="aspect-video w-full rounded-xl bg-slate-100 overflow-hidden">
@@ -286,26 +286,26 @@ export const CoursesTab: React.FC = () => {
 
                         <div className="grid grid-cols-2 gap-4 text-sm">
                             <div className="p-3 bg-slate-50 rounded-xl">
-                                <span className="block text-xs text-slate-400 mb-1">Teacher</span>
+                                <span className="block text-xs text-slate-400 mb-1">{t.teacher}</span>
                                 <span className="font-bold flex items-center gap-2">
                                     <User size={14} className="text-primary" />
                                     {selectedCourse.teacher?.first_name} {selectedCourse.teacher?.last_name}
                                 </span>
                             </div>
                             <div className="p-3 bg-slate-50 rounded-xl">
-                                <span className="block text-xs text-slate-400 mb-1">Price</span>
-                                <span className="font-bold text-primary">{selectedCourse.price} SAR</span>
+                                <span className="block text-xs text-slate-400 mb-1">{t.priceRange.split(' ')[0]}</span>
+                                <span className="font-bold text-primary">{selectedCourse.price} {t.sar}</span>
                             </div>
                             <div className="p-3 bg-slate-50 rounded-xl">
-                                <span className="block text-xs text-slate-400 mb-1">Category</span>
-                                <span className="font-bold">{selectedCourse.category?.name || 'N/A'}</span>
+                                <span className="block text-xs text-slate-400 mb-1">{t.category}</span>
+                                <span className="font-bold">{selectedCourse.category?.name || t.na}</span>
                             </div>
                             <div className="p-3 bg-slate-50 rounded-xl">
-                                <span className="block text-xs text-slate-400 mb-1">Approval</span>
+                                <span className="block text-xs text-slate-400 mb-1">{t.approve}</span>
                                 <span className={`font-bold capitalize ${selectedCourse.approval_status === 'approved' ? 'text-green-600' :
                                     selectedCourse.approval_status === 'rejected' ? 'text-red-600' : 'text-amber-600'
                                     }`}>
-                                    {selectedCourse.approval_status}
+                                    {selectedCourse.approval_status === 'approved' ? t.approve : selectedCourse.approval_status === 'rejected' ? t.reject : t.pending}
                                 </span>
                             </div>
                         </div>
@@ -313,11 +313,11 @@ export const CoursesTab: React.FC = () => {
                         <div className="flex gap-2 pt-2">
                             {selectedCourse.approval_status !== 'approved' && (
                                 <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => handleApprove(selectedCourse.id)}>
-                                    Approve Course
+                                    {t.approve} {t.course}
                                 </Button>
                             )}
                             <Button variant="outline" className="flex-1" onClick={() => setSelectedCourse(null)}>
-                                Close
+                                {t.close}
                             </Button>
                         </div>
                     </div>

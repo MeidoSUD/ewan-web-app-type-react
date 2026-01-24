@@ -338,20 +338,20 @@ export const adminService = {
   // Course Management
   getCourses: (filters: any = {}) => {
     const query = new URLSearchParams(filters).toString();
-    return fetchWithAuth(`/admin/courses?${query}`);
+    return fetchWithAuth(`/admin/courses?${query}`).then(extractArray);
   },
   getCourseDetails: (id: number) => fetchWithAuth(`/admin/courses/${id}`),
   approveCourse: (id: number) => fetchWithAuth(`/admin/courses/${id}/approve`, { method: 'PUT' }),
   rejectCourse: (id: number, reason: string) => fetchWithAuth(`/admin/courses/${id}/reject`, { method: 'PUT', body: JSON.stringify({ rejection_reason: reason }) }),
   updateCourseStatus: (id: number, status: number) => fetchWithAuth(`/admin/courses/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) }),
   deleteCourse: (id: number) => fetchWithAuth(`/admin/courses/${id}`, { method: 'DELETE' }),
-  getPendingCourses: () => fetchWithAuth('/admin/courses/pending-approval'),
+  getPendingCourses: () => fetchWithAuth('/admin/courses/pending-approval').then(extractArray),
   featureCourse: (id: number, isFeatured: boolean) => fetchWithAuth(`/admin/courses/${id}/feature`, { method: 'PUT', body: JSON.stringify({ is_featured: isFeatured }) }),
 
   // Education Levels
   getEducationLevels: (filters: any = {}) => {
     const query = new URLSearchParams(filters).toString();
-    return fetchWithAuth(`/admin/education-levels?${query}`);
+    return fetchWithAuth(`/admin/education-levels?${query}`).then(extractArray);
   },
   createEducationLevel: (data: any) => fetchWithAuth('/admin/education-levels', { method: 'POST', body: JSON.stringify(data) }),
   getEducationLevelDetails: (id: number) => fetchWithAuth(`/admin/education-levels/${id}`),
@@ -362,7 +362,7 @@ export const adminService = {
   // Classes
   getClasses: (filters: any = {}) => {
     const query = new URLSearchParams(filters).toString();
-    return fetchWithAuth(`/admin/classes?${query}`);
+    return fetchWithAuth(`/admin/classes?${query}`).then(extractArray);
   },
   createClass: (data: any) => fetchWithAuth('/admin/classes', { method: 'POST', body: JSON.stringify(data) }),
   getClassDetails: (id: number) => fetchWithAuth(`/admin/classes/${id}`),
@@ -373,7 +373,7 @@ export const adminService = {
   // Subjects
   getSubjects: (filters: any = {}) => {
     const query = new URLSearchParams(filters).toString();
-    return fetchWithAuth(`/admin/subjects?${query}`);
+    return fetchWithAuth(`/admin/subjects?${query}`).then(extractArray);
   },
   createSubject: (data: any) => fetchWithAuth('/admin/subjects', { method: 'POST', body: JSON.stringify(data) }),
   getSubjectDetails: (id: number) => fetchWithAuth(`/admin/subjects/${id}`),

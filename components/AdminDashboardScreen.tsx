@@ -13,12 +13,15 @@ import { SettingsTab } from './dashboard/SettingsTab';
 import { AdminOverviewTab } from './admin/AdminOverviewTab';
 import { Menu } from 'lucide-react';
 
+import { useLanguage } from '../contexts/LanguageContext';
+
 interface AdminDashboardScreenProps {
   data: AuthResponse;
   onLogout: () => void;
 }
 
 export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ data, onLogout }) => {
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -63,7 +66,7 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ data
           <button onClick={() => setSidebarOpen(true)} className="text-slate-600">
             <Menu size={24} />
           </button>
-          <h1 className="font-bold text-lg">Admin Dashboard</h1>
+          <h1 className="font-bold text-lg">{t.adminPanel}</h1>
         </header>
 
         {/* Main Content */}

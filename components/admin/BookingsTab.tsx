@@ -11,7 +11,7 @@ export const BookingsTab: React.FC = () => {
     const { t } = useLanguage();
     const [bookings, setBookings] = useState<AdminBooking[]>([]);
     const [loading, setLoading] = useState(true);
-    
+
     // Filters
     const [filterTeacher, setFilterTeacher] = useState('');
     const [filterDate, setFilterDate] = useState('');
@@ -48,44 +48,44 @@ export const BookingsTab: React.FC = () => {
 
     return (
         <div className="space-y-6 animate-fade-in">
-            <h2 className="text-2xl font-bold text-slate-900">All Bookings</h2>
-            
+            <h2 className="text-2xl font-bold text-slate-900">{t.allBookings}</h2>
+
             {/* Filters Bar */}
             <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-end">
                 <div className="w-full md:w-1/3">
-                    <label className="text-xs font-bold text-slate-500 mb-1 block">Teacher Name</label>
-                    <input 
-                        type="text" 
+                    <label className="text-xs font-bold text-slate-500 mb-1 block">{t.teacherName}</label>
+                    <input
+                        type="text"
                         className="w-full p-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-primary"
-                        placeholder="Search teacher..."
+                        placeholder={t.phSearchCourses}
                         value={filterTeacher}
                         onChange={(e) => setFilterTeacher(e.target.value)}
                     />
                 </div>
                 <div className="w-full md:w-1/4">
-                    <label className="text-xs font-bold text-slate-500 mb-1 block">Date</label>
-                    <input 
-                        type="date" 
+                    <label className="text-xs font-bold text-slate-500 mb-1 block">{t.date}</label>
+                    <input
+                        type="date"
                         className="w-full p-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-primary"
                         value={filterDate}
                         onChange={(e) => setFilterDate(e.target.value)}
                     />
                 </div>
                 <div className="w-full md:w-1/4">
-                    <label className="text-xs font-bold text-slate-500 mb-1 block">Status</label>
-                    <select 
+                    <label className="text-xs font-bold text-slate-500 mb-1 block">{t.status}</label>
+                    <select
                         className="w-full p-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-primary bg-white"
                         value={filterStatus}
                         onChange={(e) => setFilterStatus(e.target.value)}
                     >
-                        <option value="">All Statuses</option>
-                        <option value="confirmed">Confirmed</option>
-                        <option value="pending">Pending</option>
-                        <option value="completed">Completed</option>
-                        <option value="cancelled">Cancelled</option>
+                        <option value="">{t.allStatus}</option>
+                        <option value="confirmed">{t.confirmed}</option>
+                        <option value="pending">{t.pending}</option>
+                        <option value="completed">{t.completed}</option>
+                        <option value="cancelled">{t.cancelled}</option>
                     </select>
                 </div>
-                <button 
+                <button
                     onClick={clearFilters}
                     className="p-2 text-slate-400 hover:text-red-500 transition-colors"
                     title="Clear Filters"
@@ -98,35 +98,34 @@ export const BookingsTab: React.FC = () => {
                 <table className="w-full text-left text-sm">
                     <thead className="bg-slate-50 border-b border-slate-200">
                         <tr>
-                            <th className="px-6 py-4 font-bold text-slate-700">Reference</th>
-                            <th className="px-6 py-4 font-bold text-slate-700">Student</th>
-                            <th className="px-6 py-4 font-bold text-slate-700">Teacher</th>
-                            <th className="px-6 py-4 font-bold text-slate-700">Amount</th>
-                            <th className="px-6 py-4 font-bold text-slate-700">Status</th>
-                            <th className="px-6 py-4 font-bold text-slate-700">Date</th>
+                            <th className="px-6 py-4 font-bold text-slate-700">{t.reference}</th>
+                            <th className="px-6 py-4 font-bold text-slate-700">{t.student}</th>
+                            <th className="px-6 py-4 font-bold text-slate-700">{t.teacher}</th>
+                            <th className="px-6 py-4 font-bold text-slate-700">{t.payoutAmount}</th>
+                            <th className="px-6 py-4 font-bold text-slate-700">{t.status}</th>
+                            <th className="px-6 py-4 font-bold text-slate-700">{t.date}</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                         {filteredBookings.map(booking => (
                             <tr key={booking.id} className="hover:bg-slate-50">
                                 <td className="px-6 py-4 font-mono text-slate-500">{booking.reference || `#${booking.id}`}</td>
-                                <td className="px-6 py-4">{booking.student_name || 'N/A'}</td>
-                                <td className="px-6 py-4">{booking.teacher_name || 'N/A'}</td>
+                                <td className="px-6 py-4">{booking.student_name || t.na}</td>
+                                <td className="px-6 py-4">{booking.teacher_name || t.na}</td>
                                 <td className="px-6 py-4 font-bold text-slate-900">{booking.amount} {t.sar}</td>
                                 <td className="px-6 py-4">
-                                    <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${
-                                        booking.status === 'confirmed' ? 'bg-green-100 text-green-700' : 
-                                        booking.status === 'cancelled' ? 'bg-red-100 text-red-700' :
-                                        'bg-slate-100 text-slate-600'
-                                    }`}>
-                                        {booking.status}
+                                    <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${booking.status === 'confirmed' ? 'bg-green-100 text-green-700' :
+                                            booking.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                                                'bg-slate-100 text-slate-600'
+                                        }`}>
+                                        {booking.status === 'confirmed' ? t.confirmed : booking.status === 'cancelled' ? t.cancelled : booking.status === 'completed' ? t.completed : t.pending}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 text-slate-500">{new Date(booking.created_at).toLocaleDateString()}</td>
                             </tr>
                         ))}
                         {filteredBookings.length === 0 && (
-                            <tr><td colSpan={6} className="p-8 text-center text-slate-500">No bookings found matching filters.</td></tr>
+                            <tr><td colSpan={6} className="p-8 text-center text-slate-500">{t.noBookingsFound}</td></tr>
                         )}
                     </tbody>
                 </table>

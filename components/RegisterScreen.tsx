@@ -155,10 +155,10 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onSwitch, onVeri
         <div className="space-y-6">
           <div className="text-center">
             <h2 className="mt-2 text-3xl font-bold tracking-tight text-text">
-              {language === 'ar' ? 'اختر نوع الحساب' : 'Choose Account Type'}
+              {t.chooseAccount}
             </h2>
             <p className="mt-2 text-sm text-slate-500">
-              {language === 'ar' ? 'ابدأ باختيار دورك في المنصة' : 'Start by selecting your role on the platform'}
+              {t.roleSelectionDesc}
             </p>
           </div>
 
@@ -175,7 +175,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onSwitch, onVeri
                   {language === 'ar' ? 'طالب' : 'Student'}
                 </p>
                 <p className="text-xs text-slate-500 mt-1">
-                  {language === 'ar' ? 'تعلم وطور مهاراتك مع نخبة من المعلمين' : 'Learn and develop your skills with elite teachers'}
+                  {t.studentDesc}
                 </p>
               </div>
             </div>
@@ -189,10 +189,10 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onSwitch, onVeri
               </div>
               <div className="flex-1">
                 <p className={`font-bold text-lg ${roleId === 3 ? 'text-primary' : 'text-text'}`}>
-                  {language === 'ar' ? 'معلم / معهد' : 'Teacher / Institute'}
+                  {t.teacherInstitute}
                 </p>
                 <p className="text-xs text-slate-500 mt-1">
-                  {language === 'ar' ? 'كن جزءاً من منصتنا التعليمية وقدم دوراتك' : 'Be part of our education platform and offer your courses'}
+                  {t.teacherInstituteDesc}
                 </p>
               </div>
             </div>
@@ -201,16 +201,14 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onSwitch, onVeri
           {roleId === 3 && (
             <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl animate-fade-in">
               <p className="text-sm text-blue-700 leading-relaxed">
-                {language === 'ar'
-                  ? 'يمكنك التسجيل كمعلم مستقل، مدرب لغات، مدرب دورات، أو كمعهد / مركز تدريب يقدم دورات مهنية عبر منصتنا.'
-                  : 'You can register as a private teacher, language instructor, course trainer, or as a training institute/center offering professional courses through our platform.'}
+                {t.teacherDetailedDesc}
               </p>
             </div>
           )}
 
           <div className="pt-4">
             <Button onClick={() => setStep('info')} className="w-full py-4 text-lg shadow-lg shadow-primary/20">
-              {language === 'ar' ? 'متابعة' : 'Continue'}
+              {t.continue}
             </Button>
           </div>
         </div>
@@ -219,10 +217,10 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onSwitch, onVeri
           <div className="text-center">
             <div className="flex items-center justify-between mb-2">
               <button onClick={() => setStep('role')} className="text-sm text-slate-500 hover:text-primary flex items-center gap-1">
-                {language === 'ar' ? '← العودة' : '← Back'}
+                ← {t.back}
               </button>
               <span className="text-xs font-bold text-primary uppercase tracking-wider">
-                {roleId === 4 ? (language === 'ar' ? 'تسجيل طالب' : 'Student Registration') : (language === 'ar' ? 'تسجيل معلم' : 'Teacher Registration')}
+                {roleId === 4 ? t.studentRegistration : t.teacherRegistration}
               </span>
             </div>
             <h2 className="text-3xl font-bold tracking-tight text-text">

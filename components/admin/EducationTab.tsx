@@ -84,8 +84,8 @@ export const EducationTab: React.FC = () => {
     const fetchLevels = async () => {
         setLoadingLevels(true);
         try {
-            const resp = await adminService.getEducationLevels({ include_deleted: 1 });
-            setLevels(resp.data || []);
+            const data = await adminService.getEducationLevels({ include_deleted: 1 });
+            setLevels(data || []);
         } catch (e) {
             showToast("Failed to load levels", 'error');
         } finally {
@@ -96,8 +96,8 @@ export const EducationTab: React.FC = () => {
     const fetchClasses = async (levelId: number) => {
         setLoadingClasses(true);
         try {
-            const resp = await adminService.getClasses({ education_level_id: levelId, include_deleted: 1 });
-            setClasses(resp.data || []);
+            const data = await adminService.getClasses({ education_level_id: levelId, include_deleted: 1 });
+            setClasses(data || []);
         } catch (e) {
             showToast("Failed to load classes", 'error');
         } finally {
@@ -108,8 +108,8 @@ export const EducationTab: React.FC = () => {
     const fetchSubjects = async (classId: number) => {
         setLoadingSubjects(true);
         try {
-            const resp = await adminService.getSubjects({ class_id: classId, include_deleted: 1 });
-            setSubjects(resp.data || []);
+            const data = await adminService.getSubjects({ class_id: classId, include_deleted: 1 });
+            setSubjects(data || []);
         } catch (e) {
             showToast("Failed to load subjects", 'error');
         } finally {
@@ -143,7 +143,7 @@ export const EducationTab: React.FC = () => {
                         ...data,
                         class_id: activeClass,
                         education_level_id: activeLevel,
-                        service_id: 1 // Default to Tutoring or similar
+                        service_id: data.service_id || 1 // Fallback if not specified
                     });
                 }
                 if (activeClass) fetchSubjects(activeClass);
@@ -227,13 +227,13 @@ export const EducationTab: React.FC = () => {
                                 key={level.id}
                                 onClick={() => { setActiveLevel(level.id); setActiveClass(null); }}
                                 className={`group flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all border ${activeLevel === level.id
-                                        ? 'bg-primary/5 border-primary text-primary'
-                                        : 'hover:bg-slate-50 border-transparent'
+                                    ? 'bg-primary/5 border-primary text-primary'
+                                    : 'hover:bg-slate-50 border-transparent'
                                     } ${level.deleted_at ? 'opacity-50 grayscale' : ''}`}
                             >
                                 <div className="flex flex-col">
                                     <span className="font-medium">{language === 'ar' ? level.name_ar : level.name_en}</span>
-                                    {level.deleted_at && <span className="text-[10px] text-red-500 font-bold uppercase">Deleted</span>}
+                                    {level.deleted_at && <span className="text-[10px] text-red-500 font-bold uppercase">{t.deleted}</span>}
                                 </div>
                                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button onClick={(e) => { e.stopPropagation(); openModal('level', level); }} className="p-1.5 text-slate-400 hover:text-blue-500 rounded-md hover:bg-white"><Edit2 size={14} /></button>
@@ -268,23 +268,23 @@ export const EducationTab: React.FC = () => {
                         {!activeLevel ? (
                             <div className="flex flex-col items-center justify-center h-full text-slate-400 text-sm p-4 text-center">
                                 <AlertCircle size={24} className="mb-2 opacity-20" />
-                                Select a level first
+                                {t.selectLevelFirst}
                             </div>
                         ) : classes.length === 0 && !loadingClasses ? (
-                            <div className="text-center text-slate-400 mt-10 text-sm">No classes found</div>
+                            <div className="text-center text-slate-400 mt-10 text-sm">{t.noClassesFound}</div>
                         ) : (
                             classes.map(cls => (
                                 <div
                                     key={cls.id}
                                     onClick={() => setActiveClass(cls.id)}
                                     className={`group flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all border ${activeClass === cls.id
-                                            ? 'bg-primary/5 border-primary text-primary'
-                                            : 'hover:bg-slate-50 border-transparent'
+                                        ? 'bg-primary/5 border-primary text-primary'
+                                        : 'hover:bg-slate-50 border-transparent'
                                         } ${cls.deleted_at ? 'opacity-50 grayscale' : ''}`}
                                 >
                                     <div className="flex flex-col">
                                         <span className="font-medium">{language === 'ar' ? cls.name_ar : cls.name_en}</span>
-                                        {cls.deleted_at && <span className="text-[10px] text-red-500 font-bold uppercase">Deleted</span>}
+                                        {cls.deleted_at && <span className="text-[10px] text-red-500 font-bold uppercase">{t.deleted}</span>}
                                     </div>
                                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <button onClick={(e) => { e.stopPropagation(); openModal('class', cls); }} className="p-1.5 text-slate-400 hover:text-blue-500 rounded-md hover:bg-white"><Edit2 size={14} /></button>
@@ -320,10 +320,10 @@ export const EducationTab: React.FC = () => {
                         {!activeClass ? (
                             <div className="flex flex-col items-center justify-center h-full text-slate-400 text-sm p-4 text-center">
                                 <AlertCircle size={24} className="mb-2 opacity-20" />
-                                Select a class first
+                                {t.selectClassFirst}
                             </div>
                         ) : subjects.length === 0 && !loadingSubjects ? (
-                            <div className="text-center text-slate-400 mt-10 text-sm">No subjects found</div>
+                            <div className="text-center text-slate-400 mt-10 text-sm">{t.noSubjectsFound}</div>
                         ) : (
                             subjects.map(sub => (
                                 <div
@@ -332,7 +332,7 @@ export const EducationTab: React.FC = () => {
                                 >
                                     <div className="flex flex-col">
                                         <span className="font-medium">{language === 'ar' ? sub.name_ar : sub.name_en}</span>
-                                        {sub.deleted_at && <span className="text-[10px] text-red-500 font-bold uppercase">Deleted</span>}
+                                        {sub.deleted_at && <span className="text-[10px] text-red-500 font-bold uppercase">{t.deleted}</span>}
                                     </div>
                                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <button onClick={() => openModal('subject', sub)} className="p-1.5 text-slate-400 hover:text-blue-500 rounded-md hover:bg-white"><Edit2 size={14} /></button>
@@ -354,25 +354,25 @@ export const EducationTab: React.FC = () => {
             <Modal
                 isOpen={modal.isOpen}
                 onClose={() => setModal({ ...modal, isOpen: false })}
-                title={`${modal.isEditing ? 'Edit' : 'Create'} ${modal.type.charAt(0).toUpperCase() + modal.type.slice(1)}`}
+                title={`${modal.isEditing ? t.edit : t.create} ${modal.type === 'level' ? t.levels : modal.type === 'class' ? t.classes : t.subjects}`}
             >
                 <div className="space-y-4">
                     <Input
-                        label="Name (English)"
+                        label={t.nameEn}
                         value={modal.data.name_en || ''}
                         onChange={e => setModal({ ...modal, data: { ...modal.data, name_en: e.target.value } })}
                         placeholder="e.g. Mathematics"
                     />
                     <Input
-                        label="Name (Arabic)"
+                        label={t.nameAr}
                         value={modal.data.name_ar || ''}
                         onChange={e => setModal({ ...modal, data: { ...modal.data, name_ar: e.target.value } })}
-                        placeholder="مثال: الرياضيات"
+                        placeholder={t.phMathematics}
                         dir="rtl"
                     />
                     {modal.type === 'level' && (
                         <div className="mb-4 w-full">
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Description (Optional)</label>
+                            <label className="block text-sm font-medium text-slate-700 mb-1">{t.description}</label>
                             <textarea
                                 className="w-full rounded-lg border border-slate-200 p-3 h-20 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
                                 value={modal.data.description || ''}
@@ -382,22 +382,22 @@ export const EducationTab: React.FC = () => {
                     )}
 
                     <div className="flex items-center gap-2 py-2">
-                        <label className="text-sm font-medium text-slate-700">Status:</label>
+                        <label className="text-sm font-medium text-slate-700">{t.status}:</label>
                         <button
                             onClick={() => setModal({ ...modal, data: { ...modal.data, status: modal.data.status === 1 ? 0 : 1 } })}
                             className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${modal.data.status === 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                                 }`}
                         >
-                            {modal.data.status === 1 ? 'ACTIVE' : 'INACTIVE'}
+                            {modal.data.status === 1 ? t.activeStatus : t.inactiveStatus}
                         </button>
                     </div>
 
                     <div className="flex gap-2 pt-4">
                         <Button variant="outline" className="flex-1" onClick={() => setModal({ ...modal, isOpen: false })}>
-                            <X size={18} className="mr-2" /> Cancel
+                            <X size={18} className="mr-2" /> {t.cancel}
                         </Button>
                         <Button className="flex-1" onClick={handleSave}>
-                            <Save size={18} className="mr-2" /> {modal.isEditing ? 'Update' : 'Create'}
+                            <Save size={18} className="mr-2" /> {modal.isEditing ? t.update : t.create}
                         </Button>
                     </div>
                 </div>

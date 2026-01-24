@@ -108,9 +108,9 @@ export const UsersTab: React.FC = () => {
                     <table className="w-full text-left text-sm">
                         <thead className="bg-slate-50 border-b border-slate-200">
                             <tr>
-                                <th className="px-6 py-3 font-semibold text-slate-700">Name</th>
-                                <th className="px-6 py-3 font-semibold text-slate-700">Role</th>
-                                <th className="px-6 py-3 font-semibold text-slate-700">Status</th>
+                                <th className="px-6 py-3 font-semibold text-slate-700">{t.name}</th>
+                                <th className="px-6 py-3 font-semibold text-slate-700">{t.role}</th>
+                                <th className="px-6 py-3 font-semibold text-slate-700">{t.status}</th>
                                 <th className="px-6 py-3 font-semibold text-slate-700 text-right">{t.actions}</th>
                             </tr>
                         </thead>
@@ -126,13 +126,13 @@ export const UsersTab: React.FC = () => {
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-2 capitalize bg-slate-100 px-3 py-1 rounded-full w-fit text-xs font-medium">
                                             {getRoleIcon(user.role_id)}
-                                            {user.role_id === 1 ? 'Admin' : user.role_id === 3 ? 'Teacher' : 'Student'}
+                                            {user.role_id === 1 ? t.admin : user.role_id === 3 ? t.teacher : t.student}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${user.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                                             }`}>
-                                            {user.is_active ? 'Active' : 'Disabled'}
+                                            {user.is_active ? t.activeStatus : t.inactiveStatus}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-right relative">
@@ -146,26 +146,26 @@ export const UsersTab: React.FC = () => {
                                         {openMenuId === user.id && (
                                             <div className={`absolute z-20 w-48 bg-white rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 py-1 ${direction === 'rtl' ? 'left-8' : 'right-8'} top-8`}>
                                                 <button onClick={(e) => { e.stopPropagation(); setSelectedUser(user); }} className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-slate-700">
-                                                    <Eye size={16} /> View Details
+                                                    <Eye size={16} /> {t.viewDetails}
                                                 </button>
 
                                                 {user.is_active ? (
                                                     <button onClick={(e) => { e.stopPropagation(); handleSuspend(user.id); }} className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-orange-600">
-                                                        <Ban size={16} /> Suspend User
+                                                        <Ban size={16} /> {t.deactivate}
                                                     </button>
                                                 ) : (
                                                     <button onClick={(e) => { e.stopPropagation(); handleActivate(user.id); }} className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-green-600">
-                                                        <CheckCircle size={16} /> Activate User
+                                                        <CheckCircle size={16} /> {t.activate}
                                                     </button>
                                                 )}
 
                                                 <button onClick={(e) => { e.stopPropagation(); handleResetPassword(user.id); }} className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-blue-600">
-                                                    <Key size={16} /> Reset Password
+                                                    <Key size={16} /> {t.resetPassword}
                                                 </button>
 
                                                 <div className="border-t border-slate-100 my-1"></div>
                                                 <button onClick={(e) => { e.stopPropagation(); handleDelete(user.id); }} className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-red-600">
-                                                    <Trash2 size={16} /> Delete
+                                                    <Trash2 size={16} /> {t.delete}
                                                 </button>
                                             </div>
                                         )}
@@ -178,7 +178,7 @@ export const UsersTab: React.FC = () => {
             </div>
 
             {/* User Details Modal */}
-            <Modal isOpen={!!selectedUser} onClose={() => setSelectedUser(null)} title="User Details">
+            <Modal isOpen={!!selectedUser} onClose={() => setSelectedUser(null)} title={t.details}>
                 {selectedUser && (
                     <div className="space-y-4">
                         <div className="flex flex-col items-center mb-6">
@@ -191,29 +191,29 @@ export const UsersTab: React.FC = () => {
 
                         <div className="grid grid-cols-2 gap-4 text-sm">
                             <div className="p-3 bg-slate-50 rounded">
-                                <span className="block text-xs text-slate-400">Phone</span>
+                                <span className="block text-xs text-slate-400">{t.phone}</span>
                                 <span className="font-medium" dir="ltr">{selectedUser.phone_number}</span>
                             </div>
                             <div className="p-3 bg-slate-50 rounded">
-                                <span className="block text-xs text-slate-400">Role</span>
-                                <span className="font-medium">{selectedUser.role_id === 3 ? 'Teacher' : 'Student'}</span>
+                                <span className="block text-xs text-slate-400">{t.role}</span>
+                                <span className="font-medium">{selectedUser.role_id === 1 ? t.admin : selectedUser.role_id === 3 ? t.teacher : t.student}</span>
                             </div>
                             <div className="p-3 bg-slate-50 rounded">
-                                <span className="block text-xs text-slate-400">Status</span>
-                                <span className={`font-bold ${selectedUser.is_active ? 'text-green-600' : 'text-red-600'}`}>{selectedUser.is_active ? 'Active' : 'Disabled'}</span>
+                                <span className="block text-xs text-slate-400">{t.status}</span>
+                                <span className={`font-bold ${selectedUser.is_active ? 'text-green-600' : 'text-red-600'}`}>{selectedUser.is_active ? t.activeStatus : t.inactiveStatus}</span>
                             </div>
                             <div className="p-3 bg-slate-50 rounded">
-                                <span className="block text-xs text-slate-400">Joined</span>
+                                <span className="block text-xs text-slate-400">{t.signUp}</span>
                                 <span className="font-medium">{new Date(selectedUser.created_at).toLocaleDateString()}</span>
                             </div>
                         </div>
 
                         <div className="flex gap-2 pt-4">
                             <Button variant="outline" className="flex-1 text-red-600 border-red-200 hover:bg-red-50" onClick={() => handleDelete(selectedUser.id)}>
-                                Delete User
+                                {t.delete}
                             </Button>
                             <Button className="flex-1" onClick={() => setSelectedUser(null)}>
-                                Close
+                                {t.close}
                             </Button>
                         </div>
                     </div>

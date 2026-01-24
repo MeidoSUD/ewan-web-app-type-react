@@ -18,8 +18,8 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, setActive
     const menuItems = [
         { id: 'overview', label: t.dashboard, icon: LayoutDashboard },
         { id: 'users', label: t.users, icon: Users },
-        { id: 'courses', label: 'Courses', icon: BookOpen },
-        { id: 'bookings', label: 'Bookings', icon: Calendar },
+        { id: 'courses', label: t.courses, icon: BookOpen },
+        { id: 'bookings', label: t.bookings, icon: Calendar },
         { id: 'education', label: t.academicStructure, icon: Layers },
         { id: 'verifications', label: t.verifications, icon: CheckSquare },
         { id: 'payouts', label: t.payoutRequests, icon: DollarSign },
@@ -53,8 +53,8 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, setActive
                                 key={item.id}
                                 onClick={() => { setActiveTab(item.id); setIsOpen(false); }}
                                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === item.id
-                                        ? 'bg-primary text-white shadow-md shadow-primary/30'
-                                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                                    ? 'bg-primary text-white shadow-md shadow-primary/30'
+                                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                                     }`}
                             >
                                 <item.icon size={20} />
