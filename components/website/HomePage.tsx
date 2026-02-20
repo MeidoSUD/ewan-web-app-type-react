@@ -33,7 +33,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onLoginClick, onRegisterClic
                             </div>
                             <h1 className="text-4xl lg:text-6xl font-bold tracking-tight text-slate-900 mb-6 leading-tight">
                                 {language === 'ar' ? 'أطلق العنان لقدراتك مع' : 'Unlock Your Potential with'} <br />
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600">Ewan Geniuses</span>
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600">Ewan</span>
                             </h1>
                             <p className="text-lg text-slate-600 mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed">
                                 {language === 'ar'
@@ -127,7 +127,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onLoginClick, onRegisterClic
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                         <div>
                             <h2 className="text-3xl font-bold mb-6">
-                                {language === 'ar' ? 'لماذا تختار Ewan Geniuses؟' : 'Why Choose Ewan Geniuses?'}
+                                {language === 'ar' ? 'لماذا تختار Ewan' : 'Why Choose Ewan?'}
                             </h2>
                             <p className="text-slate-400 mb-8 text-lg leading-relaxed">
                                 {language === 'ar'
@@ -180,7 +180,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onLoginClick, onRegisterClic
                         <p className="text-blue-100 mb-8 max-w-2xl mx-auto text-lg relative z-10">
                             {language === 'ar'
                                 ? 'انضم إلى آلاف الطلاب الذين يحققون أهدافهم مع Ewan Geniuses اليوم.'
-                                : 'Join thousands of students achieving their goals with Ewan Geniuses today.'}
+                                : 'Join thousands of students achieving their goals with Ewan today.'}
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
                             <Button className="bg-white text-primary hover:bg-slate-100 border-0 px-8 py-4 text-base shadow-lg" onClick={onRegisterClick}>

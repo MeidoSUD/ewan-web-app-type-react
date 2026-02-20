@@ -149,40 +149,61 @@ const AppContent = () => {
     return () => window.removeEventListener(AUTH_SESSION_EXPIRED, handleSessionExpired);
   }, []);
 
-  const handleLoginSuccess = (data: AuthResponse) => {
-    if (data.token) {
-      tokenService.setToken(data.token);
-    } else {
+  const handleLoginSuccess = (incomingData: any) => {
+    console.log("[App] handleLoginSuccess called. Raw:", incomingData);
+
+    // 1. Normalize the data structure
+    // The API returns { success: true, data: { token: "...", user: { ... } } }
+    // But sometimes might return { token: "...", user: { ... } } directly
+    let authData = incomingData;
+    if (incomingData && incomingData.data && incomingData.data.token) {
+      console.log("[App] Detected nested 'data' property. Unwrapping...");
+      authData = incomingData.data;
+    }
+
+    const token = authData.token;
+
+    if (!token) {
+      console.error("[App] Login success but no token present in authData:", authData);
       return;
     }
 
-    const rawUser = data.user as any;
-    let userObj: UserData;
-    let roleName: string;
+    tokenService.setToken(token);
 
-    if (rawUser && rawUser.data && typeof rawUser.data === 'object') {
-      userObj = rawUser.data;
-      roleName = rawUser.role;
-    } else {
-      userObj = rawUser as UserData;
-      roleName = (rawUser as any)?.role || '';
+    // 2. Find the user object that contains the role_id
+    // authData.user should be { role: "...", data: { role_id: ..., ... } }
+    const candidates = [
+      authData.user?.data,      // Standard location: data.user.data
+      authData.user,            // Fallback
+      authData.data,            // Fallback
+      authData                  // Fallback
+    ];
+
+    const isValidUser = (obj: any) => obj && (obj.role_id !== undefined || obj.roleId !== undefined);
+    const finalUserObj = candidates.find(isValidUser);
+
+    console.log("[App] User Candidates:", candidates);
+    console.log("[App] Selected User Object:", finalUserObj);
+
+    if (!finalUserObj) {
+      console.error("[App] Could not find a valid user object with role_id in login response.");
+      // If we have a token but can't find the user, let's try to fetch the profile
+      console.log("[App] Have token but missing user details. Fetching profile...");
+      initAuth();
+      return;
     }
 
-    if (!roleName && userObj) {
-      if (Number(userObj.role_id) === 3) roleName = 'teacher';
-      else if (Number(userObj.role_id) === 4) roleName = 'student';
-      else if (Number(userObj.role_id) === 1) roleName = 'admin';
-    }
+    // 3. Process the user object (converts role_id to string role, etc.)
+    const processedData = processUserObject(finalUserObj, token);
+    console.log("[App] Processed Data:", processedData);
 
-    if (userObj && roleName) {
-      const normalizedData: AuthResponse = {
-        user: { role: roleName, data: userObj },
-        token: data.token
-      };
-      setUserData(normalizedData);
-      localStorage.setItem(USER_DATA_KEY, JSON.stringify(normalizedData));
+    if (processedData) {
+      setUserData(processedData);
+      localStorage.setItem(USER_DATA_KEY, JSON.stringify(processedData));
+      console.log("[App] Set user data and redirecting to dashboard...");
       setCurrentScreen('dashboard');
     } else {
+      console.error("[App] processUserObject returned null. Role ID might be invalid.");
       initAuth();
     }
   };

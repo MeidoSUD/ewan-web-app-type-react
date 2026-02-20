@@ -14,7 +14,7 @@ export const Footer: React.FC = () => {
                     <div>
                         <div className="flex items-center gap-2 text-white mb-6">
                             <Hexagon className="text-primary fill-primary" size={32} />
-                            <span className="text-xl font-bold tracking-tight">Ewan Geniuses</span>
+                            <span className="text-xl font-bold tracking-tight">Ewan</span>
                         </div>
                         <p className="text-sm leading-relaxed text-slate-400 mb-6">
                             {language === 'ar'
@@ -71,7 +71,7 @@ export const Footer: React.FC = () => {
                 </div>
 
                 <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500">
-                    <p>&copy; {new Date().getFullYear()} Ewan Geniuses. All rights reserved.</p>
+                    <p>&copy; {new Date().getFullYear()} Ewan. All rights reserved.</p>
                     <div className="flex gap-6">
                         <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
                         <a href="#" className="hover:text-white transition-colors">Terms of Service</a>

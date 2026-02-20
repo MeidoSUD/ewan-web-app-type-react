@@ -13,12 +13,24 @@ const firebaseConfig = {
 };
 
 // Initialize App (Required for any Firebase service)
-const app = initializeApp(firebaseConfig);
+const isConfigValid = Object.values(firebaseConfig).every(value => !!value);
+
+let app: any = null;
+if (isConfigValid) {
+  try {
+    app = initializeApp(firebaseConfig);
+  } catch (e) {
+    console.warn("[Firebase] Initialization failed:", e);
+  }
+} else {
+  console.warn("[Firebase] Missing configuration. Firebase features disabled.");
+}
 
 let messaging: any = null;
 
 // Async function to safely get messaging instance
 export const getMessagingSafe = async () => {
+  if (!app) return null;
   if (messaging) return messaging; // Return existing instance
 
   try {

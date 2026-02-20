@@ -216,7 +216,7 @@ export const VerificationsTab: React.FC = () => {
                         {/* Print Header */}
                         <div className="hidden print:block text-center mb-8">
                             <h1 className="text-2xl font-bold">{t.teacherProfile}</h1>
-                            <p>Ewan Geniuses Platform</p>
+                            <p>Ewan Platform</p>
                         </div>
 
                         <div className="flex items-center gap-4 border-b border-slate-100 pb-6">

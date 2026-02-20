@@ -68,6 +68,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onSwitch, onLoginSucce
       };
 
       const response = await authService.login(payload);
+      console.log("FULL LOGIN RESPONSE (STRINGIFIED):", JSON.stringify(response, null, 2));
       onLoginSuccess(response);
       showToast(t.loginSuccess || "Login successful", 'success');
     } catch (error: any) {
