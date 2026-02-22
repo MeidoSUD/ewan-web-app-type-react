@@ -4,9 +4,11 @@ import { CheckCircle, XCircle, FileText, ExternalLink, Loader2, Eye, Printer, Do
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { adminService, AdminTeacher, getStorageUrl, Service } from '../../services/api';
+import { useToast } from '../../contexts/ToastContext';
 
 export const VerificationsTab: React.FC = () => {
     const { t, language } = useLanguage();
+    const { showToast } = useToast();
     const [teachers, setTeachers] = useState<AdminTeacher[]>([]);
     const [services, setServices] = useState<Service[]>([]);
     const [loading, setLoading] = useState(true);
@@ -32,6 +34,7 @@ export const VerificationsTab: React.FC = () => {
             setServices(Array.isArray(servicesData) ? servicesData : []);
         } catch (e) {
             console.error(e);
+            showToast(t.error, 'error');
         } finally {
             setLoading(false);
         }
@@ -47,6 +50,7 @@ export const VerificationsTab: React.FC = () => {
             setSelectedTeacher(teacherData);
         } catch (e) {
             console.error("Failed to load full teacher details", e);
+            showToast(t.error, 'error');
         } finally {
             setDetailsLoading(false);
         }
@@ -60,7 +64,7 @@ export const VerificationsTab: React.FC = () => {
         console.log(`[VerificationsTab] Verify Button Clicked for:`, userId);
 
         try {
-            const response = await adminService.verifyUser(userId);
+            const response = await adminService.verifyUser(userId, true);
             console.log("[VerificationsTab] Verification API Success:", response);
 
             // Optimistic Update
@@ -72,9 +76,10 @@ export const VerificationsTab: React.FC = () => {
 
             // Re-fetch to ensure sync with server
             fetchData();
+            showToast(t.updatedSuccessfully, 'success');
         } catch (e: any) {
             console.error("[VerificationsTab] Verification Failed:", e);
-            alert(e.message || t.error);
+            showToast(e.message || t.error, 'error');
         } finally {
             setVerifyingId(null);
         }
@@ -84,12 +89,12 @@ export const VerificationsTab: React.FC = () => {
         if (!confirm(t.confirmAction)) return;
         try {
             await adminService.rejectUser(userId);
-            alert(t.confirmRejection);
+            showToast(t.confirmRejection, 'success');
             fetchData();
             if (selectedTeacher?.id === userId) setSelectedTeacher(null);
         } catch (e: any) {
             console.error(e);
-            alert(e.message || t.rejectCourse);
+            showToast(e.message || t.rejectCourse, 'error');
         }
     }
 

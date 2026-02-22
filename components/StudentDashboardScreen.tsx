@@ -11,12 +11,13 @@ import { StudentScheduleTab } from './student/StudentScheduleTab';
 import { BookingsTab } from './student/BookingsTab';
 import { DisputesTab } from './student/DisputesTab';
 import { PaymentMethodsTab } from './student/PaymentMethodsTab';
-import { ProfileTab } from './dashboard/ProfileTab';   
+import { ProfileTab } from './dashboard/ProfileTab';
 import { TeacherDetailsPage } from './student/TeacherDetailsPage';
 import { MyTransactions } from './student/MyTransactions';
 import { MyCertificates } from './student/MyCertificates';
 import { SettingsTab } from './dashboard/SettingsTab';
 import { useLanguage } from '../contexts/LanguageContext';
+import { AdsBanner } from './dashboard/AdsBanner';
 
 interface StudentDashboardScreenProps {
   data: AuthResponse;
@@ -46,16 +47,16 @@ export const StudentDashboardScreen: React.FC<StudentDashboardScreenProps> = ({ 
         return <SubjectsTab />;
       case 'language-learning':
         // Assuming service ID 2 for Language Learning based on context
-        return <LanguageLearningTab />; 
+        return <LanguageLearningTab />;
       case 'teacher-details':
         if (!selectedTeacher) return <PrivateLessonsTab onTeacherSelect={(t) => handleTeacherSelect(t, 3)} />;
         return (
-            <TeacherDetailsPage 
-                teacher={selectedTeacher} 
-                serviceId={selectedServiceId}
-                onBack={() => setActiveTab('private-lessons')}
-                onBookingComplete={() => setActiveTab('bookings')}
-            />
+          <TeacherDetailsPage
+            teacher={selectedTeacher}
+            serviceId={selectedServiceId}
+            onBack={() => setActiveTab('private-lessons')}
+            onBookingComplete={() => setActiveTab('bookings')}
+          />
         );
       case 'schedule':
         return <StudentScheduleTab onViewList={() => setActiveTab('bookings')} />;
@@ -80,14 +81,15 @@ export const StudentDashboardScreen: React.FC<StudentDashboardScreenProps> = ({ 
 
   return (
     <div className="min-h-screen bg-slate-50/50 font-sans pb-10">
-      <Navbar 
-        userData={data} 
-        onLogout={onLogout} 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
+      <Navbar
+        userData={data}
+        onLogout={onLogout}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
       />
-      
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <AdsBanner />
         {renderContent()}
       </main>
     </div>

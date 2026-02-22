@@ -12,9 +12,11 @@ import { TeacherCoursesTab } from './teacher/TeacherCoursesTab';
 import { TeacherLanguagesTab } from './teacher/TeacherLanguagesTab';
 import { DisputesTab } from './student/DisputesTab';
 import { SettingsTab } from './dashboard/SettingsTab';
-import { AlertTriangle, Lock, Bug, User, Briefcase, ArrowRight, Loader2 } from 'lucide-react';
+import { Bug, User, Briefcase, ArrowRight, Loader2, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useToast } from '../contexts/ToastContext';
 import { Button } from './ui/Button';
+import { AdsBanner } from './dashboard/AdsBanner';
 
 interface TeacherDashboardScreenProps {
   data: AuthResponse;
@@ -26,6 +28,7 @@ export const TeacherDashboardScreen: React.FC<TeacherDashboardScreenProps> = ({ 
   const [showDebug, setShowDebug] = useState(false);
   const [isUpdatingType, setIsUpdatingType] = useState(false);
   const { t, language } = useLanguage();
+  const { showToast } = useToast();
 
   const user = data.user.data;
 
@@ -44,7 +47,7 @@ export const TeacherDashboardScreen: React.FC<TeacherDashboardScreenProps> = ({ 
       window.location.reload();
     } catch (e) {
       console.error("Failed to update teacher type", e);
-      alert("Failed to update profile. Please try again.");
+      showToast("Failed to update profile. Please try again.", 'error');
     } finally {
       setIsUpdatingType(false);
     }
@@ -162,6 +165,7 @@ export const TeacherDashboardScreen: React.FC<TeacherDashboardScreenProps> = ({ 
       />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <AdsBanner />
         {!isVerified && (
           <div className="mb-6 bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg shadow-sm animate-fade-in">
             <div className="flex items-start">

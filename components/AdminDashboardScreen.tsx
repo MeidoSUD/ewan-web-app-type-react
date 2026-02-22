@@ -11,6 +11,7 @@ import { AdminDisputesTab } from './admin/DisputesTab';
 import { CoursesTab } from './admin/CoursesTab';
 import { SettingsTab } from './dashboard/SettingsTab';
 import { AdminOverviewTab } from './admin/AdminOverviewTab';
+import { AdsTab } from './admin/AdsTab';
 import { Menu } from 'lucide-react';
 
 import { useLanguage } from '../contexts/LanguageContext';
@@ -43,6 +44,8 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ data
         return <VerificationsTab />;
       case 'disputes':
         return <AdminDisputesTab />;
+      case 'ads':
+        return <AdsTab />;
       case 'settings':
         return <SettingsTab />;
       default:
@@ -51,7 +54,7 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ data
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex font-sans">
+    <div className="h-screen bg-slate-50 flex overflow-hidden font-sans">
       <AdminSidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}

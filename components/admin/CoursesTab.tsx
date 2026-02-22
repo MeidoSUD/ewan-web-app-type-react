@@ -4,6 +4,7 @@ import { Search, MoreVertical, BookOpen, User, CheckCircle, XCircle, Trash2, Eye
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { adminService, getStorageUrl } from '../../services/api';
+import { useToast } from '../../contexts/ToastContext';
 
 interface AdminCourse {
     id: number;
@@ -28,6 +29,7 @@ interface AdminCourse {
 
 export const CoursesTab: React.FC = () => {
     const { t, direction, language } = useLanguage();
+    const { showToast } = useToast();
     const [courses, setCourses] = useState<AdminCourse[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -49,6 +51,7 @@ export const CoursesTab: React.FC = () => {
             setCourses(data);
         } catch (e) {
             console.error(e);
+            showToast(t.error, 'error');
         } finally {
             setLoading(false);
         }
@@ -59,18 +62,20 @@ export const CoursesTab: React.FC = () => {
             await adminService.approveCourse(id);
             setCourses(courses.map(c => c.id === id ? { ...c, approval_status: 'approved' } : c));
             setOpenMenuId(null);
-        } catch (e) { alert(t.error); }
+            showToast(t.updatedSuccessfully, 'success');
+        } catch (e) { showToast(t.error, 'error'); }
     };
 
     const handleReject = async (id: number) => {
-        if (!rejectionReason) return alert(t.provideReason);
+        if (!rejectionReason) return showToast(t.provideReason, 'warning');
         try {
             await adminService.rejectCourse(id, rejectionReason);
             setCourses(courses.map(c => c.id === id ? { ...c, approval_status: 'rejected' } : c));
             setShowRejectionModal(false);
             setRejectionReason('');
             setOpenMenuId(null);
-        } catch (e) { alert(t.error); }
+            showToast(t.updatedSuccessfully, 'success');
+        } catch (e) { showToast(t.error, 'error'); }
     };
 
     const handleToggleStatus = async (id: number, currentStatus: number) => {
@@ -79,7 +84,8 @@ export const CoursesTab: React.FC = () => {
             await adminService.updateCourseStatus(id, newStatus);
             setCourses(courses.map(c => c.id === id ? { ...c, status: newStatus } : c));
             setOpenMenuId(null);
-        } catch (e) { alert(t.error); }
+            showToast(t.updatedSuccessfully, 'success');
+        } catch (e) { showToast(t.error, 'error'); }
     };
 
     const handleToggleFeatured = async (id: number, currentFeatured: boolean) => {
@@ -87,7 +93,8 @@ export const CoursesTab: React.FC = () => {
             await adminService.featureCourse(id, !currentFeatured);
             setCourses(courses.map(c => c.id === id ? { ...c, is_featured: !currentFeatured } : c));
             setOpenMenuId(null);
-        } catch (e) { alert(t.error); }
+            showToast(t.updatedSuccessfully, 'success');
+        } catch (e) { showToast(t.error, 'error'); }
     };
 
     const handleDelete = async (id: number) => {
@@ -96,7 +103,8 @@ export const CoursesTab: React.FC = () => {
             await adminService.deleteCourse(id);
             setCourses(courses.filter(c => c.id !== id));
             setOpenMenuId(null);
-        } catch (e) { alert(t.error); }
+            showToast(t.deletedSuccessfully, 'success');
+        } catch (e) { showToast(t.error, 'error'); }
     };
 
     const filteredCourses = courses.filter(course => {

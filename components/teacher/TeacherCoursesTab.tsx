@@ -7,6 +7,7 @@ import { Input } from '../ui/Input';
 import { Modal } from '../ui/Modal';
 import { Select } from '../ui/Select';
 import { teacherService, referenceService, Course, CourseCategory, getStorageUrl, UserData, fetchWithProgress } from '../../services/api';
+import { useToast } from '../../contexts/ToastContext';
 
 interface TeacherCoursesTabProps {
     user?: UserData;
@@ -14,6 +15,7 @@ interface TeacherCoursesTabProps {
 
 export const TeacherCoursesTab: React.FC<TeacherCoursesTabProps> = ({ user }) => {
     const { t, language } = useLanguage();
+    const { showToast } = useToast();
     const [courses, setCourses] = useState<Course[]>([]);
     const [loading, setLoading] = useState(true);
     const [modalOpen, setModalOpen] = useState(false);
@@ -118,7 +120,7 @@ export const TeacherCoursesTab: React.FC<TeacherCoursesTabProps> = ({ user }) =>
     const handleSubmit = async () => {
         setError(null);
         if (!formData.name || !formData.price || !formData.category_id) {
-            alert("Please fill all required fields");
+            showToast("Please fill all required fields", 'warning');
             return;
         }
 
@@ -174,7 +176,7 @@ export const TeacherCoursesTab: React.FC<TeacherCoursesTabProps> = ({ user }) =>
                 });
             }
 
-            alert(editingId ? "Course updated!" : "Course created!");
+            showToast(editingId ? "Course updated!" : "Course created!", 'success');
             setModalOpen(false);
             resetForm();
             await loadData();
@@ -193,13 +195,12 @@ export const TeacherCoursesTab: React.FC<TeacherCoursesTabProps> = ({ user }) =>
         try {
             const response = await teacherService.deleteCourse(id);
             if (response && response.success === false) {
-                alert(response.message || "Failed to delete course");
+                showToast(response.message || "Failed to delete course", 'error');
             } else {
-                await loadData();
                 setConfirmDeleteId(null);
             }
         } catch (e: any) {
-            alert(e.message || "Failed to delete");
+            showToast(e.message || "Failed to delete", 'error');
         } finally {
             setLoading(false);
         }

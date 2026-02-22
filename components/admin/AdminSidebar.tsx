@@ -24,6 +24,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, setActive
         { id: 'verifications', label: t.verifications, icon: CheckSquare },
         { id: 'payouts', label: t.payoutRequests, icon: DollarSign },
         { id: 'disputes', label: t.disputes, icon: AlertCircle },
+        { id: 'ads', label: t.adsManagement, icon: Globe },
     ];
 
     return (

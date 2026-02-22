@@ -6,6 +6,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Modal } from '../ui/Modal';
 import { teacherService, authService, profileService, UserData, getStorageUrl, Service } from '../../services/api';
+import { useToast } from '../../contexts/ToastContext';
 
 interface TeacherServicesTabProps {
     onNavigate?: (tab: string) => void;
@@ -13,10 +14,11 @@ interface TeacherServicesTabProps {
 
 export const TeacherServicesTab: React.FC<TeacherServicesTabProps> = ({ onNavigate }) => {
     const { t, language } = useLanguage();
+    const { showToast } = useToast();
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState<UserData | null>(null);
     const [servicesList, setServicesList] = useState<Service[]>([]);
-    
+
     const [uploadModalOpen, setUploadModalOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [targetServiceId, setTargetServiceId] = useState<number | null>(null);
@@ -39,10 +41,10 @@ export const TeacherServicesTab: React.FC<TeacherServicesTabProps> = ({ onNaviga
             const res = await authService.getUserDetails();
             const userData = res.user?.data || res.data || res;
             setUser(userData);
-            
+
             const servicesData = await teacherService.getServicesList();
             setServicesList(Array.isArray(servicesData) ? servicesData : []);
-            
+
             const profile = userData?.profile;
             if (profile) {
                 setLessonPrefs({
@@ -68,10 +70,10 @@ export const TeacherServicesTab: React.FC<TeacherServicesTabProps> = ({ onNaviga
                 teach_individual: lessonPrefs.teach_individual ? 1 : 0,
                 teach_group: lessonPrefs.teach_group ? 1 : 0
             });
-            alert(language === 'ar' ? 'تم حفظ التفضيلات بنجاح' : 'Preferences saved successfully');
+            showToast(language === 'ar' ? 'تم حفظ التفضيلات بنجاح' : 'Preferences saved successfully', 'success');
             await loadData();
         } catch (e: any) {
-            alert(e.message || "Failed to save settings");
+            showToast(e.message || "Failed to save settings", 'error');
         } finally {
             setLoading(false);
         }
@@ -86,10 +88,10 @@ export const TeacherServicesTab: React.FC<TeacherServicesTabProps> = ({ onNaviga
             formData.append('service_id', String(targetServiceId));
             await profileService.updateProfileFull(formData);
             setUploadModalOpen(false);
-            alert(language === 'ar' ? "تم رفع الشهادة بنجاح" : "Certificate uploaded successfully.");
+            showToast(language === 'ar' ? "تم رفع الشهادة بنجاح" : "Certificate uploaded successfully.", 'success');
             await loadData();
         } catch (e: any) {
-            alert(e.message || "Failed to upload certificate.");
+            showToast(e.message || "Failed to upload certificate.", 'error');
         } finally {
             setLoading(false);
         }
@@ -108,7 +110,7 @@ export const TeacherServicesTab: React.FC<TeacherServicesTabProps> = ({ onNaviga
     const chosenServiceId = user?.profile?.service;
 
     // Filter logic: If verified, only show the one verified service card.
-    const displayServices = (isVerified && chosenServiceId) 
+    const displayServices = (isVerified && chosenServiceId)
         ? servicesList.filter(s => s.id === chosenServiceId)
         : servicesList;
 
@@ -118,7 +120,7 @@ export const TeacherServicesTab: React.FC<TeacherServicesTabProps> = ({ onNaviga
                 <Settings className="text-primary" />
                 {isVerified ? (language === 'ar' ? 'إعدادات خدمتك' : 'Your Service Settings') : (language === 'ar' ? 'الخدمات والتفضيلات' : 'Services & Preferences')}
             </h2>
-            
+
             {!isVerified && !chosenServiceId && (
                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-blue-800 text-sm mb-6 flex items-start gap-3">
                     <AlertCircleIcon className="flex-shrink-0 mt-0.5" size={18} />
@@ -133,7 +135,7 @@ export const TeacherServicesTab: React.FC<TeacherServicesTabProps> = ({ onNaviga
 
                     return (
                         <div key={service.id} className="rounded-2xl border shadow-sm overflow-hidden bg-white border-slate-200">
-                             <div className={`p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50`}>
+                            <div className={`p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50`}>
                                 <div className="flex items-center gap-3">
                                     <div className="p-2 rounded-lg bg-primary/10 text-primary">
                                         {getServiceIcon(serviceName)}
@@ -151,7 +153,7 @@ export const TeacherServicesTab: React.FC<TeacherServicesTabProps> = ({ onNaviga
                                 )}
                             </div>
 
-                             <div className="p-6">
+                            <div className="p-6">
                                 {isVerified && isMyService ? (
                                     <>
                                         {serviceName.toLowerCase().includes('private') && (
@@ -172,16 +174,16 @@ export const TeacherServicesTab: React.FC<TeacherServicesTabProps> = ({ onNaviga
                                                         <div className="p-4 bg-slate-50 rounded-xl border">
                                                             <label className="flex items-center justify-between mb-4">
                                                                 <span className="font-semibold">Individual Sessions</span>
-                                                                <input type="checkbox" checked={lessonPrefs.teach_individual} onChange={(e) => setLessonPrefs({...lessonPrefs, teach_individual: e.target.checked})} />
+                                                                <input type="checkbox" checked={lessonPrefs.teach_individual} onChange={(e) => setLessonPrefs({ ...lessonPrefs, teach_individual: e.target.checked })} />
                                                             </label>
-                                                            {lessonPrefs.teach_individual && <Input label="Price (SAR)" type="number" value={lessonPrefs.individual_hour_price} onChange={(e) => setLessonPrefs({...lessonPrefs, individual_hour_price: Number(e.target.value)})} />}
+                                                            {lessonPrefs.teach_individual && <Input label="Price (SAR)" type="number" value={lessonPrefs.individual_hour_price} onChange={(e) => setLessonPrefs({ ...lessonPrefs, individual_hour_price: Number(e.target.value) })} />}
                                                         </div>
                                                         <div className="p-4 bg-slate-50 rounded-xl border">
                                                             <label className="flex items-center justify-between mb-4">
                                                                 <span className="font-semibold">Group Sessions</span>
-                                                                <input type="checkbox" checked={lessonPrefs.teach_group} onChange={(e) => setLessonPrefs({...lessonPrefs, teach_group: e.target.checked})} />
+                                                                <input type="checkbox" checked={lessonPrefs.teach_group} onChange={(e) => setLessonPrefs({ ...lessonPrefs, teach_group: e.target.checked })} />
                                                             </label>
-                                                            {lessonPrefs.teach_group && <Input label="Price (SAR)" type="number" value={lessonPrefs.group_hour_price} onChange={(e) => setLessonPrefs({...lessonPrefs, group_hour_price: Number(e.target.value)})} />}
+                                                            {lessonPrefs.teach_group && <Input label="Price (SAR)" type="number" value={lessonPrefs.group_hour_price} onChange={(e) => setLessonPrefs({ ...lessonPrefs, group_hour_price: Number(e.target.value) })} />}
                                                         </div>
                                                     </div>
                                                     <div className="mt-4 flex justify-end">
@@ -219,9 +221,9 @@ export const TeacherServicesTab: React.FC<TeacherServicesTabProps> = ({ onNaviga
             <Modal isOpen={uploadModalOpen} onClose={() => setUploadModalOpen(false)} title="Upload Certificate">
                 <div className="space-y-4">
                     <div className="border-2 border-dashed rounded-xl p-8 text-center cursor-pointer relative hover:bg-slate-50">
-                         <input type="file" className="absolute inset-0 opacity-0" onChange={(e) => setSelectedFile(e.target.files?.[0] || null)} />
-                         <Upload className="mx-auto mb-2 text-slate-400" />
-                         <p className="text-sm font-medium">{selectedFile ? selectedFile.name : "Select academic document"}</p>
+                        <input type="file" className="absolute inset-0 opacity-0" onChange={(e) => setSelectedFile(e.target.files?.[0] || null)} />
+                        <Upload className="mx-auto mb-2 text-slate-400" />
+                        <p className="text-sm font-medium">{selectedFile ? selectedFile.name : "Select academic document"}</p>
                     </div>
                     <Button className="w-full" disabled={!selectedFile} onClick={handleFileUpload} isLoading={loading}>Submit Verification</Button>
                 </div>

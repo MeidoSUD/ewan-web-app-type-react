@@ -5,9 +5,11 @@ import { Check, X, Building, Loader2, Upload, AlertCircle, Filter as FilterIcon 
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { adminService, PayoutRequest } from '../../services/api';
+import { useToast } from '../../contexts/ToastContext';
 
 export const PayoutsTab: React.FC = () => {
     const { t } = useLanguage();
+    const { showToast } = useToast();
     const [payouts, setPayouts] = useState<PayoutRequest[]>([]);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
@@ -34,6 +36,7 @@ export const PayoutsTab: React.FC = () => {
             setPayouts(Array.isArray(data) ? data : []);
         } catch (e) {
             console.error(e);
+            showToast(t.error, 'error');
         } finally {
             setLoading(false);
         }
@@ -53,20 +56,20 @@ export const PayoutsTab: React.FC = () => {
         try {
             if (actionType === 'approve') {
                 if (!receiptFile) {
-                    alert("Please upload a receipt image.");
+                    showToast("Please upload a receipt image.", 'warning');
                     setActionLoading(false);
                     return;
                 }
                 await adminService.approvePayout(selectedPayout.id, receiptFile);
-                alert("Payout approved successfully.");
+                showToast("Payout approved successfully.", 'success');
             } else {
                 if (!rejectReason) {
-                    alert("Please provide a reason for rejection.");
+                    showToast("Please provide a reason for rejection.", 'warning');
                     setActionLoading(false);
                     return;
                 }
                 await adminService.rejectPayout(selectedPayout.id, rejectReason);
-                alert("Payout rejected.");
+                showToast("Payout rejected.", 'success');
             }
 
             // Cleanup and Refresh
@@ -75,7 +78,7 @@ export const PayoutsTab: React.FC = () => {
             fetchPayouts();
         } catch (e: any) {
             console.error(e);
-            alert(e.message || "Action failed.");
+            showToast(e.message || "Action failed.", 'error');
         } finally {
             setActionLoading(false);
         }

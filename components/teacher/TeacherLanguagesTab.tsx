@@ -5,6 +5,7 @@ import { Globe, Plus, Trash2, Loader2 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Select } from '../ui/Select';
 import { teacherService, TeacherSubject, UserData } from '../../services/api';
+import { useToast } from '../../contexts/ToastContext';
 
 interface TeacherLanguagesTabProps {
     user?: UserData;
@@ -12,9 +13,10 @@ interface TeacherLanguagesTabProps {
 
 export const TeacherLanguagesTab: React.FC<TeacherLanguagesTabProps> = ({ user }) => {
     const { t, language } = useLanguage();
+    const { showToast } = useToast();
     const [myLanguages, setMyLanguages] = useState<TeacherSubject[]>([]);
     const [loading, setLoading] = useState(true);
-    const [availableLanguages, setAvailableLanguages] = useState<{id: number, name: string}[]>([]);
+    const [availableLanguages, setAvailableLanguages] = useState<{ id: number, name: string }[]>([]);
     const [selectedLang, setSelectedLang] = useState('');
     const [submitting, setSubmitting] = useState(false);
 
@@ -48,12 +50,12 @@ export const TeacherLanguagesTab: React.FC<TeacherLanguagesTabProps> = ({ user }
         setSubmitting(true);
         try {
             await teacherService.addSubjects([Number(selectedLang)]);
-            alert("Language added successfully");
+            showToast("Language added successfully", 'success');
             const subs = await teacherService.getSubjects();
             setMyLanguages(subs);
             setSelectedLang('');
         } catch (e: any) {
-            alert(e.message || "Failed to add language");
+            showToast(e.message || "Failed to add language", 'error');
         } finally {
             setSubmitting(false);
         }
@@ -63,7 +65,7 @@ export const TeacherLanguagesTab: React.FC<TeacherLanguagesTabProps> = ({ user }
 
     return (
         <div className="space-y-6 animate-fade-in">
-             <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-slate-900">{language === 'ar' ? 'لغاتي' : 'My Languages'}</h2>
             </div>
 
@@ -71,9 +73,9 @@ export const TeacherLanguagesTab: React.FC<TeacherLanguagesTabProps> = ({ user }
                 <h3 className="font-bold text-lg mb-4">{language === 'ar' ? 'إضافة لغة جديدة' : 'Add New Language'}</h3>
                 <div className="flex gap-4 items-end">
                     <div className="flex-1">
-                        <Select 
+                        <Select
                             label={language === 'ar' ? 'اللغة' : 'Language'}
-                            options={[{value: '', label: '-- Select --'}, ...availableLanguages.map(l => ({ value: String(l.id), label: l.name }))]}
+                            options={[{ value: '', label: '-- Select --' }, ...availableLanguages.map(l => ({ value: String(l.id), label: l.name }))]}
                             value={selectedLang}
                             onChange={(e) => setSelectedLang(e.target.value)}
                             className="mb-0"
@@ -103,7 +105,7 @@ export const TeacherLanguagesTab: React.FC<TeacherLanguagesTabProps> = ({ user }
                     );
                 })}
                 {myLanguages.length === 0 && (
-                     <div className="col-span-full text-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-300 text-slate-500">
+                    <div className="col-span-full text-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-300 text-slate-500">
                         No languages added yet.
                     </div>
                 )}

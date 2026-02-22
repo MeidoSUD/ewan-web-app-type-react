@@ -403,6 +403,8 @@ export interface AdminUser {
   last_name: string;
   email: string;
   phone_number: string;
+  gender?: string;
+  nationality?: string;
   role_id: number;
   verified: number | boolean | string;
   is_active: number | boolean;
@@ -460,4 +462,85 @@ export interface PayoutRequest {
   bank_details: string;
   status: string;
   created_at: string;
+}
+export interface Ad {
+  id: number;
+  image_url: string;
+  image_path?: string;
+  description: string | null;
+  link_url: string | null;
+  cta_text: string | null;
+  platform: 'web' | 'app' | 'both';
+  role_id?: number | null;
+  role_name?: string | null;
+  is_active?: boolean | number;
+  display_order?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface AdPayload {
+  image?: File | null;
+  description?: string;
+  role_id?: number | null;
+  platform: 'web' | 'app' | 'both';
+  link_url?: string;
+  cta_text?: string;
+  display_order?: number;
+  is_active?: boolean | number;
+}
+
+// --- Admin Dashboard ---
+
+export interface DashboardRecentActivity {
+  id: number;
+  type: string;
+  user_name?: string;
+  student_name?: string;
+  teacher_name?: string;
+  user_role: string;
+  status: string;
+  amount: number | string;
+  created_at: string;
+}
+
+export interface AdminDashboardData {
+  summary: {
+    total_users: number;
+    total_teachers: number;
+    active_teachers: number;
+    unverified_teachers: number;
+    total_students: number;
+    inactive_users: number;
+    total_bookings: number;
+    total_revenue: number;
+    teachers_wallet_total: number;
+  };
+  bookings: {
+    total: number;
+    confirmed: number;
+    pending_payment: number;
+    cancelled: number;
+    by_status: Record<string, number>;
+  };
+  payments: {
+    total: number;
+    successful: number;
+    total_amount: number;
+    by_status: Record<string, number>;
+  };
+  users_by_role: {
+    admin: number;
+    teacher: number;
+    student: number;
+  };
+  monthly_metrics: {
+    new_users_this_month: number;
+    new_bookings_this_month: number;
+  };
+  recent_activity: DashboardRecentActivity[];
+  wallet_info: {
+    total_teachers_wallet: number;
+    average_per_teacher: number;
+  };
 }

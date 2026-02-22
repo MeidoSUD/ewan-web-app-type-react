@@ -3,7 +3,7 @@
 // !! API SERVICE - PROD READY V44 !!
 // =====================================================
 
-const PRODUCTION_URL = "https://portal.ewan-geniuses.com/api";
+const PRODUCTION_URL = "https://vernice-narial-gustily.ngrok-free.dev/api";
 
 const URL_STORAGE_KEY = 'api_base_url';
 
@@ -84,7 +84,8 @@ import {
   TeacherSubject, TeacherSubjectDetail, BankReference, BankAccount, UserData, TeacherProfile,
   BookingPayload, PaymentPayload, Course, Session, Booking, Certificate,
   CourseCategory, CoursePayload, AvailableTime, AvailabilityPayload,
-  AdminUser, AdminTeacher, AdminBooking, AdminDispute, PayoutRequest, Service
+  AdminUser, AdminTeacher, AdminBooking, AdminDispute, PayoutRequest, Service,
+  Ad, AdPayload
 } from '../types';
 
 export type {
@@ -92,7 +93,8 @@ export type {
   BookingPayload, PaymentPayload, Booking, Session, Certificate,
   Course, CourseCategory, CoursePayload, AvailableTime, AvailabilityPayload,
   ReferenceItem, StudentPaymentMethod, BankReference, BankAccount, WalletResponse,
-  AdminUser, AdminTeacher, AdminBooking, AdminDispute, PayoutRequest, Service
+  AdminUser, AdminTeacher, AdminBooking, AdminDispute, PayoutRequest, Service,
+  Ad, AdPayload
 };
 
 export const AUTH_SESSION_EXPIRED = 'auth:session-expired';
@@ -115,7 +117,14 @@ const extractArray = (response: any): any[] => {
     return rawData;
   }
 
+  if (response.users && Array.isArray(response.users)) return response.users;
+  if (rawData && rawData.users && Array.isArray(rawData.users)) return rawData.users;
+  if (rawData && rawData.teachers && Array.isArray(rawData.teachers)) return rawData.teachers;
+  if (rawData && rawData.bookings && Array.isArray(rawData.bookings)) return rawData.bookings;
+  if (rawData && rawData.disputes && Array.isArray(rawData.disputes)) return rawData.disputes;
+  if (rawData && rawData.ads && Array.isArray(rawData.ads)) return rawData.ads;
   if (response.education_levels && Array.isArray(response.education_levels)) return response.education_levels;
+  if (rawData && rawData.education_levels && Array.isArray(rawData.education_levels)) return rawData.education_levels;
   if (response.classes && Array.isArray(response.classes)) return response.classes;
   if (response.subject && Array.isArray(response.subject)) return response.subject;
   if (response.subjects && Array.isArray(response.subjects)) return response.subjects;
@@ -314,13 +323,19 @@ export const studentService = {
 };
 
 export const adminService = {
+  getDashboardData: () => fetchWithAuth('/admin/dashboard'),
   getStats: () => fetchWithAuth('/admin/stats'),
-  getUsers: () => fetchWithAuth('/admin/users').then(extractArray),
+  getUsers: (filters: any = {}) => {
+    const query = new URLSearchParams(filters).toString();
+    return fetchWithAuth(`/admin/users${query ? `?${query}` : ''}`).then(extractArray);
+  },
+  createUser: (data: any) => fetchWithAuth('/admin/users', { method: 'POST', body: JSON.stringify(data) }),
+  updateUser: (id: number, data: any) => fetchWithAuth(`/admin/users/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteUser: (id: number) => fetchWithAuth(`/admin/users/${id}`, { method: 'DELETE' }),
   suspendUser: (id: number) => fetchWithAuth(`/admin/users/${id}/suspend`, { method: 'PUT' }),
-  activateUser: (id: number) => fetchWithAuth(`/admin/users/${id}/activate`, { method: 'PUT' }),
-  resetUserPassword: (id: number) => fetchWithAuth(`/admin/users/${id}/reset-password`, { method: 'PUT' }),
-  verifyUser: (id: number) => fetchWithAuth(`/admin/users/${id}/verify-teacher`, { method: 'PUT' }),
+  activateUser: (id: number) => fetchWithAuth(`/admin/users/${id}/activate`, { method: 'POST' }),
+  resetUserPassword: (id: number, data: { new_password?: string }) => fetchWithAuth(`/admin/users/${id}/reset-password`, { method: 'PUT', body: JSON.stringify(data) }),
+  verifyUser: (id: number, verified: boolean) => fetchWithAuth(`/admin/users/${id}/verify-teacher`, { method: 'PUT', body: JSON.stringify({ verified }) }),
   getTeachers: () => fetchWithAuth('/admin/teachers').then(extractArray),
   getTeacherDetails: (id: number) => fetchWithAuth(`/admin/teachers/${id}`),
   rejectUser: (id: number) => fetchWithAuth(`/admin/users/${id}/reject-teacher`, { method: 'PUT' }),
@@ -333,12 +348,12 @@ export const adminService = {
     return fetchWithAuth(`/admin/payout-requests/${id}/approve`, { method: 'POST', body: formData });
   },
   rejectPayout: (id: number, reason: string) => fetchWithAuth(`/admin/payout-requests/${id}/reject`, { method: 'POST', body: JSON.stringify({ reason }) }),
-  getServices: () => fetchWithAuth('/admin/services').then(extractArray),
+  getServices: () => fetchWithAuth('/services').then(extractArray),
 
   // Course Management
   getCourses: (filters: any = {}) => {
     const query = new URLSearchParams(filters).toString();
-    return fetchWithAuth(`/admin/courses?${query}`).then(extractArray);
+    return fetchWithAuth(`/admin/courses${query ? `?${query}` : ''}`).then(extractArray);
   },
   getCourseDetails: (id: number) => fetchWithAuth(`/admin/courses/${id}`),
   approveCourse: (id: number) => fetchWithAuth(`/admin/courses/${id}/approve`, { method: 'PUT' }),
@@ -351,7 +366,7 @@ export const adminService = {
   // Education Levels
   getEducationLevels: (filters: any = {}) => {
     const query = new URLSearchParams(filters).toString();
-    return fetchWithAuth(`/admin/education-levels?${query}`).then(extractArray);
+    return fetchWithAuth(`/admin/education-levels${query ? `?${query}` : ''}`).then(extractArray);
   },
   createEducationLevel: (data: any) => fetchWithAuth('/admin/education-levels', { method: 'POST', body: JSON.stringify(data) }),
   getEducationLevelDetails: (id: number) => fetchWithAuth(`/admin/education-levels/${id}`),
@@ -362,7 +377,7 @@ export const adminService = {
   // Classes
   getClasses: (filters: any = {}) => {
     const query = new URLSearchParams(filters).toString();
-    return fetchWithAuth(`/admin/classes?${query}`).then(extractArray);
+    return fetchWithAuth(`/admin/classes${query ? `?${query}` : ''}`).then(extractArray);
   },
   createClass: (data: any) => fetchWithAuth('/admin/classes', { method: 'POST', body: JSON.stringify(data) }),
   getClassDetails: (id: number) => fetchWithAuth(`/admin/classes/${id}`),
@@ -373,13 +388,27 @@ export const adminService = {
   // Subjects
   getSubjects: (filters: any = {}) => {
     const query = new URLSearchParams(filters).toString();
-    return fetchWithAuth(`/admin/subjects?${query}`).then(extractArray);
+    return fetchWithAuth(`/admin/subjects${query ? `?${query}` : ''}`).then(extractArray);
   },
   createSubject: (data: any) => fetchWithAuth('/admin/subjects', { method: 'POST', body: JSON.stringify(data) }),
   getSubjectDetails: (id: number) => fetchWithAuth(`/admin/subjects/${id}`),
   updateSubject: (id: number, data: any) => fetchWithAuth(`/admin/subjects/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteSubject: (id: number, force = false) => fetchWithAuth(`/admin/subjects/${id}${force ? '/force' : ''}`, { method: 'DELETE' }),
   restoreSubject: (id: number) => fetchWithAuth(`/admin/subjects/${id}/restore`, { method: 'POST' }),
+
+  // Ads Management
+  getAds: (filters: any = {}) => {
+    const query = new URLSearchParams(filters).toString();
+    return fetchWithAuth(`/admin/ads${query ? `?${query}` : ''}`).then(res => res.data?.ads || res.ads || []);
+  },
+  createAd: (data: FormData) => fetchWithAuth('/admin/ads', { method: 'POST', body: data }),
+  updateAd: (id: number, data: FormData) => fetchWithAuth(`/admin/ads/${id}`, { method: 'POST', body: data }),
+  toggleAd: (id: number) => fetchWithAuth(`/admin/ads/${id}/toggle`, { method: 'PUT' }),
+  deleteAd: (id: number) => fetchWithAuth(`/admin/ads/${id}`, { method: 'DELETE' }),
+};
+
+export const adsService = {
+  getAds: (platform: 'web' | 'app' | 'both' = 'web') => fetchWithAuth(`/ads?platform=${platform}`).then(res => res.data.ads || []),
 };
 
 export const referenceService = {
