@@ -3,7 +3,7 @@
 // !! API SERVICE - PROD READY V44 !!
 // =====================================================
 
-const PRODUCTION_URL = "https://vernice-narial-gustily.ngrok-free.dev/api";
+const PRODUCTION_URL = "http://127.0.0.1:8002/api";
 
 const URL_STORAGE_KEY = 'api_base_url';
 
@@ -333,7 +333,7 @@ export const adminService = {
   updateUser: (id: number, data: any) => fetchWithAuth(`/admin/users/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteUser: (id: number) => fetchWithAuth(`/admin/users/${id}`, { method: 'DELETE' }),
   suspendUser: (id: number) => fetchWithAuth(`/admin/users/${id}/suspend`, { method: 'PUT' }),
-  activateUser: (id: number) => fetchWithAuth(`/admin/users/${id}/activate`, { method: 'POST' }),
+  activateUser: (id: number) => fetchWithAuth(`/admin/users/${id}/activate`, { method: 'PUT' }),
   resetUserPassword: (id: number, data: { new_password?: string }) => fetchWithAuth(`/admin/users/${id}/reset-password`, { method: 'PUT', body: JSON.stringify(data) }),
   verifyUser: (id: number, verified: boolean) => fetchWithAuth(`/admin/users/${id}/verify-teacher`, { method: 'PUT', body: JSON.stringify({ verified }) }),
   getTeachers: () => fetchWithAuth('/admin/teachers').then(extractArray),

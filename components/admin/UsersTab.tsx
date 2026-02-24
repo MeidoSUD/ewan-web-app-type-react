@@ -51,8 +51,8 @@ export const UsersTab: React.FC = () => {
         try {
             const filters: any = {};
             if (roleFilter !== 'all') filters.role_id = roleFilter;
-            if (statusFilter !== 'all') filters.is_active = statusFilter === 'active' ? 1 : 0;
-            if (verifiedFilter !== 'all') filters.verified = verifiedFilter === 'verified' ? 1 : 0;
+            if (statusFilter !== 'all') filters.is_active = statusFilter === 'active' ? 'true' : 'false';
+            if (verifiedFilter !== 'all') filters.verified = verifiedFilter === 'verified' ? 'true' : 'false';
 
             const data = await adminService.getUsers(filters);
             setUsers(Array.isArray(data) ? data : []);
@@ -109,6 +109,9 @@ export const UsersTab: React.FC = () => {
                 const updateData = { ...formData };
                 if (!updateData.password) delete (updateData as any).password;
                 await adminService.updateUser(selectedUser.id, updateData);
+                // Update local lists and the currently viewed user so UI reflects server change immediately
+                setUsers(prev => prev.map(u => u.id === selectedUser.id ? { ...u, ...updateData } : u));
+                setSelectedUser(prev => prev ? { ...prev, ...updateData } : prev);
                 showToast(t.userUpdatedSuccess, 'success');
             } else {
                 await adminService.createUser(formData);
@@ -141,7 +144,9 @@ export const UsersTab: React.FC = () => {
             } else {
                 await adminService.activateUser(user.id);
             }
-            setUsers(users.map(u => u.id === user.id ? { ...u, is_active: !user.is_active } : u));
+            const newStatus = !user.is_active;
+            setUsers(users.map(u => u.id === user.id ? { ...u, is_active: newStatus } : u));
+            if (selectedUser?.id === user.id) setSelectedUser(prev => prev ? { ...prev, is_active: newStatus } : prev);
             setOpenMenuId(null);
             showToast(t.updatedSuccessfully, 'success');
         } catch (e: any) { showToast(t.error, 'error'); }
@@ -152,6 +157,7 @@ export const UsersTab: React.FC = () => {
             const newStatus = !user.verified;
             await adminService.verifyUser(user.id, newStatus);
             setUsers(users.map(u => u.id === user.id ? { ...u, verified: newStatus } : u));
+            if (selectedUser?.id === user.id) setSelectedUser(prev => prev ? { ...prev, verified: newStatus } : prev);
             setOpenMenuId(null);
             showToast(t.updatedSuccessfully, 'success');
         } catch (e: any) { showToast(t.error, 'error'); }
@@ -420,8 +426,8 @@ export const UsersTab: React.FC = () => {
                                 onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                                 className="w-full p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-primary text-sm"
                             >
-                                <option value="male">{t.male}</option>
-                                <option value="female">{t.female}</option>
+                                <option value="male">{t.genderMale}</option>
+                                <option value="female">{t.genderFemale}</option>
                             </select>
                         </div>
                         <div className="space-y-1">
@@ -496,7 +502,7 @@ export const UsersTab: React.FC = () => {
                             <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
                                 <span className="block text-[10px] font-bold text-slate-400 uppercase mb-1">{t.gender}</span>
                                 <span className="font-semibold text-slate-700 capitalize">
-                                    {selectedUser.gender === 'male' ? t.male : t.female}
+                                    {selectedUser.gender === 'male' ? t.genderMale : t.genderFemale}
                                 </span>
                             </div>
                             <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
