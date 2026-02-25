@@ -347,7 +347,7 @@ export const adminService = {
     formData.append('receipt', receipt);
     return fetchWithAuth(`/admin/payout-requests/${id}/approve`, { method: 'POST', body: formData });
   },
-  rejectPayout: (id: number, reason: string) => fetchWithAuth(`/admin/payout-requests/${id}/reject`, { method: 'POST', body: JSON.stringify({ reason }) }),
+  rejectPayout: (id: number, reason: string) => fetchWithAuth(`/admin/payout-requests/${id}/reject`, { method: 'POST', body: JSON.stringify({ reject_reason: reason }) }),
   getServices: () => fetchWithAuth('/services').then(extractArray),
 
   // Course Management

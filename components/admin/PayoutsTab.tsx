@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { Check, X, Building, Loader2, Upload, AlertCircle, Filter as FilterIcon } from 'lucide-react';
+import { Check, X, Building, Loader2, Upload, AlertCircle, Filter as FilterIcon, FileText, Eye } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
-import { adminService, PayoutRequest } from '../../services/api';
+import { adminService, PayoutRequest, getStorageUrl } from '../../services/api';
 import { useToast } from '../../contexts/ToastContext';
 
 export const PayoutsTab: React.FC = () => {
@@ -24,6 +24,8 @@ export const PayoutsTab: React.FC = () => {
     const [actionType, setActionType] = useState<'approve' | 'reject' | null>(null);
     const [receiptFile, setReceiptFile] = useState<File | null>(null);
     const [rejectReason, setRejectReason] = useState('');
+    const [viewReceipt, setViewReceipt] = useState<string | null>(null);
+    const [viewType, setViewType] = useState<'receipt' | 'reason' | null>(null);
 
     useEffect(() => {
         fetchPayouts();
@@ -161,27 +163,49 @@ export const PayoutsTab: React.FC = () => {
                     <tbody className="divide-y divide-slate-100">
                         {filteredPayouts.map(payout => (
                             <tr key={payout.id} className="hover:bg-slate-50">
-                                <td className="px-6 py-4 font-medium text-slate-900">{payout.user?.name || `User #${payout.user?.id}`}</td>
+                                <td className="px-6 py-4 font-medium text-slate-900">{payout.teacher?.name || `User #${payout.user?.id}`}</td>
                                 <td className="px-6 py-4 text-lg font-bold text-green-600">{payout.amount} {t.sar}</td>
-                                <td className="px-6 py-4 text-slate-600 truncate max-w-xs" title={typeof payout.bank_details === 'string' ? payout.bank_details : JSON.stringify(payout.bank_details)}>
-                                    {typeof payout.bank_details === 'string' ? payout.bank_details : t.bankDetails}
+                                  <td className="px-6 py-4 text-slate-600 truncate max-w-xs" >
+                                    { payout.payment_method.account_holder_name} { payout.payment_method.account_number}
                                 </td>
-                                <td className="px-6 py-4 text-slate-500">{new Date(payout.created_at).toLocaleDateString()}</td>
+                                {/* <td className="px-6 py-4 text-slate-600 truncate max-w-xs" title={typeof payout.bank_details === 'string' ? payout.bank_details : JSON.stringify(payout.bank_details)}>
+                                    {typeof payout.bank_details === 'string' ? payout.bank_details : t.bankDetails}
+                                </td> */}
+                                <td className="px-6 py-4 text-slate-500">{new Date(payout.requested_at).toLocaleDateString()}</td>
                                 <td className="px-6 py-4 text-right">
-                                    {payout.status === 'pending' ? (
-                                        <div className="flex items-center justify-end gap-2">
-                                            <button onClick={() => openActionModal(payout, 'approve')} className="p-2 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 transition-colors" title={t.approve}>
-                                                <Check size={18} />
+                                    <div className="flex items-center justify-end gap-2">
+                                        {(payout.receipt || (payout.status === 'rejected' && payout.reject_reason)) && (
+                                            <button 
+                                                onClick={() => { 
+                                                    if (payout.receipt) {
+                                                        setViewReceipt(getStorageUrl(payout.receipt)); 
+                                                        setViewType('receipt'); 
+                                                    } else if (payout.reject_reason) {
+                                                        setViewReceipt(payout.reject_reason); 
+                                                        setViewType('reason'); 
+                                                    }
+                                                }} 
+                                                className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors" 
+                                                title={payout.receipt ? (t.viewReceipt || 'عرض الإيصال') : (t.viewReason || 'سبب الرفض')}
+                                            >
+                                                <Eye size={18} />
                                             </button>
-                                            <button onClick={() => openActionModal(payout, 'reject')} className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors" title={t.reject}>
-                                                <X size={18} />
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <span className={`capitalize font-medium ${payout.status === 'approved' ? 'text-green-600' : 'text-red-600'}`}>
-                                            {payout.status === 'approved' ? t.approve : payout.status === 'rejected' ? t.reject : t.pending}
-                                        </span>
-                                    )}
+                                        )}
+                                        {payout.status === 'pending' ? (
+                                            <>
+                                                <button onClick={() => openActionModal(payout, 'approve')} className="p-2 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 transition-colors" title={t.approve}>
+                                                    <Check size={18} />
+                                                </button>
+                                                <button onClick={() => openActionModal(payout, 'reject')} className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors" title={t.reject}>
+                                                    <X size={18} />
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <span className={`capitalize font-medium ${payout.status === 'approved' ? 'text-green-600' : 'text-red-600'}`}>
+                                                {payout.status === 'approved' ? t.approve : payout.status === 'rejected' ? t.reject : t.pending}
+                                            </span>
+                                        )}
+                                    </div>
                                 </td>
                             </tr>
                         ))}
@@ -235,6 +259,45 @@ export const PayoutsTab: React.FC = () => {
                             isLoading={actionLoading}
                         >
                             {actionType === 'approve' ? t.confirmApproval : t.confirmRejection}
+                        </Button>
+                    </div>
+                </div>
+            </Modal>
+
+            {/* Receipt View Modal */}
+            <Modal isOpen={!!viewReceipt} onClose={() => { setViewReceipt(null); setViewType(null); }} title={viewType === 'reason' ? (t.rejectionReasonLabel || 'سبب الرفض') : (t.viewReceipt || 'عرض الإيصال')}>
+                <div className="space-y-4">
+                    {viewReceipt && (
+                        <div className="flex justify-center">
+                            {viewReceipt.startsWith('http') ? (
+                                viewReceipt.toLowerCase().endsWith('.pdf') ? (
+                                    <a 
+                                        href={viewReceipt} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-2 text-primary hover:underline"
+                                    >
+                                        <FileText size={24} />
+                                        {t.viewPdf || 'عرض ملف PDF'}
+                                    </a>
+                                ) : (
+                                    <img 
+                                        src={viewReceipt} 
+                                        alt="Receipt" 
+                                        className="max-w-full h-auto rounded-lg border border-slate-200"
+                                        style={{ maxHeight: '70vh' }}
+                                    />
+                                )
+                            ) : (
+                                <div className="p-4 bg-red-50 rounded-lg border border-red-200">
+                                    <p className="text-red-800 whitespace-pre-wrap">{viewReceipt}</p>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                    <div className="flex justify-end">
+                        <Button variant="outline" onClick={() => { setViewReceipt(null); setViewType(null); }}>
+                            {t.close || 'إغلاق'}
                         </Button>
                     </div>
                 </div>

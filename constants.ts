@@ -294,6 +294,7 @@ export const TRANSLATIONS: Record<'en' | 'ar', Translations> = {
     deactivate: "Deactivate",
     activate: "Activate",
     draft:"Draft",
+    verify:"verify",
     published:"published",
     removeFeatured: "Remove Featured",
     markFeatured: "Mark Featured",

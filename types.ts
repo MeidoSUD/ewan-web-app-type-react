@@ -458,10 +458,23 @@ export interface PayoutRequest {
     name: string;
     email: string;
   };
+  teacher?: {
+    id: number;
+    name: string;
+    email: string;
+  };
   amount: string;
   bank_details: string;
   status: string;
   created_at: string;
+  receipt?: string;
+  reject_reason?: string;
+  requested_at?: string;
+  payment_method?: {
+    account_holder_name?: string;
+    account_number?: string;
+    bank_name?: string;
+  };
 }
 export interface Ad {
   id: number;
