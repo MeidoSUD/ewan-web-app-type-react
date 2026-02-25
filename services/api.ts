@@ -358,7 +358,12 @@ export const adminService = {
   getCourseDetails: (id: number) => fetchWithAuth(`/admin/courses/${id}`),
   approveCourse: (id: number) => fetchWithAuth(`/admin/courses/${id}/approve`, { method: 'PUT' }),
   rejectCourse: (id: number, reason: string) => fetchWithAuth(`/admin/courses/${id}/reject`, { method: 'PUT', body: JSON.stringify({ rejection_reason: reason }) }),
-  updateCourseStatus: (id: number, status: number) => fetchWithAuth(`/admin/courses/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) }),
+  updateCourseStatus: (id: number, status: 'published' | 'draft') => {
+    return fetchWithAuth(`/admin/courses/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    });
+  },
   deleteCourse: (id: number) => fetchWithAuth(`/admin/courses/${id}`, { method: 'DELETE' }),
   getPendingCourses: () => fetchWithAuth('/admin/courses/pending-approval').then(extractArray),
   featureCourse: (id: number, isFeatured: boolean) => fetchWithAuth(`/admin/courses/${id}/feature`, { method: 'PUT', body: JSON.stringify({ is_featured: isFeatured }) }),

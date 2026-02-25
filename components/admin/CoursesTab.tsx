@@ -15,7 +15,7 @@ interface AdminCourse {
     category_id: number;
     service_id: number;
     approval_status: 'pending' | 'approved' | 'rejected';
-    status: number;
+    status: 'published' | 'draft';
     is_featured: boolean;
     image?: string;
     teacher?: {
@@ -26,6 +26,8 @@ interface AdminCourse {
         name: string;
     };
 }
+
+type CourseStatus = 'published' | 'draft';
 
 export const CoursesTab: React.FC = () => {
     const { t, direction, language } = useLanguage();
@@ -39,16 +41,30 @@ export const CoursesTab: React.FC = () => {
     const [selectedCourse, setSelectedCourse] = useState<AdminCourse | null>(null);
     const [rejectionReason, setRejectionReason] = useState('');
     const [showRejectionModal, setShowRejectionModal] = useState(false);
+    const [rejectingCourseId, setRejectingCourseId] = useState<number | null>(null);
 
     useEffect(() => {
         fetchCourses();
     }, []);
 
+    const normalizeStatus = (status: unknown): CourseStatus => {
+        if (typeof status === 'string') {
+            const normalized = status.toLowerCase();
+            if (normalized === 'published') return 'published';
+            if (normalized === 'draft') return 'draft';
+        }
+        return 'draft';
+    };
+
     const fetchCourses = async () => {
         setLoading(true);
         try {
             const data = await adminService.getCourses();
-            setCourses(data);
+            const normalizedCourses: AdminCourse[] = data.map((course: any) => ({
+                ...course,
+                status: normalizeStatus(course?.status),
+            }));
+            setCourses(normalizedCourses);
         } catch (e) {
             console.error(e);
             showToast(t.error, 'error');
@@ -73,16 +89,19 @@ export const CoursesTab: React.FC = () => {
             setCourses(courses.map(c => c.id === id ? { ...c, approval_status: 'rejected' } : c));
             setShowRejectionModal(false);
             setRejectionReason('');
+            setRejectingCourseId(null);
             setOpenMenuId(null);
             showToast(t.updatedSuccessfully, 'success');
         } catch (e) { showToast(t.error, 'error'); }
     };
 
-    const handleToggleStatus = async (id: number, currentStatus: number) => {
+    const handleToggleStatus = async (id: number) => {
         try {
-            const newStatus = currentStatus === 1 ? 0 : 1;
+            const currentCourse = courses.find(c => c.id === id);
+            const currentStatus = normalizeStatus(currentCourse?.status);
+            const newStatus: CourseStatus = currentStatus === 'published' ? 'draft' : 'published';
             await adminService.updateCourseStatus(id, newStatus);
-            setCourses(courses.map(c => c.id === id ? { ...c, status: newStatus } : c));
+            setCourses(prev => prev.map(c => c.id === id ? { ...c, status: newStatus } : c));
             setOpenMenuId(null);
             showToast(t.updatedSuccessfully, 'success');
         } catch (e) { showToast(t.error, 'error'); }
@@ -179,7 +198,7 @@ export const CoursesTab: React.FC = () => {
                                                 )}
                                             </div>
                                             <div>
-                                                <div className="font-bold text-slate-900 line-clamp-1">{course.title}</div>
+                                                <div className="font-bold text-slate-900 line-clamp-1">{course.name}</div>
                                                 {course.is_featured && (
                                                     <div className="flex items-center gap-1 text-[10px] text-amber-600 font-bold uppercase">
                                                         <Star size={10} fill="currentColor" /> {t.featured}
@@ -205,8 +224,8 @@ export const CoursesTab: React.FC = () => {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className={`h-2 w-2 rounded-full inline-block mr-2 ${course.status === 1 ? 'bg-green-500' : 'bg-slate-300'}`}></span>
-                                        {course.status === 1 ? t.activeStatus : t.inactiveStatus}
+                                        <span className={`h-2 w-2 rounded-full inline-block mr-2 ${normalizeStatus(course.status) === 'published' ? 'bg-green-500' : 'bg-slate-300'}`}></span>
+                                        {normalizeStatus(course.status) === 'published' ? t.published : t.draft}
                                     </td>
                                     <td className="px-6 py-4 text-right relative">
                                         <button
@@ -229,13 +248,13 @@ export const CoursesTab: React.FC = () => {
                                                 )}
 
                                                 {course.approval_status !== 'rejected' && (
-                                                    <button onClick={(e) => { e.stopPropagation(); setShowRejectionModal(true); setOpenMenuId(course.id); }} className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-amber-600">
+                                                    <button onClick={(e) => { e.stopPropagation(); setShowRejectionModal(true); setRejectingCourseId(course.id); }} className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-amber-600">
                                                         <XCircle size={16} /> {t.reject}
                                                     </button>
                                                 )}
 
-                                                <button onClick={(e) => { e.stopPropagation(); handleToggleStatus(course.id, course.status); }} className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-blue-600">
-                                                    <Filter size={16} /> {course.status === 1 ? t.deactivate : t.activate}
+                                                <button onClick={(e) => { e.stopPropagation(); handleToggleStatus(course.id); }} className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-blue-600">
+                                                    <Filter size={16} /> {normalizeStatus(course.status) === 'published' ? t.draft : t.published}
                                                 </button>
 
                                                 <button onClick={(e) => { e.stopPropagation(); handleToggleFeatured(course.id, course.is_featured); }} className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-amber-500">
@@ -267,8 +286,8 @@ export const CoursesTab: React.FC = () => {
                         className="w-full h-32 p-3 rounded-lg border border-slate-200 focus:outline-none focus:border-primary resize-none"
                     />
                     <div className="flex gap-2">
-                        <Button variant="outline" className="flex-1" onClick={() => setShowRejectionModal(false)}>{t.cancel}</Button>
-                        <Button className="flex-1 bg-red-600 hover:bg-red-700" onClick={() => openMenuId && handleReject(openMenuId)}>{t.confirmRejection}</Button>
+                        <Button variant="outline" className="flex-1" onClick={() => { setShowRejectionModal(false); setRejectingCourseId(null); }}>{t.cancel}</Button>
+                        <Button className="flex-1 bg-red-600 hover:bg-red-700" onClick={() => rejectingCourseId && handleReject(rejectingCourseId)}>{t.confirmRejection}</Button>
                     </div>
                 </div>
             </Modal>

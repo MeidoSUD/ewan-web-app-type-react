@@ -293,6 +293,8 @@ export const TRANSLATIONS: Record<'en' | 'ar', Translations> = {
     viewDetails: "View Details",
     deactivate: "Deactivate",
     activate: "Activate",
+    draft:"Draft",
+    published:"published",
     removeFeatured: "Remove Featured",
     markFeatured: "Mark Featured",
     rejectCourse: "Reject Course",
