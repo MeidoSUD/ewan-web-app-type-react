@@ -102,10 +102,17 @@ export const VerificationsTab: React.FC = () => {
         window.print();
     };
 
-    const getServiceName = (serviceId?: number | null) => {
-        if (!serviceId) return t.na;
-        const service = services.find(s => s.id === serviceId);
-        return service ? (language === 'ar' ? service.name_ar : service.name_en) : `${t.subject} #${serviceId}`;
+    const getTeacherServiceNames = (teacher: AdminTeacher): string => {
+        if (teacher.services && teacher.services.length > 0) {
+            return teacher.services
+                .map(s => language === 'ar' ? s.name_ar : s.name_en)
+                .join(', ');
+        }
+        if (teacher.service_id) {
+            const service = services.find(s => s.id === teacher.service_id);
+            return service ? (language === 'ar' ? service.name_ar : service.name_en) : `#${teacher.service_id}`;
+        }
+        return t.na;
     };
 
     if (loading) return <div className="flex justify-center p-12"><Loader2 className="animate-spin text-primary" /></div>;
@@ -150,7 +157,7 @@ export const VerificationsTab: React.FC = () => {
                                 </td>
                                 <td className="px-6 py-4">
                                     <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs font-semibold">
-                                        {getServiceName(teacher.service_id)}
+                                        {getTeacherServiceNames(teacher)}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
@@ -190,7 +197,7 @@ export const VerificationsTab: React.FC = () => {
                                             }}
                                             className="bg-green-600 hover:bg-green-700 h-8 text-xs px-3 shadow-sm z-10 relative"
                                         >
-                                            {t.verify}
+                                            {t.verifyTeacher}
                                         </Button>
                                     )}
                                     {teacher.verified && (
@@ -251,7 +258,7 @@ export const VerificationsTab: React.FC = () => {
                         <div className="grid grid-cols-2 gap-4 text-sm">
                             <div className="p-3 bg-slate-50 rounded-lg">
                                 <span className="block text-xs text-slate-400">{t.requestedService}</span>
-                                <span className="font-medium text-slate-800">{getServiceName(selectedTeacher.service_id)}</span>
+                                <span className="font-medium text-slate-800">{getTeacherServiceNames(selectedTeacher)}</span>
                             </div>
                             <div className="p-3 bg-slate-50 rounded-lg">
                                 <span className="block text-xs text-slate-400">{t.phone}</span>

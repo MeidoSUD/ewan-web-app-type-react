@@ -427,6 +427,7 @@ export interface AdminTeacher {
   profile_photo?: string | null;
   certificate?: string | null;
   service_id?: number | null;
+  services?: Service[];
 }
 
 export interface AdminBooking {
