@@ -5,6 +5,7 @@ import { ChevronRight, Plus, Trash2, Edit2, Loader2, RotateCcw, AlertCircle, Sav
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { Input } from '../ui/Input';
+import { Select } from '../ui/Select';
 import { adminService } from '../../services/api';
 import { useToast } from '../../contexts/ToastContext';
 
@@ -44,6 +45,7 @@ export const EducationTab: React.FC = () => {
     const [levels, setLevels] = useState<EducationLevel[]>([]);
     const [classes, setClasses] = useState<ClassEntity[]>([]);
     const [subjects, setSubjects] = useState<Subject[]>([]);
+    const [services, setServices] = useState<{id: number; name_en: string; name_ar: string}[]>([]);
 
     const [loadingLevels, setLoadingLevels] = useState(false);
     const [loadingClasses, setLoadingClasses] = useState(false);
@@ -117,8 +119,24 @@ export const EducationTab: React.FC = () => {
         }
     };
 
+    const fetchServices = async () => {
+        try {
+            const data = await adminService.getServices();
+            setServices(data || []);
+        } catch (e) {
+            console.error("Failed to load services", e);
+        }
+    };
+
     const handleSave = async () => {
         const { type, data, isEditing } = modal;
+        
+        // التحقق من اختيار الخدمة للمادة
+        if (type === 'subject' && !data.service_id) {
+            showToast(t.serviceRequired || 'Please select a service', 'error');
+            return;
+        }
+        
         try {
             let resp;
             if (type === 'level') {
@@ -142,8 +160,7 @@ export const EducationTab: React.FC = () => {
                     resp = await adminService.createSubject({
                         ...data,
                         class_id: activeClass,
-                        education_level_id: activeLevel,
-                        service_id: data.service_id || 1 // Fallback if not specified
+                        education_level_id: activeLevel
                     });
                 }
                 if (activeClass) fetchSubjects(activeClass);
@@ -193,11 +210,14 @@ export const EducationTab: React.FC = () => {
     };
 
     const openModal = (type: 'level' | 'class' | 'subject', item: any = null) => {
+        if (type === 'subject' && services.length === 0) {
+            fetchServices();
+        }
         setModal({
             isOpen: true,
             type,
             isEditing: !!item,
-            data: item || { name_en: '', name_ar: '', status: 1, description: '' }
+            data: item || { name_en: '', name_ar: '', status: 1, description: '', service_id: '' }
         });
     };
 
@@ -379,6 +399,19 @@ export const EducationTab: React.FC = () => {
                                 onChange={e => setModal({ ...modal, data: { ...modal.data, description: e.target.value } })}
                             />
                         </div>
+                    )}
+
+                    {modal.type === 'subject' && (
+                        <Select
+                            label={t.service || 'Service'}
+                            value={modal.data.service_id?.toString() || ''}
+                            onChange={e => setModal({ ...modal, data: { ...modal.data, service_id: parseInt(e.target.value) } })}
+                            options={[
+                                { value: '', label: t.selectService || 'Select a service' },
+                                ...services.map(s => ({ value: s.id.toString(), label: language === 'ar' ? s.name_ar : s.name_en }))
+                            ]}
+                            error={!modal.data.service_id ? (t.serviceRequired || 'Service is required') : undefined}
+                        />
                     )}
 
                     <div className="flex items-center gap-2 py-2">
