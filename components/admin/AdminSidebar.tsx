@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { LayoutDashboard, Users, Layers, DollarSign, CheckSquare, AlertCircle, LogOut, Globe, Calendar, BookOpen } from 'lucide-react';
+import { LayoutDashboard, Users, Layers, DollarSign, CheckSquare, AlertCircle, LogOut, Globe, Calendar, BookOpen, Settings } from 'lucide-react';
 import { Logo } from '../Logo';
 
 interface AdminSidebarProps {
@@ -25,6 +25,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, setActive
         { id: 'payouts', label: t.payoutRequests, icon: DollarSign },
         { id: 'disputes', label: t.disputes, icon: AlertCircle },
         { id: 'ads', label: t.adsManagement, icon: Globe },
+        { id: 'settings', label: language === 'ar' ? 'الإعدادات' : 'Settings', icon: Settings },
     ];
 
     return (

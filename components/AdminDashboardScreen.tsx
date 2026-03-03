@@ -12,6 +12,7 @@ import { CoursesTab } from './admin/CoursesTab';
 import { SettingsTab } from './dashboard/SettingsTab';
 import { AdminOverviewTab } from './admin/AdminOverviewTab';
 import { AdsTab } from './admin/AdsTab';
+import { AdminSettingsTab } from './admin/AdminSettingsTab';
 import { Menu } from 'lucide-react';
 
 import { useLanguage } from '../contexts/LanguageContext';
@@ -47,7 +48,7 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ data
       case 'ads':
         return <AdsTab />;
       case 'settings':
-        return <SettingsTab />;
+        return <AdminSettingsTab />;
       default:
         return <AdminOverviewTab />;
     }

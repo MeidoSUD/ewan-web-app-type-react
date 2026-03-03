@@ -4,6 +4,7 @@
 // =====================================================
 
 
+// const PRODUCTION_URL = "http://localhost:8000/api";
 const PRODUCTION_URL = "https://portal.ewan-geniuses.com/api";
 
 const URL_STORAGE_KEY = 'api_base_url';
@@ -411,10 +412,38 @@ export const adminService = {
   updateAd: (id: number, data: FormData) => fetchWithAuth(`/admin/ads/${id}`, { method: 'POST', body: data }),
   toggleAd: (id: number) => fetchWithAuth(`/admin/ads/${id}/toggle`, { method: 'PUT' }),
   deleteAd: (id: number) => fetchWithAuth(`/admin/ads/${id}`, { method: 'DELETE' }),
+
+  // Settings Management
+  getSettings: () => fetchWithAuth('/admin/settings'),
+  getSettingsByGroup: (group: string) => fetchWithAuth(`/admin/settings/${group}`),
+  updateSetting: (id: number, data: any) => fetchWithAuth(`/admin/settings/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  createSetting: (data: any) => fetchWithAuth('/admin/settings', { method: 'POST', body: JSON.stringify(data) }),
+  bulkUpdateSettings: (settings: { id: number; value: string }[]) => 
+    fetchWithAuth('/admin/settings/bulk', { method: 'PUT', body: JSON.stringify({ settings }) }),
 };
 
 export const adsService = {
   getAds: (platform: 'web' | 'app' | 'both' = 'web') => fetchWithAuth(`/ads?platform=${platform}`).then(res => res.data.ads || []),
+};
+
+export const settingsService = {
+  // Get all settings
+  getAll: () => fetchWithAuth('/settings'),
+  
+  // Get settings by group (e.g., 'app', 'contact')
+  getByGroup: (group: string) => fetchWithAuth(`/settings/${group}`),
+  
+  // Update a single setting
+  update: (id: number, data: { key: string; value: string; type?: string; group?: string; description?: string }) => 
+    fetchWithAuth(`/settings/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  
+  // Create a new setting
+  create: (data: { key: string; value: string; type: string; group: string; description?: string }) => 
+    fetchWithAuth('/settings', { method: 'POST', body: JSON.stringify(data) }),
+  
+  // Bulk update settings
+  bulkUpdate: (settings: { id: number; value: string }[]) => 
+    fetchWithAuth('/settings/bulk', { method: 'PUT', body: JSON.stringify({ settings }) }),
 };
 
 export const referenceService = {
