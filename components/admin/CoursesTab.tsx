@@ -15,6 +15,7 @@ interface AdminCourse {
     category_id: number;
     service_id: number;
     approval_status: 'pending' | 'approved' | 'rejected';
+    rejection_reason?: string;
     status: 'published' | 'draft';
     is_featured: boolean;
     image?: string;
@@ -75,23 +76,25 @@ export const CoursesTab: React.FC = () => {
 
     const handleApprove = async (id: number) => {
         try {
-            await adminService.approveCourse(id);
+            const response = await adminService.approveCourse(id);
             setCourses(courses.map(c => c.id === id ? { ...c, approval_status: 'approved' } : c));
             setOpenMenuId(null);
-            showToast(t.updatedSuccessfully, 'success');
+            setSelectedCourse(null);
+            showToast(response.message || t.updatedSuccessfully, 'success');
         } catch (e) { showToast(t.error, 'error'); }
     };
 
     const handleReject = async (id: number) => {
         if (!rejectionReason) return showToast(t.provideReason, 'warning');
         try {
-            await adminService.rejectCourse(id, rejectionReason);
-            setCourses(courses.map(c => c.id === id ? { ...c, approval_status: 'rejected' } : c));
+            const response = await adminService.rejectCourse(id, rejectionReason);
+            setCourses(courses.map(c => c.id === id ? { ...c, approval_status: 'rejected', rejection_reason: rejectionReason } : c));
             setShowRejectionModal(false);
             setRejectionReason('');
             setRejectingCourseId(null);
             setOpenMenuId(null);
-            showToast(t.updatedSuccessfully, 'success');
+            setSelectedCourse(null);
+            showToast(response.message || t.updatedSuccessfully, 'success');
         } catch (e) { showToast(t.error, 'error'); }
     };
 
@@ -199,9 +202,13 @@ export const CoursesTab: React.FC = () => {
                                             </div>
                                             <div>
                                                 <div className="font-bold text-slate-900 line-clamp-1">{course.name}</div>
-                                                {course.is_featured && (
+                                                {course.is_featured ? (
                                                     <div className="flex items-center gap-1 text-[10px] text-amber-600 font-bold uppercase">
                                                         <Star size={10} fill="currentColor" /> {t.featured}
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase">
+                                                        <Star size={10} /> {t.notFeatured}
                                                     </div>
                                                 )}
                                             </div>
@@ -335,7 +342,21 @@ export const CoursesTab: React.FC = () => {
                                     {selectedCourse.approval_status === 'approved' ? t.approve : selectedCourse.approval_status === 'rejected' ? t.reject : t.pending}
                                 </span>
                             </div>
+                            <div className="p-3 bg-slate-50 rounded-xl">
+                                <span className="block text-xs text-slate-400 mb-1">{t.featured}</span>
+                                <span className={`font-bold flex items-center gap-1 ${selectedCourse.is_featured ? 'text-amber-600' : 'text-slate-400'}`}>
+                                    <Star size={14} fill={selectedCourse.is_featured ? 'currentColor' : 'none'} />
+                                    {selectedCourse.is_featured ? t.featured : t.notFeatured}
+                                </span>
+                            </div>
                         </div>
+
+                        {selectedCourse.approval_status === 'rejected' && (
+                            <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
+                                <span className="block text-xs text-red-500 mb-1 font-semibold">{t.rejectionReason || 'سبب الرفض'}</span>
+                                <p className="text-sm text-red-700">{selectedCourse.rejection_reason || 'لا يوجد سبب محدد'}</p>
+                            </div>
+                        )}
 
                         <div className="flex gap-2 pt-2">
                             {selectedCourse.approval_status !== 'approved' && (

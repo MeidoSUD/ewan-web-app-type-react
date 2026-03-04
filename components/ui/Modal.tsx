@@ -31,7 +31,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
             <X size={20} />
           </button>
         </div>
-        <div className={direction === 'rtl' ? 'text-right' : 'text-left'}>
+        <div className={`max-h-[70vh] overflow-y-auto pr-1 ${direction === 'rtl' ? 'text-right' : 'text-left'}`}>
           {children}
         </div>
       </div>

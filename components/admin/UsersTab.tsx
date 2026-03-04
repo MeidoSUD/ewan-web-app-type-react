@@ -509,7 +509,7 @@ export const UsersTab: React.FC = () => {
                                 <span className="block text-[10px] font-bold text-slate-400 uppercase mb-1">{t.nationality}</span>
                                 <span className="font-semibold text-slate-700 flex items-center gap-2">
                                     <Globe size={14} className="text-slate-400" />
-                                    {selectedUser.nationality || t.na}
+                                    {selectedUser.nationality  }
                                 </span>
                             </div>
                             <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
