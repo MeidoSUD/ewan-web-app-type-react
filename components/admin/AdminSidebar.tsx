@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { LayoutDashboard, Users, Layers, DollarSign, CheckSquare, AlertCircle, LogOut, Globe, Calendar, BookOpen, Settings } from 'lucide-react';
+import { LayoutDashboard, Users, Layers, DollarSign, CheckSquare, AlertCircle, LogOut, Globe, Calendar, BookOpen, Settings, Package, ShoppingBag, Percent, Cog } from 'lucide-react';
 import { Logo } from '../Logo';
 
 interface AdminSidebarProps {
@@ -18,13 +18,17 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, setActive
     const menuItems = [
         { id: 'overview', label: t.dashboard, icon: LayoutDashboard },
         { id: 'users', label: t.users, icon: Users },
+        { id: 'services', label: t.servicesManagement, icon: Package },
+        { id: 'orders', label: t.ordersManagement, icon: ShoppingBag },
         { id: 'courses', label: t.courses, icon: BookOpen },
         { id: 'bookings', label: t.bookings, icon: Calendar },
         { id: 'education', label: t.academicStructure, icon: Layers },
         { id: 'verifications', label: t.verifications, icon: CheckSquare },
         { id: 'payouts', label: t.payoutRequests, icon: DollarSign },
         { id: 'disputes', label: t.disputes, icon: AlertCircle },
+        { id: 'percentage', label: t.revenueManagement, icon: Percent },
         { id: 'ads', label: t.adsManagement, icon: Globe },
+        { id: 'appConfig', label: language === 'ar' ? 'إعدادات التطبيق' : 'App Config', icon: Cog },
         { id: 'settings', label: language === 'ar' ? 'الإعدادات' : 'Settings', icon: Settings },
     ];
 

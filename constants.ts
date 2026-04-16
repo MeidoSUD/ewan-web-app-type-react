@@ -145,6 +145,10 @@ export const TRANSLATIONS: Record<'en' | 'ar', Translations> = {
     optional: "Optional",
     signUp: "Sign Up Date",
     noResults: "No matching users found",
+    servicesManagement: "Services Management",
+    ordersManagement: "Orders Management",
+    percentage: "Percentage",
+    revenueManagement: "Revenue Management",
     // Ads Management
     adsManagement: "Ads Management",
     uploadAd: "Upload New Ad",
@@ -595,6 +599,10 @@ export const TRANSLATIONS: Record<'en' | 'ar', Translations> = {
     optional: "اختياري",
     signUp: "تاريخ التسجيل",
     noResults: "لم يتم العثور على مستخدمين مطابقين",
+    servicesManagement: "إدارة الخدمات",
+    ordersManagement: "إدارة الطلبات",
+    percentage: "النسبة",
+    revenueManagement: "إدارة الإيرادات",
     // Ads Management
     adsManagement: "إدارة الإعلانات",
     uploadAd: "رفع إعلان جديد",

@@ -87,7 +87,8 @@ import {
   BookingPayload, PaymentPayload, Course, Session, Booking, Certificate,
   CourseCategory, CoursePayload, AvailableTime, AvailabilityPayload,
   AdminUser, AdminTeacher, AdminBooking, AdminDispute, PayoutRequest, Service,
-  Ad, AdPayload
+  Ad, AdPayload, AdminService, AdminOrder, TeacherApplication, PlatformPercentage,
+  RevenueAnalytics, CalculatorResults, AppConfig, AppVersion, MaintenanceMode
 } from '../types';
 
 export type {
@@ -96,7 +97,8 @@ export type {
   Course, CourseCategory, CoursePayload, AvailableTime, AvailabilityPayload,
   ReferenceItem, StudentPaymentMethod, BankReference, BankAccount, WalletResponse,
   AdminUser, AdminTeacher, AdminBooking, AdminDispute, PayoutRequest, Service,
-  Ad, AdPayload
+  Ad, AdPayload, AdminService, AdminOrder, TeacherApplication, PlatformPercentage,
+  RevenueAnalytics, CalculatorResults, AppConfig, AppVersion, MaintenanceMode
 };
 
 export const AUTH_SESSION_EXPIRED = 'auth:session-expired';
@@ -420,6 +422,63 @@ export const adminService = {
   createSetting: (data: any) => fetchWithAuth('/admin/settings', { method: 'POST', body: JSON.stringify(data) }),
   bulkUpdateSettings: (settings: { id: number; value: string }[]) => 
     fetchWithAuth('/admin/settings/bulk', { method: 'PUT', body: JSON.stringify({ settings }) }),
+
+  // Services Management
+  getAdminServices: (filters: any = {}) => {
+    const query = new URLSearchParams(filters).toString();
+    return fetchWithAuth(`/admin/services${query ? `?${query}` : ''}`).then(extractArray);
+  },
+  createService: (data: any) => fetchWithAuth('/admin/services', { 
+    method: 'POST', 
+    body: data instanceof FormData ? data : JSON.stringify(data) 
+  }),
+  updateService: (id: number, data: any) => {
+    if (data instanceof FormData) {
+      data.append('_method', 'PUT');
+      return fetchWithAuth(`/admin/services/${id}`, { method: 'POST', body: data });
+    }
+    return fetchWithAuth(`/admin/services/${id}`, { 
+      method: 'PUT', 
+      body: JSON.stringify(data) 
+    });
+  },
+  deleteService: (id: number) => fetchWithAuth(`/admin/services/${id}`, { method: 'DELETE' }),
+
+  // Order Management
+  getOrders: (filters: any = {}) => {
+    const query = new URLSearchParams(filters).toString();
+    return fetchWithAuth(`/admin/orders${query ? `?${query}` : ''}`).then(extractArray);
+  },
+  getOrderApplications: (orderId: number) => fetchWithAuth(`/admin/orders/${orderId}/applications`),
+  assignTeacher: (orderId: number, data: { teacher_id: number; reason?: string }) => 
+    fetchWithAuth(`/admin/orders/${orderId}/assign`, { method: 'POST', body: JSON.stringify(data) }),
+  updateOrderStatus: (orderId: number, data: { status: string; notes?: string }) => 
+    fetchWithAuth(`/admin/orders/${orderId}/status`, { method: 'PUT', body: JSON.stringify(data) }),
+
+  // Revenue & Percentage
+  getActivePercentage: () => fetchWithAuth('/admin/revenue/percentage'),
+  getPercentageHistory: (filters: any = {}) => {
+    const query = new URLSearchParams(filters).toString();
+    return fetchWithAuth(`/admin/revenue/history${query ? `?${query}` : ''}`).then(extractArray);
+  },
+  updatePercentage: (data: { value: number; effective_date: string; description?: string }) => 
+    fetchWithAuth('/admin/revenue/percentage', { method: 'POST', body: JSON.stringify(data) }),
+  getRevenueAnalytics: (filters: any = {}) => {
+    const query = new URLSearchParams(filters).toString();
+    return fetchWithAuth(`/admin/revenue/analytics${query ? `?${query}` : ''}`);
+  },
+  getRevenueCalculator: (teacherRate: number, date?: string) => {
+    const params = new URLSearchParams({ teacher_rate: String(teacherRate) });
+    if (date) params.append('date', date);
+    return fetchWithAuth(`/admin/revenue/calculate?${params.toString()}`);
+  },
+
+  // App Config Management
+  getAppConfig: () => fetchWithAuth('/admin/app-config/settings'),
+  updateAppVersion: (data: { platform: 'ios' | 'android'; version: string; force_update: boolean; release_notes?: string }) => 
+    fetchWithAuth('/admin/app-config/version', { method: 'PUT', body: JSON.stringify(data) }),
+  toggleMaintenanceMode: (data: { enabled: boolean; message?: string; estimated_end_time?: string }) => 
+    fetchWithAuth('/admin/app-config/maintenance', { method: 'PUT', body: JSON.stringify(data) }),
 };
 
 export const adsService = {

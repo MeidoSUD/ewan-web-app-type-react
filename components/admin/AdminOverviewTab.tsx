@@ -2,22 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Users, BookOpen, DollarSign, CheckSquare, Loader2, TrendingUp, UserCheck, Calendar, Activity, Wallet } from 'lucide-react';
 import { adminService } from '../../services/api';
-import { AdminDashboardData } from '../../types';
+import { AdminDashboardData, RevenueAnalytics } from '../../types';
 
 export const AdminOverviewTab: React.FC = () => {
     const { t, language } = useLanguage();
     const [data, setData] = useState<AdminDashboardData | null>(null);
+    const [analytics, setAnalytics] = useState<RevenueAnalytics | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
-                const response = await adminService.getDashboardData();
-                setData(response.data || response); // Handle both nested and flat responses
-            } catch (e: any) {
-                console.error("Failed to load admin dashboard data, trying stats fallback", e);
+                // Fetch dashboard data first
                 try {
-                    // Fallback to simpler stats if dashboard fails
+                    const dashboardRes = await adminService.getDashboardData();
+                    setData(dashboardRes.data || dashboardRes);
+                } catch (dashboardErr) {
+                    console.error("Main dashboard fetch failed, trying fallback stats", dashboardErr);
                     const stats = await adminService.getStats();
                     setData({
                         summary: {
@@ -38,9 +39,18 @@ export const AdminOverviewTab: React.FC = () => {
                         recent_activity: [],
                         wallet_info: { total_teachers_wallet: stats.revenue || 0, average_per_teacher: 0 }
                     });
-                } catch (fallbackError) {
-                    console.error("Dashboard and stats fallback failed", fallbackError);
                 }
+
+                // Fetch analytics independently
+                try {
+                    const analyticsRes = await adminService.getRevenueAnalytics();
+                    setAnalytics(analyticsRes.data || analyticsRes);
+                } catch (analyticsErr) {
+                    console.warn("Revenue analytics unavailable (possibly 404)", analyticsErr);
+                    setAnalytics(null);
+                }
+            } catch (e: any) {
+                console.error("Fatal error in fetchDashboardData", e);
             } finally {
                 setLoading(false);
             }
@@ -54,8 +64,8 @@ export const AdminOverviewTab: React.FC = () => {
     const statsCards = [
         { title: t.totalUsers, value: summary?.total_users || 0, icon: Users, color: 'bg-blue-500' },
         { title: t.activeTeachers, value: summary?.active_teachers || 0, icon: UserCheck, color: 'bg-green-500' },
-        { title: t.totalBookings, value: summary?.total_bookings || 0, icon: BookOpen, color: 'bg-purple-500' },
-        { title: t.revenue, value: `${summary?.total_revenue?.toLocaleString() || '0'} ${t.sar}`, icon: DollarSign, color: 'bg-orange-500' },
+        { title: t.totalBookings, value: analytics?.total_bookings || summary?.total_bookings || 0, icon: BookOpen, color: 'bg-purple-500' },
+        { title: t.revenue, value: `${(analytics?.total_platform_revenue || summary?.total_revenue || 0).toLocaleString()} ${t.sar}`, icon: DollarSign, color: 'bg-orange-500' },
     ];
 
     return (

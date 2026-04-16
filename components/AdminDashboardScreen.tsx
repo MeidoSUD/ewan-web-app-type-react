@@ -1,18 +1,11 @@
 
 import React, { useState } from 'react';
 import { AuthResponse } from '../services/api';
-import { AdminSidebar } from './admin/AdminSidebar';
-import { UsersTab } from './admin/UsersTab';
-import { EducationTab } from './admin/EducationTab';
-import { PayoutsTab } from './admin/PayoutsTab';
-import { VerificationsTab } from './admin/VerificationsTab';
-import { BookingsTab } from './admin/BookingsTab';
-import { AdminDisputesTab } from './admin/DisputesTab';
-import { CoursesTab } from './admin/CoursesTab';
-import { SettingsTab } from './dashboard/SettingsTab';
-import { AdminOverviewTab } from './admin/AdminOverviewTab';
-import { AdsTab } from './admin/AdsTab';
-import { AdminSettingsTab } from './admin/AdminSettingsTab';
+import { 
+  AdminSidebar, UsersTab, EducationTab, PayoutsTab, VerificationsTab, 
+  BookingsTab, AdminDisputesTab, CoursesTab, AdminOverviewTab, 
+  AdsTab, AdminSettingsTab, AdminServicesTab, AdminOrdersTab, AdminPercentageTab, AdminAppConfigTab 
+} from './admin';
 import { Menu } from 'lucide-react';
 
 import { useLanguage } from '../contexts/LanguageContext';
@@ -33,6 +26,10 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ data
         return <AdminOverviewTab />;
       case 'users':
         return <UsersTab />;
+      case 'services':
+        return <AdminServicesTab />;
+      case 'orders':
+        return <AdminOrdersTab />;
       case 'courses':
         return <CoursesTab />;
       case 'bookings':
@@ -45,8 +42,12 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ data
         return <VerificationsTab />;
       case 'disputes':
         return <AdminDisputesTab />;
+      case 'percentage':
+        return <AdminPercentageTab />;
       case 'ads':
         return <AdsTab />;
+      case 'appConfig':
+        return <AdminAppConfigTab />;
       case 'settings':
         return <AdminSettingsTab />;
       default:

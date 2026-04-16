@@ -558,3 +558,122 @@ export interface AdminDashboardData {
     average_per_teacher: number;
   };
 }
+
+export interface AdminService extends Service {
+  key_name: string;
+  name_en: string;
+  name_ar: string;
+  description_en: string;
+  description_ar: string;
+  status: string | number;
+  role_id: string | number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AdminOrder {
+  id: number;
+  student: {
+    id: number;
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone_number: string;
+  };
+  subject: {
+    id: number;
+    name_en: string;
+    name_ar: string;
+  };
+  assigned_teacher?: {
+    id: number;
+    first_name: string;
+    last_name: string;
+    rating: string;
+    experience_years: string;
+  };
+  status: string;
+  min_price: string;
+  max_price: string;
+  notes: string;
+  application_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TeacherApplication {
+  id: number;
+  teacher: {
+    id: number;
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone_number: string;
+    rating: string;
+    experience_years: string;
+    verified: boolean;
+    profile_photo: string;
+  };
+  applied_at: string;
+  status: string;
+  is_preferred: boolean;
+}
+
+export interface PlatformPercentage {
+  id: number;
+  value: string;
+  effective_date: string;
+  is_active: boolean;
+  description: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RevenueAnalytics {
+  total_bookings: number;
+  total_student_spent: number;
+  total_teacher_earned: number;
+  total_platform_revenue: number;
+  average_percentage: number;
+  bookings_by_period: {
+    period: string;
+    bookings: number;
+    student_spent: number;
+    teacher_earned: number;
+    platform_revenue: number;
+  }[];
+}
+
+export interface CalculatorResults {
+  teacher_rate: number;
+  platform_percentage: number;
+  student_price: number;
+  platform_revenue: number;
+  effective_date: string;
+}
+
+// --- App Config Management ---
+export interface AppVersion {
+  id?: number;
+  platform: 'ios' | 'android';
+  version: string;
+  force_update: boolean;
+  release_notes?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface MaintenanceMode {
+  id?: number;
+  enabled: boolean;
+  message?: string;
+  estimated_end_time?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface AppConfig {
+  ios_version: AppVersion;
+  android_version: AppVersion;
+  maintenance_mode: MaintenanceMode;
+}
