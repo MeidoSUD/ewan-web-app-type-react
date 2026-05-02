@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { AuthResponse } from '../services/api';
 import { 
   AdminSidebar, UsersTab, EducationTab, PayoutsTab, VerificationsTab, 
   BookingsTab, AdminDisputesTab, CoursesTab, AdminOverviewTab, 
-  AdsTab, AdminSettingsTab, AdminServicesTab, AdminOrdersTab, AdminPercentageTab, AdminAppConfigTab 
+  AdsTab, AdminSettingsTab, AdminServicesTab, AdminOrdersTab, AdminPercentageTab, AdminAppConfigTab, AdminSessionsTab 
 } from './admin';
 import { Menu } from 'lucide-react';
 
@@ -34,6 +33,8 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ data
         return <CoursesTab />;
       case 'bookings':
         return <BookingsTab />;
+      case 'sessions':
+        return <AdminSessionsTab />;
       case 'education':
         return <EducationTab />;
       case 'payouts':

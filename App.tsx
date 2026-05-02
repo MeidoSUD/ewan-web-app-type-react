@@ -83,7 +83,21 @@ const AppContent = () => {
     }
 
     const cached = localStorage.getItem(USER_DATA_KEY);
+    const cachedTimestamp = localStorage.getItem('user_session_timestamp');
+
     if (cached) {
+      const isExpired = !cachedTimestamp || (Date.now() - parseInt(cachedTimestamp, 10)) > 24 * 60 * 60 * 1000; // 24 hours timeout
+
+      if (isExpired) {
+        console.log("[App] Session expired due to timeout");
+        localStorage.removeItem(USER_DATA_KEY);
+        localStorage.removeItem('user_session_timestamp');
+        tokenService.removeToken();
+        setCurrentScreen('login');
+        setIsLoading(false);
+        return;
+      }
+
       try {
         const cachedData = JSON.parse(cached);
         if (cachedData && cachedData.user) {
@@ -119,12 +133,14 @@ const AppContent = () => {
 
       setUserData(processedData);
       localStorage.setItem(USER_DATA_KEY, JSON.stringify(processedData));
+      localStorage.setItem('user_session_timestamp', Date.now().toString());
       setCurrentScreen('dashboard');
 
     } catch (error: any) {
       if (error.status === 401 || error.message?.includes('expired')) {
         tokenService.removeToken();
         localStorage.removeItem(USER_DATA_KEY);
+        localStorage.removeItem('user_session_timestamp');
         setUserData(null);
         setCurrentScreen('login');
       } else {
@@ -143,6 +159,7 @@ const AppContent = () => {
       setUserData(null);
       tokenService.removeToken();
       localStorage.removeItem(USER_DATA_KEY);
+      localStorage.removeItem('user_session_timestamp');
       setCurrentScreen('login');
     };
     window.addEventListener(AUTH_SESSION_EXPIRED, handleSessionExpired);
@@ -200,6 +217,7 @@ const AppContent = () => {
     if (processedData) {
       setUserData(processedData);
       localStorage.setItem(USER_DATA_KEY, JSON.stringify(processedData));
+      localStorage.setItem('user_session_timestamp', Date.now().toString());
       console.log("[App] Set user data and redirecting to dashboard...");
       setCurrentScreen('dashboard');
     } else {
@@ -212,6 +230,7 @@ const AppContent = () => {
     authService.logout().catch(() => { });
     setUserData(null);
     localStorage.removeItem(USER_DATA_KEY);
+    localStorage.removeItem('user_session_timestamp');
     tokenService.removeToken();
     setCurrentScreen('website');
     setAuthError(null);

@@ -479,6 +479,16 @@ export const adminService = {
     fetchWithAuth('/admin/app-config/version', { method: 'PUT', body: JSON.stringify(data) }),
   toggleMaintenanceMode: (data: { enabled: boolean; message?: string; estimated_end_time?: string }) => 
     fetchWithAuth('/admin/app-config/maintenance', { method: 'PUT', body: JSON.stringify(data) }),
+    
+  // Sessions Management
+  getSessions: (filters: any = {}) => {
+    const query = new URLSearchParams(filters).toString();
+    return fetchWithAuth(`/admin/sessions${query ? `?${query}` : ''}`).then(extractArray);
+  },
+  updateSessionDate: (id: number, data: { session_date: string; start_time?: string; end_time?: string }) => 
+    fetchWithAuth(`/admin/sessions/${id}/reschedule`, { method: 'PUT', body: JSON.stringify(data) }),
+  getUserSessions: (userId: number, role: 'teacher' | 'student') => 
+    fetchWithAuth(`/admin/users/${userId}/sessions?role=${role}`).then(extractArray),
 };
 
 export const adsService = {
