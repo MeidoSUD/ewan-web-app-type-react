@@ -6,6 +6,7 @@ import { adminService, AdminBooking } from '../../services/api';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
 import { Button } from '../ui/Button';
+import { Pagination } from '../ui/Pagination';
 
 export const BookingsTab: React.FC = () => {
     const { t } = useLanguage();
@@ -16,6 +17,10 @@ export const BookingsTab: React.FC = () => {
     const [filterTeacher, setFilterTeacher] = useState('');
     const [filterDate, setFilterDate] = useState('');
     const [filterStatus, setFilterStatus] = useState('');
+
+    // Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 10;
 
     useEffect(() => {
         const fetch = async () => {
@@ -37,6 +42,16 @@ export const BookingsTab: React.FC = () => {
         const matchStatus = !filterStatus || booking.status === filterStatus;
         return matchTeacher && matchDate && matchStatus;
     });
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filterTeacher, filterDate, filterStatus]);
+
+    const totalPages = Math.ceil(filteredBookings.length / ITEMS_PER_PAGE);
+    const paginatedBookings = filteredBookings.slice(
+        (currentPage - 1) * ITEMS_PER_PAGE,
+        currentPage * ITEMS_PER_PAGE
+    );
 
     const clearFilters = () => {
         setFilterTeacher('');
@@ -107,7 +122,7 @@ export const BookingsTab: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                        {filteredBookings.map(booking => (
+                        {paginatedBookings.map(booking => (
                             <tr key={booking.id} className="hover:bg-slate-50">
                                 <td className="px-6 py-4 font-mono text-slate-500">{booking.reference || `#${booking.id}`}</td>
                                 <td className="px-6 py-4">{booking.student_name || t.na}</td>
@@ -124,11 +139,16 @@ export const BookingsTab: React.FC = () => {
                                 <td className="px-6 py-4 text-slate-500">{new Date(booking.created_at).toLocaleDateString()}</td>
                             </tr>
                         ))}
-                        {filteredBookings.length === 0 && (
+                        {paginatedBookings.length === 0 && (
                             <tr><td colSpan={6} className="p-8 text-center text-slate-500">{t.noBookingsFound}</td></tr>
                         )}
                     </tbody>
                 </table>
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                />
             </div>
         </div>
     );

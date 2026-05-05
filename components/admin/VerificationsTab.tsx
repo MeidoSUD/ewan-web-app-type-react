@@ -3,6 +3,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { CheckCircle, XCircle, FileText, ExternalLink, Loader2, Eye, Printer, Download } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
+import { Pagination } from '../ui/Pagination';
 import { adminService, AdminTeacher, getStorageUrl, Service } from '../../services/api';
 import { useToast } from '../../contexts/ToastContext';
 
@@ -13,6 +14,10 @@ export const VerificationsTab: React.FC = () => {
     const [services, setServices] = useState<Service[]>([]);
     const [loading, setLoading] = useState(true);
     const [verifyingId, setVerifyingId] = useState<number | null>(null);
+
+    // Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 10;
 
     // Details Modal State
     const [selectedTeacher, setSelectedTeacher] = useState<AdminTeacher | null>(null);
@@ -115,6 +120,12 @@ export const VerificationsTab: React.FC = () => {
         return t.na;
     };
 
+    const totalPages = Math.ceil(teachers.length / ITEMS_PER_PAGE);
+    const paginatedTeachers = teachers.slice(
+        (currentPage - 1) * ITEMS_PER_PAGE,
+        currentPage * ITEMS_PER_PAGE
+    );
+
     if (loading) return <div className="flex justify-center p-12"><Loader2 className="animate-spin text-primary" /></div>;
 
     return (
@@ -134,7 +145,7 @@ export const VerificationsTab: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                        {teachers.map(teacher => (
+                        {paginatedTeachers.map(teacher => (
                             <tr key={teacher.id} className="hover:bg-slate-50 cursor-pointer" onClick={() => handleViewDetails(teacher)}>
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-3">
@@ -219,6 +230,11 @@ export const VerificationsTab: React.FC = () => {
                         ))}
                     </tbody>
                 </table>
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                />
             </div>
 
             {/* Teacher Details Modal */}

@@ -317,6 +317,11 @@ export const TRANSLATIONS: Record<'en' | 'ar', Translations> = {
     details: "Details",
     view: "View",
     teacherProfile: "Teacher Profile",
+    // Pagination
+    previous: "Previous",
+    next: "Next",
+    page: "Page",
+    of: "of",
     // Calendar
     months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
     weekDays: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
@@ -621,6 +626,11 @@ export const TRANSLATIONS: Record<'en' | 'ar', Translations> = {
     adUpdatedSuccess: "تم تحديث الإعلان بنجاح!",
     adDeletedSuccess: "تم حذف الإعلان بنجاح!",
     confirmDeleteAd: "هل أنت متأكد من حذف هذا الإعلان؟",
+    // Pagination
+    previous: "السابق",
+    next: "التالي",
+    page: "الصفحة",
+    of: "من",
     // Calendar
     months: ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"],
     weekDays: ["أحد", "إثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة", "سبت"],

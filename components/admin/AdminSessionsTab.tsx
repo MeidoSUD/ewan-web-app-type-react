@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Video, Loader2, Filter, X, Printer, Calendar as CalendarIcon, User, ChevronRight } from 'lucide-react';
 import { adminService } from '../../services/api';
+import { Pagination } from '../ui/Pagination';
 
 interface AdminSession {
     id: number;
@@ -27,6 +28,10 @@ export const AdminSessionsTab: React.FC = () => {
     const [filterStudent, setFilterStudent] = useState('');
     const [filterDate, setFilterDate] = useState('');
     const [filterStatus, setFilterStatus] = useState('');
+
+    // Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 10;
 
     // Modals
     const [makeupModal, setMakeupModal] = useState<{ isOpen: boolean; session: AdminSession | null }>({ isOpen: false, session: null });
@@ -113,6 +118,16 @@ export const AdminSessionsTab: React.FC = () => {
         return matchTeacher && matchStudent && matchDate && matchStatus;
     });
 
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filterTeacher, filterStudent, filterDate, filterStatus]);
+
+    const totalPages = Math.ceil(filteredSessions.length / ITEMS_PER_PAGE);
+    const paginatedSessions = filteredSessions.slice(
+        (currentPage - 1) * ITEMS_PER_PAGE,
+        currentPage * ITEMS_PER_PAGE
+    );
+
     const clearFilters = () => {
         setFilterTeacher('');
         setFilterStudent('');
@@ -122,10 +137,10 @@ export const AdminSessionsTab: React.FC = () => {
 
     const getStatusBadge = (status: string) => {
         switch (status) {
-            case 'live': return <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-bold rounded flex items-center gap-1 animate-pulse"><span className="w-2 h-2 rounded-full bg-red-500"></span> Live Now</span>;
-            case 'scheduled': return <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded">Scheduled</span>;
-            case 'ended': return <span className="px-2 py-1 bg-slate-100 text-slate-700 text-xs font-bold rounded">Ended</span>;
-            case 'cancelled': return <span className="px-2 py-1 bg-red-50 text-red-600 text-xs font-bold rounded line-through">Cancelled</span>;
+            case 'live': return <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-bold rounded flex items-center gap-1 animate-pulse"><span className="w-2 h-2 rounded-full bg-red-500"></span> {language === 'ar' ? 'جاري الآن' : 'Live Now'}</span>;
+            case 'scheduled': return <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded">{language === 'ar' ? 'مجدول' : 'Scheduled'}</span>;
+            case 'ended': return <span className="px-2 py-1 bg-slate-100 text-slate-700 text-xs font-bold rounded">{language === 'ar' ? 'مكتمل' : 'Ended'}</span>;
+            case 'cancelled': return <span className="px-2 py-1 bg-red-50 text-red-600 text-xs font-bold rounded line-through">{language === 'ar' ? 'ملغي' : 'Cancelled'}</span>;
             default: return <span className="px-2 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded">{status}</span>;
         }
     };
@@ -166,10 +181,10 @@ export const AdminSessionsTab: React.FC = () => {
                     <label className="text-xs font-bold text-slate-500 mb-1 block">{t.status}</label>
                     <select className="w-full p-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-primary bg-white" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
                         <option value="">{t.allStatus}</option>
-                        <option value="live">Live Now</option>
-                        <option value="scheduled">Scheduled</option>
-                        <option value="ended">Ended</option>
-                        <option value="cancelled">Cancelled</option>
+                        <option value="live">{language === 'ar' ? 'جاري الآن' : 'Live Now'}</option>
+                        <option value="scheduled">{language === 'ar' ? 'مجدول' : 'Scheduled'}</option>
+                        <option value="ended">{language === 'ar' ? 'مكتمل' : 'Ended'}</option>
+                        <option value="cancelled">{language === 'ar' ? 'ملغي' : 'Cancelled'}</option>
                     </select>
                 </div>
                 <button onClick={clearFilters} className="p-2 text-slate-400 hover:text-red-500 transition-colors" title="Clear Filters"><X size={20} /></button>
@@ -178,8 +193,8 @@ export const AdminSessionsTab: React.FC = () => {
             {/* Printable Content Container */}
             <div ref={printRef}>
                 <div className="print:block hidden mb-6 text-center">
-                    <h1 className="text-2xl font-bold mb-2">Sessions Report</h1>
-                    <p className="text-sm text-gray-500">Generated on {new Date().toLocaleDateString()}</p>
+                    <h1 className="text-2xl font-bold mb-2">{language === 'ar' ? 'تقرير الجلسات' : 'Sessions Report'}</h1>
+                    <p className="text-sm text-gray-500">{language === 'ar' ? 'تم الإنشاء في' : 'Generated on'} {new Date().toLocaleDateString()}</p>
                 </div>
 
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -196,7 +211,7 @@ export const AdminSessionsTab: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
-                                {filteredSessions.map(session => (
+                                {paginatedSessions.map(session => (
                                     <tr key={session.id} className="hover:bg-slate-50/50 transition-colors">
                                         <td className="px-6 py-4">{getStatusBadge(session.status)}</td>
                                         <td className="px-6 py-4 font-medium text-slate-700">{new Date(session.session_date).toLocaleDateString()}</td>
@@ -221,19 +236,24 @@ export const AdminSessionsTab: React.FC = () => {
                                             <button 
                                                 onClick={() => setMakeupModal({ isOpen: true, session })}
                                                 className="px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 font-semibold text-xs rounded-lg transition-colors border border-blue-100"
-                                                title="Make-up session (Push +7 Days)"
+                                                title={language === 'ar' ? "تأجيل لمدة 7 أيام" : "Make-up session (Push +7 Days)"}
                                             >
-                                                Make-up Session
+                                                {language === 'ar' ? 'جلسة تعويضية' : 'Make-up Session'}
                                             </button>
                                         </td>
                                     </tr>
                                 ))}
-                                {filteredSessions.length === 0 && (
+                                {paginatedSessions.length === 0 && (
                                     <tr><td colSpan={6} className="p-8 text-center text-slate-500">{language === 'ar' ? 'لا توجد جلسات' : 'No sessions found'}</td></tr>
                                 )}
                             </tbody>
                         </table>
                     </div>
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                    />
                 </div>
             </div>
 
@@ -252,17 +272,22 @@ export const AdminSessionsTab: React.FC = () => {
                         </div>
                         <div className="p-6">
                             <p className="text-slate-600 mb-6 text-sm leading-relaxed">
-                                You are about to schedule a make-up session for <strong>{makeupModal.session.student.name}</strong> with <strong>{makeupModal.session.teacher.name}</strong>. 
-                                This will move the session exactly 7 days forward.
+                                {language === 'ar' ? (
+                                    <>أنت على وشك جدولة جلسة تعويضية للطالب <strong>{makeupModal.session.student.name}</strong> مع المعلم <strong>{makeupModal.session.teacher.name}</strong>. 
+                                    هذا سيؤجل الجلسة بمقدار 7 أيام للأمام.</>
+                                ) : (
+                                    <>You are about to schedule a make-up session for <strong>{makeupModal.session.student.name}</strong> with <strong>{makeupModal.session.teacher.name}</strong>. 
+                                    This will move the session exactly 7 days forward.</>
+                                )}
                             </p>
                             
                             <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 mb-6 space-y-2 text-sm">
                                 <div className="flex justify-between">
-                                    <span className="text-slate-500">Current Date:</span>
+                                    <span className="text-slate-500">{language === 'ar' ? 'التاريخ الحالي:' : 'Current Date:'}</span>
                                     <span className="font-medium text-slate-900 line-through">{makeupModal.session.session_date}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span className="text-slate-500">New Date:</span>
+                                    <span className="text-slate-500">{language === 'ar' ? 'التاريخ الجديد:' : 'New Date:'}</span>
                                     <span className="font-bold text-blue-600">
                                         {(() => {
                                             const d = new Date(makeupModal.session.session_date);
@@ -272,7 +297,7 @@ export const AdminSessionsTab: React.FC = () => {
                                     </span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span className="text-slate-500">Time:</span>
+                                    <span className="text-slate-500">{language === 'ar' ? 'الوقت:' : 'Time:'}</span>
                                     <span className="font-medium text-slate-900">{makeupModal.session.start_time.substring(0, 5)} - {makeupModal.session.end_time.substring(0, 5)}</span>
                                 </div>
                             </div>
@@ -311,22 +336,22 @@ export const AdminSessionsTab: React.FC = () => {
                         
                         <div className="p-6 bg-slate-50 border-b border-slate-100 flex gap-6 overflow-x-auto">
                             <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex-1 min-w-[150px]">
-                                <p className="text-sm text-slate-500 font-medium mb-1">Total Sessions</p>
+                                <p className="text-sm text-slate-500 font-medium mb-1">{language === 'ar' ? 'إجمالي الجلسات' : 'Total Sessions'}</p>
                                 <p className="text-3xl font-bold text-slate-900">{userSessions.length}</p>
                             </div>
                             <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex-1 min-w-[150px]">
-                                <p className="text-sm text-slate-500 font-medium mb-1">Completed</p>
+                                <p className="text-sm text-slate-500 font-medium mb-1">{language === 'ar' ? 'مكتملة' : 'Completed'}</p>
                                 <p className="text-3xl font-bold text-green-600">{userSessions.filter(s => s.status === 'ended').length}</p>
                             </div>
                             <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex-1 min-w-[150px]">
-                                <p className="text-sm text-slate-500 font-medium mb-1">Scheduled</p>
+                                <p className="text-sm text-slate-500 font-medium mb-1">{language === 'ar' ? 'مجدولة' : 'Scheduled'}</p>
                                 <p className="text-3xl font-bold text-blue-600">{userSessions.filter(s => s.status === 'scheduled').length}</p>
                             </div>
                         </div>
 
                         <div className="p-6 flex-1 overflow-y-auto bg-white">
                             <h4 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                                <CalendarIcon size={18} className="text-slate-400"/> Session History
+                                <CalendarIcon size={18} className="text-slate-400"/> {language === 'ar' ? 'سجل الجلسات' : 'Session History'}
                             </h4>
                             
                             {loadingUserSessions ? (
@@ -358,7 +383,7 @@ export const AdminSessionsTab: React.FC = () => {
                             ) : (
                                 <div className="text-center p-12 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
                                     <Video size={32} className="mx-auto text-slate-300 mb-3" />
-                                    <p className="text-slate-500 font-medium">No sessions found for this user.</p>
+                                    <p className="text-slate-500 font-medium">{language === 'ar' ? 'لا توجد جلسات لهذا المستخدم.' : 'No sessions found for this user.'}</p>
                                 </div>
                             )}
                         </div>

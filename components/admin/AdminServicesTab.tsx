@@ -3,6 +3,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { Search, Plus, Trash2, Edit, Loader2, Filter, Package, UserCheck, ToggleLeft, ToggleRight, Image as ImageIcon } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
+import { Pagination } from '../ui/Pagination';
 import { adminService } from '../../services/api';
 import { AdminService } from '../../types';
 import { useToast } from '../../contexts/ToastContext';
@@ -14,6 +15,10 @@ export const AdminServicesTab: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState<string>('all');
+
+    // Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 10;
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -152,6 +157,16 @@ export const AdminServicesTab: React.FC = () => {
         return matchesSearch && matchesStatus;
     });
 
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, filterStatus]);
+
+    const totalPages = Math.ceil(filteredServices.length / ITEMS_PER_PAGE);
+    const paginatedServices = filteredServices.slice(
+        (currentPage - 1) * ITEMS_PER_PAGE,
+        currentPage * ITEMS_PER_PAGE
+    );
+
     if (loading) return <div className="flex justify-center p-12"><Loader2 className="animate-spin text-primary" /></div>;
 
     return (
@@ -200,14 +215,14 @@ export const AdminServicesTab: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                            {filteredServices.length === 0 ? (
+                            {paginatedServices.length === 0 ? (
                                 <tr>
                                     <td colSpan={4} className="px-6 py-12 text-center text-slate-400">
                                         {t.noResults}
                                     </td>
                                 </tr>
                             ) : (
-                                filteredServices.map(service => (
+                                paginatedServices.map(service => (
                                     <tr key={service.id} className="hover:bg-slate-50">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
@@ -255,6 +270,11 @@ export const AdminServicesTab: React.FC = () => {
                         </tbody>
                     </table>
                 </div>
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                />
             </div>
 
             <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); resetForm(); }} title={isEditing ? t.update : t.create}>

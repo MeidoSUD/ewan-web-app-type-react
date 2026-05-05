@@ -7,7 +7,7 @@ import { PlatformPercentage, RevenueAnalytics } from '../../types';
 import { useToast } from '../../contexts/ToastContext';
 
 export const AdminPercentageTab: React.FC = () => {
-    const { t, direction } = useLanguage();
+    const { t, language, direction } = useLanguage();
     const { showToast } = useToast();
     const [activePercentage, setActivePercentage] = useState<PlatformPercentage | null>(null);
     const [history, setHistory] = useState<PlatformPercentage[]>([]);
@@ -113,14 +113,14 @@ export const AdminPercentageTab: React.FC = () => {
                     <div className="bg-gradient-to-br from-primary to-blue-600 rounded-3xl p-8 text-white shadow-xl shadow-primary/20 relative overflow-hidden">
                         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                             <div>
-                                <p className="text-blue-100 font-medium mb-1">Current Platform Commission</p>
+                                <p className="text-blue-100 font-medium mb-1">{language === 'ar' ? 'عمولة المنصة الحالية' : 'Current Platform Commission'}</p>
                                 <div className="flex items-baseline gap-2">
                                     <span className="text-6xl font-black tracking-tight">{activePercentage?.value || '0.00'}%</span>
-                                    <span className="text-blue-100 text-sm">per booking</span>
+                                    <span className="text-blue-100 text-sm">{language === 'ar' ? 'لكل حجز' : 'per booking'}</span>
                                 </div>
                                 <div className="flex items-center gap-2 mt-4 bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-full text-xs">
                                     <CalendarIcon size={14} />
-                                    {activePercentage ? `Active since: ${activePercentage.effective_date}` : 'No active configuration found'}
+                                    {activePercentage ? `${language === 'ar' ? 'نشط منذ:' : 'Active since:'} ${activePercentage.effective_date}` : (language === 'ar' ? 'لم يتم العثور على إعداد نشط' : 'No active configuration found')}
                                 </div>
                             </div>
                             <div className="hidden md:block opacity-20 pointer-events-none">
@@ -132,10 +132,10 @@ export const AdminPercentageTab: React.FC = () => {
                     {/* Analytics Overview Section */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {[
-                            { label: 'Total Revenue', value: `${analytics?.total_platform_revenue?.toLocaleString() || 0} SAR`, icon: DollarSign, color: 'text-green-600', bg: 'bg-green-50' },
-                            { label: 'Total Bookings', value: analytics?.total_bookings || 0, icon: BookOpen, color: 'text-blue-600', bg: 'bg-blue-50' },
-                            { label: 'Student Spent', value: `${analytics?.total_student_spent?.toLocaleString() || 0} SAR`, icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-                            { label: 'Platform Margin', value: `${analytics?.average_percentage || activePercentage?.value || 0}%`, icon: BarChart3, color: 'text-orange-600', bg: 'bg-orange-50' },
+                            { label: language === 'ar' ? 'إجمالي الإيرادات' : 'Total Revenue', value: `${analytics?.total_platform_revenue?.toLocaleString() || 0} ${language === 'ar' ? 'ريال' : 'SAR'}`, icon: DollarSign, color: 'text-green-600', bg: 'bg-green-50' },
+                            { label: language === 'ar' ? 'إجمالي الحجوزات' : 'Total Bookings', value: analytics?.total_bookings || 0, icon: BookOpen, color: 'text-blue-600', bg: 'bg-blue-50' },
+                            { label: language === 'ar' ? 'مدفوعات الطلاب' : 'Student Spent', value: `${analytics?.total_student_spent?.toLocaleString() || 0} ${language === 'ar' ? 'ريال' : 'SAR'}`, icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+                            { label: language === 'ar' ? 'هامش المنصة' : 'Platform Margin', value: `${analytics?.average_percentage || activePercentage?.value || 0}%`, icon: BarChart3, color: 'text-orange-600', bg: 'bg-orange-50' },
                         ].map((stat, i) => (
                             <div key={i} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4 transition-all hover:shadow-md">
                                 <div className={`p-3 rounded-xl ${stat.bg} ${stat.color}`}>
@@ -155,42 +155,42 @@ export const AdminPercentageTab: React.FC = () => {
                             <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
                                 <Calculator size={20} />
                             </div>
-                            <h3 className="font-bold text-slate-900">Pricing Calculator</h3>
+                            <h3 className="font-bold text-slate-900">{language === 'ar' ? 'حاسبة الأسعار' : 'Pricing Calculator'}</h3>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                             <div className="space-y-4">
                                 <div>
-                                    <label className="text-sm font-semibold text-slate-600 mb-2 block">Teacher Hourly Rate (SAR)</label>
+                                    <label className="text-sm font-semibold text-slate-600 mb-2 block">{language === 'ar' ? 'سعر ساعة المعلم (ريال)' : 'Teacher Hourly Rate (SAR)'}</label>
                                     <div className="relative">
                                         <input
                                             type="number"
                                             value={teacherRate}
                                             onChange={(e) => setTeacherRate(Number(e.target.value))}
-                                            className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-2xl font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            className={`w-full bg-slate-50 border border-slate-100 rounded-2xl ${language === 'ar' ? 'pr-6 pl-14' : 'px-6'} py-4 text-2xl font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/20`}
                                         />
-                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">SAR</div>
+                                        <div className={`absolute ${language === 'ar' ? 'left-4' : 'right-4'} top-1/2 -translate-y-1/2 text-slate-400 font-bold`}>{language === 'ar' ? 'ريال' : 'SAR'}</div>
                                     </div>
                                 </div>
                                 <p className="text-xs text-slate-400 flex items-center gap-1.5 px-1">
                                     <Info size={12} /> {activePercentage 
-                                        ? `This calculates how much the student pays based on the current ${activePercentage.value}% rate.`
-                                        : "No rate configured. Set a percentage strategy to see impact calculations."}
+                                        ? (language === 'ar' ? `هذا يحسب المبلغ الذي يدفعه الطالب بناءً على النسبة الحالية ${activePercentage.value}%.` : `This calculates how much the student pays based on the current ${activePercentage.value}% rate.`)
+                                        : (language === 'ar' ? "لا توجد نسبة معدة. قم بتعيين استراتيجية نسبة لرؤية حسابات التأثير." : "No rate configured. Set a percentage strategy to see impact calculations.")}
                                 </p>
                             </div>
 
                             <div className="space-y-4 p-6 bg-slate-50 rounded-2xl border border-slate-100">
                                 <div className="flex justify-between items-center pb-3 border-b border-slate-200">
-                                    <span className="text-sm text-slate-500">Teacher Gets</span>
-                                    <span className="font-bold text-slate-900">{teacherRate} SAR</span>
+                                    <span className="text-sm text-slate-500">{language === 'ar' ? 'يحصل المعلم' : 'Teacher Gets'}</span>
+                                    <span className="font-bold text-slate-900">{teacherRate} {language === 'ar' ? 'ريال' : 'SAR'}</span>
                                 </div>
                                 <div className="flex justify-between items-center pb-3 border-b border-slate-200">
-                                    <span className="text-sm text-slate-500 font-medium">Platform Revenue ({activePercentage?.value || '0.00'}%)</span>
-                                    <span className="font-bold text-primary">+{revenue.toFixed(2)} SAR</span>
+                                    <span className="text-sm text-slate-500 font-medium">{language === 'ar' ? `إيرادات المنصة (${activePercentage?.value || '0.00'}%)` : `Platform Revenue (${activePercentage?.value || '0.00'}%)`}</span>
+                                    <span className="font-bold text-primary">+{revenue.toFixed(2)} {language === 'ar' ? 'ريال' : 'SAR'}</span>
                                 </div>
                                 <div className="flex justify-between items-center pt-2">
-                                    <span className="font-bold text-slate-900">Student Pays</span>
-                                    <span className="text-2xl font-black text-slate-900">{studentPrice.toFixed(2)} SAR</span>
+                                    <span className="font-bold text-slate-900">{language === 'ar' ? 'يدفع الطالب' : 'Student Pays'}</span>
+                                    <span className="text-2xl font-black text-slate-900">{studentPrice.toFixed(2)} {language === 'ar' ? 'ريال' : 'SAR'}</span>
                                 </div>
                             </div>
                         </div>
@@ -202,12 +202,12 @@ export const AdminPercentageTab: React.FC = () => {
                             <div className="p-2 bg-slate-50 text-slate-600 rounded-lg">
                                 <History size={20} />
                             </div>
-                            <h3 className="font-bold text-slate-900">Percentage History</h3>
+                            <h3 className="font-bold text-slate-900">{language === 'ar' ? 'سجل النسب' : 'Percentage History'}</h3>
                         </div>
 
                         <div className="space-y-4">
                             {history.length === 0 ? (
-                                <p className="text-center py-8 text-slate-400">No historical data available.</p>
+                                <p className="text-center py-8 text-slate-400">{language === 'ar' ? 'لا تتوفر بيانات تاريخية.' : 'No historical data available.'}</p>
                             ) : (
                                 history.map((item, idx) => (
                                     <div key={item.id} className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${item.is_active ? 'border-primary/20 bg-primary/5 shadow-sm' : 'border-slate-100'}`}>
@@ -216,16 +216,16 @@ export const AdminPercentageTab: React.FC = () => {
                                                 {item.value}%
                                             </div>
                                             <div>
-                                                <p className="font-bold text-slate-900">{item.description || 'General Strategy'}</p>
-                                                <p className="text-xs text-slate-500">Effective: {item.effective_date}</p>
+                                                <p className="font-bold text-slate-900">{item.description || (language === 'ar' ? 'استراتيجية عامة' : 'General Strategy')}</p>
+                                                <p className="text-xs text-slate-500">{language === 'ar' ? 'تاريخ السريان:' : 'Effective:'} {item.effective_date}</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3">
                                             {item.is_active && (
-                                                <span className="px-3 py-1 bg-primary text-white text-[10px] font-bold rounded-full uppercase tracking-wider">Active</span>
+                                                <span className="px-3 py-1 bg-primary text-white text-[10px] font-bold rounded-full uppercase tracking-wider">{language === 'ar' ? 'نشط' : 'Active'}</span>
                                             )}
                                             {!item.is_active && new Date(item.effective_date) > new Date() && (
-                                                <span className="px-3 py-1 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-full uppercase tracking-wider">Scheduled</span>
+                                                <span className="px-3 py-1 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-full uppercase tracking-wider">{language === 'ar' ? 'مجدول' : 'Scheduled'}</span>
                                             )}
                                         </div>
                                     </div>
@@ -242,12 +242,12 @@ export const AdminPercentageTab: React.FC = () => {
                             <div className="p-2 bg-primary/5 text-primary rounded-lg">
                                 <TrendingUp size={20} />
                             </div>
-                            <h3 className="font-bold text-slate-900">Update Rate</h3>
+                            <h3 className="font-bold text-slate-900">{language === 'ar' ? 'تحديث النسبة' : 'Update Rate'}</h3>
                         </div>
 
                         <form onSubmit={handleUpdatePercentage} className="space-y-5">
                             <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-slate-500 uppercase px-1">New Percentage</label>
+                                <label className="text-xs font-bold text-slate-500 uppercase px-1">{language === 'ar' ? 'النسبة الجديدة' : 'New Percentage'}</label>
                                 <div className="relative">
                                     <input
                                         type="number"
@@ -260,12 +260,12 @@ export const AdminPercentageTab: React.FC = () => {
                                         className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 font-bold focus:outline-none focus:ring-2 focus:ring-primary/20"
                                         placeholder="0.00"
                                     />
-                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">%</div>
+                                    <div className={`absolute ${language === 'ar' ? 'left-4' : 'right-4'} top-1/2 -translate-y-1/2 text-slate-400`}>%</div>
                                 </div>
                             </div>
 
                             <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-slate-500 uppercase px-1">Effective Date</label>
+                                <label className="text-xs font-bold text-slate-500 uppercase px-1">{language === 'ar' ? 'تاريخ السريان' : 'Effective Date'}</label>
                                 <input
                                     type="date"
                                     required
@@ -273,16 +273,16 @@ export const AdminPercentageTab: React.FC = () => {
                                     onChange={(e) => setEffectiveDate(e.target.value)}
                                     className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 font-medium focus:outline-none focus:ring-2 focus:ring-primary/20"
                                 />
-                                <p className="text-[10px] text-slate-400 px-1">Scheduled changes will activate at 00:00 on this date.</p>
+                                <p className="text-[10px] text-slate-400 px-1">{language === 'ar' ? 'سيبدأ تفعيل التغييرات المجدولة الساعة 00:00 في هذا التاريخ.' : 'Scheduled changes will activate at 00:00 on this date.'}</p>
                             </div>
 
                             <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-slate-500 uppercase px-1">Description / Reason</label>
+                                <label className="text-xs font-bold text-slate-500 uppercase px-1">{language === 'ar' ? 'الوصف / السبب' : 'Description / Reason'}</label>
                                 <textarea
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
                                     className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 min-h-[100px]"
-                                    placeholder="e.g. Q2 Promotion, Standard increase..."
+                                    placeholder={language === 'ar' ? 'مثلًا عرض الربع الثاني، زيادة قياسية...' : 'e.g. Q2 Promotion, Standard increase...'}
                                 />
                             </div>
 
@@ -290,7 +290,7 @@ export const AdminPercentageTab: React.FC = () => {
                                 {formLoading ? <Loader2 className="animate-spin" size={20} /> : (
                                     <>
                                         <Save size={20} />
-                                        Update Strategy
+                                        {language === 'ar' ? 'تحديث الاستراتيجية' : 'Update Strategy'}
                                     </>
                                 )}
                             </Button>
@@ -303,9 +303,9 @@ export const AdminPercentageTab: React.FC = () => {
                                 <Info size={20} />
                             </div>
                             <div className="space-y-1">
-                                <h4 className="font-bold text-amber-900 text-sm">Policy Reminder</h4>
+                                <h4 className="font-bold text-amber-900 text-sm">{language === 'ar' ? 'تذكير بالسياسة' : 'Policy Reminder'}</h4>
                                 <p className="text-xs text-amber-700 leading-relaxed">
-                                    Changes only apply to new orders created on or after the effective date. Existing orders maintain the percentage that was active at the time of their creation.
+                                    {language === 'ar' ? 'تنطبق التغييرات فقط على الطلبات الجديدة المنشأة في أو بعد تاريخ السريان. تحتفظ الطلبات الحالية بالنسبة التي كانت نشطة وقت إنشائها.' : 'Changes only apply to new orders created on or after the effective date. Existing orders maintain the percentage that was active at the time of their creation.'}
                                 </p>
                             </div>
                         </div>

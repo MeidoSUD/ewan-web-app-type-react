@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
+import { Pagination } from '../ui/Pagination';
 import { adminService, AdminUser } from '../../services/api';
 import { useToast } from '../../contexts/ToastContext';
 
@@ -19,6 +20,10 @@ export const UsersTab: React.FC = () => {
     const [roleFilter, setRoleFilter] = useState<string>('all');
     const [statusFilter, setStatusFilter] = useState<string>('all');
     const [verifiedFilter, setVerifiedFilter] = useState<string>('all');
+    
+    // Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 10;
 
     // UI State
     const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -180,6 +185,16 @@ export const UsersTab: React.FC = () => {
         return full.includes(term) || (user.email ?? '').toLowerCase().includes(term) || (user.phone_number ?? '').includes(term);
     });
 
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, roleFilter, statusFilter, verifiedFilter]);
+
+    const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
+    const paginatedUsers = filteredUsers.slice(
+        (currentPage - 1) * ITEMS_PER_PAGE,
+        currentPage * ITEMS_PER_PAGE
+    );
+
     const getRoleIcon = (roleId: number) => {
         switch (roleId) {
             case 1: return <Shield size={16} className="text-purple-600" />;
@@ -258,12 +273,12 @@ export const UsersTab: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                            {filteredUsers.length === 0 && !loading ? (
+                            {paginatedUsers.length === 0 && !loading ? (
                                 <tr>
                                     <td colSpan={5} className="px-6 py-8 text-center text-slate-400">{t.noResults}</td>
                                 </tr>
                             ) : (
-                                filteredUsers.map(user => (
+                                paginatedUsers.map(user => (
                                     <tr key={user.id} className="hover:bg-slate-50 cursor-pointer" onClick={() => setSelectedUser(user)}>
                                         <td className="px-6 py-4">
                                             <div>
@@ -341,6 +356,12 @@ export const UsersTab: React.FC = () => {
                     </table>
                     {loading && <div className="flex justify-center p-8"><Loader2 className="animate-spin text-primary/30" /></div>}
                 </div>
+                
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                />
             </div>
 
             {/* Create/Edit Modal */}
