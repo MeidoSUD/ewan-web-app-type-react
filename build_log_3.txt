@@ -1,0 +1,17 @@
+
+> ewan@0.0.0 build
+> vite build
+
+vite v7.3.3 building client environment for production...
+
+/index.css doesn't exist at build time, it will remain unchanged to be resolved at runtime
+transforming...
+✓ 1686 modules transformed.
+✗ Build failed in 2.66s
+error during build:
+Could not resolve "../contexts/LanguageContext" from "src/pages/EwanLandingPage.tsx"
+file: /mnt/LinuxData/freelancer/ewan/web/src/pages/EwanLandingPage.tsx
+    at getRollupError (file:///mnt/LinuxData/freelancer/ewan/web/node_modules/.pnpm/rollup@4.60.3/node_modules/rollup/dist/es/shared/parseAst.js:406:41)
+    at error (file:///mnt/LinuxData/freelancer/ewan/web/node_modules/.pnpm/rollup@4.60.3/node_modules/rollup/dist/es/shared/parseAst.js:402:42)
+    at ModuleLoader.handleInvalidResolvedId (file:///mnt/LinuxData/freelancer/ewan/web/node_modules/.pnpm/rollup@4.60.3/node_modules/rollup/dist/es/shared/node-entry.js:22126:24)
+    at file:///mnt/LinuxData/freelancer/ewan/web/node_modules/.pnpm/rollup@4.60.3/node_modules/rollup/dist/es/shared/node-entry.js:22086:26

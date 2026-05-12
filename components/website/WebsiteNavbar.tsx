@@ -8,14 +8,17 @@ import { Menu, X, Globe } from 'lucide-react';
 interface WebsiteNavbarProps {
   onLoginClick: () => void;
   onRegisterClick: () => void;
+  onPageChange: (page: string) => void;
 }
 
-export const WebsiteNavbar: React.FC<WebsiteNavbarProps> = ({ onLoginClick, onRegisterClick }) => {
+export const WebsiteNavbar: React.FC<WebsiteNavbarProps> = ({ onLoginClick, onRegisterClick, onPageChange }) => {
   const { t, language, setLanguage } = useLanguage();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navLinks = [
-    { id: 'home', label: language === 'ar' ? 'الرئيسية' : 'Home', href: '#' },
+    { id: 'home', label: language === 'ar' ? 'الرئيسية' : 'Home', href: 'website' },
+    { id: 'eprofile', label: language === 'ar' ? 'ملف التعريف' : 'E-Profile', href: 'e_profile' },
+    { id: 'school', label: language === 'ar' ? 'نظام المدرسة' : 'Smart School', href: 'ewan_school' },
     { id: 'services', label: language === 'ar' ? 'خدماتنا' : 'Services', href: '#services' },
     { id: 'about', label: language === 'ar' ? 'من نحن' : 'About Us', href: '#about' },
     { id: 'contact', label: language === 'ar' ? 'اتصل بنا' : 'Contact', href: '#contact' },
@@ -23,9 +26,14 @@ export const WebsiteNavbar: React.FC<WebsiteNavbarProps> = ({ onLoginClick, onRe
 
   const handleNavClick = (href: string) => {
     setIsMenuOpen(false);
-    const element = document.querySelector(href === '#' ? 'body' : href);
-    if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
+    if (href.startsWith('#')) {
+      const element = document.querySelector(href === '#' ? 'body' : href);
+      if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      onPageChange(href);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -35,7 +43,7 @@ export const WebsiteNavbar: React.FC<WebsiteNavbarProps> = ({ onLoginClick, onRe
         <div className="flex justify-between items-center h-20">
           
           {/* Logo */}
-          <div className="flex-shrink-0 cursor-pointer" onClick={() => handleNavClick('#')}>
+          <div className="flex-shrink-0 cursor-pointer" onClick={() => handleNavClick('website')}>
             <Logo className="scale-75" />
           </div>
 

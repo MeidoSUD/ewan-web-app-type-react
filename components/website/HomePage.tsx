@@ -2,7 +2,6 @@
 import React from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Button } from '../ui/Button';
-import { WebsiteNavbar } from './WebsiteNavbar';
 import { Footer } from './Footer';
 import { BookOpen, Users, Globe, Award, ChevronRight, PlayCircle, Star, Smartphone } from 'lucide-react';
 
@@ -16,7 +15,6 @@ export const HomePage: React.FC<HomePageProps> = ({ onLoginClick, onRegisterClic
 
     return (
         <div className="min-h-screen bg-white font-sans text-slate-900 scroll-smooth">
-            <WebsiteNavbar onLoginClick={onLoginClick} onRegisterClick={onRegisterClick} />
 
             {/* Hero Section */}
             <section id="home" className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">

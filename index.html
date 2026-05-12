@@ -7,7 +7,7 @@
   <title>Ewan</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link
-    href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap"
     rel="stylesheet">
   <script>
     tailwind.config = {
@@ -22,10 +22,14 @@
             text: '#2E2E2E',
             border: '#BDBDBD',
             error: '#ef4444',
+            'brand-blue': '#3ABEF9',
+            'brand-green': '#00D084',
           },
           fontFamily: {
             sans: ['Inter', 'sans-serif'], // English default
             arabic: ['Cairo', 'sans-serif'], // Arabic default
+            cairo: ['Cairo', 'sans-serif'],
+            poppins: ['Poppins', 'sans-serif'],
           }
         }
       }
@@ -35,6 +39,15 @@
     /* Smooth transition for RTL switching */
     body {
       transition: direction 0.3s ease;
+    }
+    
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-fade-in {
+      animation: fade-in 0.6s ease-out forwards;
     }
   </style>
   <script type="importmap">
