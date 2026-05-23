@@ -88,7 +88,8 @@ import {
   CourseCategory, CoursePayload, AvailableTime, AvailabilityPayload,
   AdminUser, AdminTeacher, AdminBooking, AdminDispute, PayoutRequest, Service,
   Ad, AdPayload, AdminService, AdminOrder, TeacherApplication, PlatformPercentage,
-  RevenueAnalytics, CalculatorResults, AppConfig, AppVersion, MaintenanceMode
+  RevenueAnalytics, CalculatorResults, AppConfig, AppVersion, MaintenanceMode,
+  TermsConditions, TermsConditionsPayload
 } from '../types';
 
 export type {
@@ -98,7 +99,8 @@ export type {
   ReferenceItem, StudentPaymentMethod, BankReference, BankAccount, WalletResponse,
   AdminUser, AdminTeacher, AdminBooking, AdminDispute, PayoutRequest, Service,
   Ad, AdPayload, AdminService, AdminOrder, TeacherApplication, PlatformPercentage,
-  RevenueAnalytics, CalculatorResults, AppConfig, AppVersion, MaintenanceMode
+  RevenueAnalytics, CalculatorResults, AppConfig, AppVersion, MaintenanceMode,
+  TermsConditions, TermsConditionsPayload
 };
 
 export const AUTH_SESSION_EXPIRED = 'auth:session-expired';
@@ -489,6 +491,23 @@ export const adminService = {
     fetchWithAuth(`/admin/sessions/${id}/reschedule`, { method: 'PUT', body: JSON.stringify(data) }),
   getUserSessions: (userId: number, role: 'teacher' | 'student') => 
     fetchWithAuth(`/admin/users/${userId}/sessions?role=${role}`).then(extractArray),
+
+  // Terms & Conditions
+  getTermsConditions: (filters: { status?: string; type?: string; include_deleted?: string } = {}) => {
+    const query = new URLSearchParams(filters as any).toString();
+    return fetchWithAuth(`/admin/terms-conditions${query ? `?${query}` : ''}`);
+  },
+  getTermsConditionById: (id: number) => fetchWithAuth(`/admin/terms-conditions/${id}`),
+  createTermsCondition: (data: TermsConditionsPayload) =>
+    fetchWithAuth('/admin/terms-conditions', { method: 'POST', body: JSON.stringify(data) }),
+  updateTermsCondition: (id: number, data: Partial<TermsConditionsPayload>) =>
+    fetchWithAuth(`/admin/terms-conditions/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteTermsCondition: (id: number) =>
+    fetchWithAuth(`/admin/terms-conditions/${id}`, { method: 'DELETE' }),
+  restoreTermsCondition: (id: number) =>
+    fetchWithAuth(`/admin/terms-conditions/${id}/restore`, { method: 'POST' }),
+  getLatestTermsByType: (type: string) =>
+    fetchWithAuth(`/admin/terms-conditions/type/${type}`),
 };
 
 export const adsService = {

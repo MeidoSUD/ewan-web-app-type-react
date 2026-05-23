@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Hexagon, Mail, Phone, MapPin, Instagram, Twitter, Linkedin } from 'lucide-react';
@@ -18,8 +17,8 @@ export const Footer: React.FC = () => {
                         </div>
                         <p className="text-sm leading-relaxed text-slate-400 mb-6">
                             {language === 'ar'
-                                ? 'منصة تعليمية رائدة تهدف إلى ربط الطلاب بأفضل المعلمين والخبراء لتجربة تعليمية فريدة ومخصصة.'
-                                : 'A leading educational platform connecting students with expert teachers for a unique and personalized learning experience.'}
+                                ? 'شركة تقنية رائدة متخصصة في تقديم حلول تعليمية مبتكرة للأفراد والمؤسسات.'
+                                : 'A leading technology company specialized in innovative education solutions for individuals and institutions.'}
                         </p>
                         <div className="flex gap-4">
                             <a href="#" className="p-2 bg-slate-800 rounded-full hover:bg-primary hover:text-white transition-colors"><Twitter size={18} /></a>
@@ -33,20 +32,18 @@ export const Footer: React.FC = () => {
                         <h3 className="text-white font-bold mb-6">{language === 'ar' ? 'روابط سريعة' : 'Quick Links'}</h3>
                         <ul className="space-y-3 text-sm">
                             <li><a href="#" className="hover:text-primary transition-colors">{language === 'ar' ? 'الرئيسية' : 'Home'}</a></li>
-                            <li><a href="#services" className="hover:text-primary transition-colors">{language === 'ar' ? 'الخدمات' : 'Services'}</a></li>
-                            <li><a href="#about" className="hover:text-primary transition-colors">{language === 'ar' ? 'من نحن' : 'About Us'}</a></li>
-                            <li><a href="#contact" className="hover:text-primary transition-colors">{language === 'ar' ? 'اتصل بنا' : 'Contact'}</a></li>
+                            <li><a href="#" className="hover:text-primary transition-colors">{language === 'ar' ? 'الخدمات' : 'Services'}</a></li>
+                            <li><a href="#" className="hover:text-primary transition-colors">{language === 'ar' ? 'من نحن' : 'About Us'}</a></li>
+                            <li><a href="#" className="hover:text-primary transition-colors">{language === 'ar' ? 'اتصل بنا' : 'Contact'}</a></li>
                         </ul>
                     </div>
 
-                    {/* Services */}
+                    {/* Products */}
                     <div>
-                        <h3 className="text-white font-bold mb-6">{language === 'ar' ? 'خدماتنا' : 'Our Services'}</h3>
+                        <h3 className="text-white font-bold mb-6">{language === 'ar' ? 'منتجاتنا' : 'Our Products'}</h3>
                         <ul className="space-y-3 text-sm">
-                            <li><a href="#" className="hover:text-primary transition-colors">{language === 'ar' ? 'دروس خصوصية' : 'Private Lessons'}</a></li>
-                            <li><a href="#" className="hover:text-primary transition-colors">{language === 'ar' ? 'تعلم اللغات' : 'Language Learning'}</a></li>
-                            <li><a href="#" className="hover:text-primary transition-colors">{language === 'ar' ? 'دورات تدريبية' : 'Specialized Courses'}</a></li>
-                            <li><a href="#" className="hover:text-primary transition-colors">{language === 'ar' ? 'اختبارات القدرات' : 'Ability Tests'}</a></li>
+                            <li><a href="#" className="hover:text-primary transition-colors">{language === 'ar' ? 'تطبيق Ewan' : 'Ewan App'}</a></li>
+                            <li><a href="#" className="hover:text-primary transition-colors">{language === 'ar' ? 'نظام المدرسة الذكية' : 'Smart School System'}</a></li>
                         </ul>
                     </div>
 
@@ -55,16 +52,16 @@ export const Footer: React.FC = () => {
                         <h3 className="text-white font-bold mb-6">{language === 'ar' ? 'تواصل معنا' : 'Contact Us'}</h3>
                         <ul className="space-y-4 text-sm">
                             <li className="flex items-start gap-3">
-                                <MapPin className="text-primary mt-0.5" size={18} />
-                                <span>Riyadh, Saudi Arabia<br />King Fahd Road, Olaya</span>
+                                <MapPin className="text-primary mt-0.5 shrink-0" size={18} />
+                                <span>{language === 'ar' ? 'جدة - شارع الأمير سلطان' : 'Jeddah - ALameer Sultan Street'}</span>
                             </li>
                             <li className="flex items-center gap-3">
-                                <Phone className="text-primary" size={18} />
-                                <span dir="ltr">+966 573 83 8872</span>
+                                <Phone className="text-primary shrink-0" size={18} />
+                                <span dir="ltr">+966 555683154</span>
                             </li>
                             <li className="flex items-center gap-3">
-                                <Mail className="text-primary" size={18} />
-                                <span>support@ewan-geniuses.com</span>
+                                <Mail className="text-primary shrink-0" size={18} />
+                                <span>contact@ewan-geniuses.com</span>
                             </li>
                         </ul>
                     </div>

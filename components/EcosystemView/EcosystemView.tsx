@@ -1,4 +1,6 @@
 import React from 'react';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { Footer } from '../website/Footer';
 import { motion } from 'framer-motion';
 import { 
   Zap, Globe, Layout, Receipt, GraduationCap, Phone, ChevronLeft, 
@@ -37,17 +39,17 @@ const adminData = [
   { name: 'Automated System', value: 60 }
 ];
 
-const financeData = [
-  { name: 'Collected', value: 85, color: '#3ABEF9' },
-  { name: 'Pending', value: 10, color: '#FCD34D' },
-  { name: 'Overdue', value: 5, color: '#F87171' }
+const getFinanceData = (lang: string) => [
+  { name: lang === 'ar' ? 'محصّل' : 'Collected', value: 85, color: '#3ABEF9' },
+  { name: lang === 'ar' ? 'معلق' : 'Pending', value: 10, color: '#FCD34D' },
+  { name: lang === 'ar' ? 'متأخر' : 'Overdue', value: 5, color: '#F87171' }
 ];
 
-const academicData = [
-  { subject: 'Attendance', A: 85, full: 100 },
-  { subject: 'Exam Scores', A: 75, full: 100 },
-  { subject: 'Participation', A: 90, full: 100 },
-  { subject: 'Assignments', A: 70, full: 100 },
+const getAcademicData = (lang: string) => [
+  { subject: lang === 'ar' ? 'الحضور' : 'Attendance', A: 85, full: 100 },
+  { subject: lang === 'ar' ? 'الامتحانات' : 'Exam Scores', A: 75, full: 100 },
+  { subject: lang === 'ar' ? 'المشاركة' : 'Participation', A: 90, full: 100 },
+  { subject: lang === 'ar' ? 'الواجبات' : 'Assignments', A: 70, full: 100 },
 ];
 
 interface EcosystemViewProps {
@@ -80,8 +82,9 @@ const scaleIn = {
 };
 
 export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile }) => {
+  const { language, direction } = useLanguage();
   return (
-    <div className="animate-fade-in bg-white scroll-smooth overflow-x-hidden" dir="rtl">
+    <div className="animate-fade-in bg-white scroll-smooth overflow-x-hidden" dir={direction}>
       {/* PAGE 4: Hero Section */}
       <section className={`${s.hero} relative`}>
         <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-brand-blue/5 -z-10" />
@@ -111,10 +114,10 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
               </motion.div>
               <h1 className="text-4xl md:text-5xl lg:text-7xl xl:text-[6rem] font-black font-cairo text-slate-900 leading-[0.9] mb-4 md:mb-8">
                 EWAN <br /> 
-                <span className="text-brand-blue">SMART SCHOOL</span> <br />
-                ECOSYSTEM
+                <span className="text-brand-blue">{language === 'ar' ? 'المدرسة الذكية' : 'SMART SCHOOL'}</span> <br />
+                {language === 'ar' ? 'المنظومة' : 'ECOSYSTEM'}
               </h1>
-              <h2 className="text-2xl md:text-4xl lg:text-5xl font-black font-cairo text-slate-800 mb-4 md:mb-6">نظام ايوان التعليمي الذكي</h2>
+              <h2 className="text-2xl md:text-4xl lg:text-5xl font-black font-cairo text-slate-800 mb-4 md:mb-6">{language === 'ar' ? 'نظام ايوان التعليمي الذكي' : 'Ewan Smart School System'}</h2>
             </div>
 
             <motion.div 
@@ -124,8 +127,7 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
               transition={{ duration: 0.5, delay: 0.2 }}
               className="bg-gradient-to-r from-brand-green/20 to-brand-green/5 border-r-4 md:border-r-8 border-brand-green p-4 md:p-6 mb-6 md:mb-12 rounded-l-2xl"
             >
-              <p className="text-lg md:text-xl lg:text-2xl font-black font-cairo text-brand-green">Integrated Digital Transformation for Schools</p>
-              <p className="text-xl md:text-2xl lg:text-3xl font-black font-cairo text-slate-800 mt-1 md:mt-2">التحول الرقمي للمدارس</p>
+              <p className="text-lg md:text-xl lg:text-2xl font-black font-cairo text-brand-green">{language === 'ar' ? 'التحول الرقمي المتكامل للمدارس' : 'Integrated Digital Transformation for Schools'}</p>
             </motion.div>
 
             <motion.div 
@@ -182,22 +184,20 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
             >
               <div>
                 <h2 className="text-3xl md:text-4xl lg:text-5xl font-black font-cairo text-slate-800 mb-3 md:mb-4 leading-tight">
-                  Schools Are <span className="text-brand-blue">Digitizing...</span> <br /> 
-                  But Not <span className="text-slate-900 border-b-4 md:border-b-8 border-brand-green">Transforming</span>
+                  {language === 'ar' ? <>المدارس <span className="text-brand-blue">تتحول رقمياً...</span> <br /> لكنها <span className="text-slate-900 border-b-4 md:border-b-8 border-brand-green">غير متكاملة</span></> : <>Schools Are <span className="text-brand-blue">Digitizing...</span> <br /> But Not <span className="text-slate-900 border-b-4 md:border-b-8 border-brand-green">Transforming</span></>}
                 </h2>
-                <h3 className="text-xl md:text-2xl lg:text-3xl font-bold font-cairo text-slate-500">المدارس تتحول رقمياً... <br/> لكنها غير متكاملة</h3>
               </div>
 
               <div className="bg-gradient-to-br from-brand-blue to-blue-700 p-6 md:p-10 lg:p-12 rounded-[2rem] md:rounded-[3rem] lg:rounded-[3.5rem] text-white shadow-[0_20px_70px_-15px_rgba(58,190,249,0.4)]">
                 <div className="flex items-center gap-4 md:gap-6 mb-4 md:mb-8 justify-end">
-                  <h4 className="text-2xl md:text-3xl lg:text-4xl font-black font-cairo text-right">The Challenge / التحدي</h4>
+                  <h4 className="text-2xl md:text-3xl lg:text-4xl font-black font-cairo text-right">{language === 'ar' ? 'التحدي' : 'The Challenge'}</h4>
                   <div className="w-3 h-3 md:w-4 md:h-4 bg-white rounded-full" />
                 </div>
                 <ul className="space-y-3 md:space-y-4 lg:space-y-6 text-lg md:text-xl lg:text-2xl font-bold">
-                  <li className="flex items-center gap-3 md:gap-4 justify-end group"><span>أنظمة منفصلة وغير مترابطة</span> <div className="w-2 h-2 bg-brand-green rounded-full group-hover:scale-150 transition-transform" /></li>
-                  <li className="flex items-center gap-3 md:gap-4 justify-end group"><span>عمليات يدوية تستهلك الوقت</span> <div className="w-2 h-2 bg-brand-green rounded-full group-hover:scale-150 transition-transform" /></li>
-                  <li className="flex items-center gap-3 md:gap-4 justify-end group"><span>ضعف التحكم المالي</span> <div className="w-2 h-2 bg-brand-green rounded-full group-hover:scale-150 transition-transform" /></li>
-                  <li className="flex items-center gap-3 md:gap-4 justify-end group"><span>غیاب الرؤية الفورية للإدارة</span> <div className="w-2 h-2 bg-brand-green rounded-full group-hover:scale-150 transition-transform" /></li>
+                  <li className="flex items-center gap-3 md:gap-4 justify-end group"><span>{language === 'ar' ? 'أنظمة منفصلة وغير مترابطة' : 'Disconnected, non-integrated systems'}</span> <div className="w-2 h-2 bg-brand-green rounded-full group-hover:scale-150 transition-transform" /></li>
+                  <li className="flex items-center gap-3 md:gap-4 justify-end group"><span>{language === 'ar' ? 'عمليات يدوية تستهلك الوقت' : 'Time-consuming manual processes'}</span> <div className="w-2 h-2 bg-brand-green rounded-full group-hover:scale-150 transition-transform" /></li>
+                  <li className="flex items-center gap-3 md:gap-4 justify-end group"><span>{language === 'ar' ? 'ضعف التحكم المالي' : 'Weak financial control'}</span> <div className="w-2 h-2 bg-brand-green rounded-full group-hover:scale-150 transition-transform" /></li>
+                  <li className="flex items-center gap-3 md:gap-4 justify-end group"><span>{language === 'ar' ? 'غیاب الرؤية الفورية للإدارة' : 'No real-time management visibility'}</span> <div className="w-2 h-2 bg-brand-green rounded-full group-hover:scale-150 transition-transform" /></li>
                 </ul>
               </div>
             </motion.div>
@@ -208,9 +208,7 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
                   <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=800" className="rounded-[1.5rem] md:rounded-[2.5rem] lg:rounded-[3rem] w-full shadow-lg" />
                 </div>
                 <div className="relative md:absolute md:-bottom-10 md:-right-10 mt-4 md:mt-0 bg-gradient-to-br from-brand-green to-emerald-600 p-5 md:p-10 lg:p-12 rounded-[2rem] md:rounded-[3rem] lg:rounded-[3.5rem] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.3)] text-white z-20 max-w-sm text-right">
-                  <p className="text-lg md:text-xl lg:text-2xl font-black font-cairo mb-3 md:mb-4 leading-tight">The problem is not lack of tools... its lack of integration</p>
-                  <div className="h-1 w-16 md:w-20 bg-white mb-3 md:mb-4 mr-auto" />
-                  <p className="text-xl md:text-2xl lg:text-3xl font-black font-cairo">المشكلة ليست في الأدوات... بل في غياب التكامل</p>
+                  <p className="text-lg md:text-xl lg:text-2xl font-black font-cairo mb-3 md:mb-4 leading-tight">{language === 'ar' ? 'المشكلة ليست في الأدوات... بل في غياب التكامل' : 'The problem is not lack of tools... its lack of integration'}</p>
                 </div>
               </div>
             </motion.div>
@@ -255,8 +253,7 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
                   <item.icon size={32} className="md:size-12 lg:size-16" strokeWidth={2.5} />
                 </div>
                 <div>
-                  <h4 className="text-lg md:text-xl lg:text-2xl font-bold font-poppins mb-2 md:mb-4">{item.tEn}</h4>
-                  <h4 className="text-xl md:text-2xl lg:text-3xl font-black font-cairo">{item.tAr}</h4>
+                  <h4 className="text-lg md:text-xl lg:text-2xl font-bold font-poppins mb-2 md:mb-4">{language === 'ar' ? item.tAr : item.tEn}</h4>
                 </div>
               </motion.div>
             ))}
@@ -270,8 +267,7 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
             className="mt-10 md:mt-16 lg:mt-20 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 p-6 md:p-10 lg:p-12 rounded-[2rem] md:rounded-[3rem] lg:rounded-[4rem] text-center text-white relative overflow-hidden group"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-brand-blue/20 to-transparent transform -skew-x-12 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-            <h3 className="text-xl md:text-2xl lg:text-3xl font-bold font-poppins mb-3 md:mb-4 relative z-10">Schools that digitize fully will dominate the market!</h3>
-            <h2 className="text-2xl md:text-4xl lg:text-5xl font-black font-cairo relative z-10 mt-3 md:mt-6">المدارس التي تتحول رقمياً بشكل كامل ستقود السوق!</h2>
+            <h3 className="text-xl md:text-2xl lg:text-3xl font-bold font-poppins mb-3 md:mb-4 relative z-10">{language === 'ar' ? 'المدارس التي تتحول رقمياً بشكل كامل ستقود السوق!' : 'Schools that digitize fully will dominate the market!'}</h3>
           </motion.div>
         </div>
       </section>
@@ -288,13 +284,10 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
           >
             <motion.div variants={fadeLeft} className="text-right">
               <h2 className="text-4xl md:text-5xl lg:text-7xl font-black font-cairo text-slate-900 mb-4 md:mb-8 leading-tight">
-                One Platform ... <br />
-                <span className="text-brand-blue">One login ...</span> <br />
-                Total Control!
+                {language === 'ar' ? <>منصة واحدة ... <br /><span className="text-brand-blue">دخول واحد ...</span> <br /> تحكم كامل!</> : <>One Platform ... <br /><span className="text-brand-blue">One login ...</span> <br />Total Control!</>}
               </h2>
               <div className="space-y-3 md:space-y-6">
-                <p className="text-xl md:text-2xl lg:text-3xl font-bold text-slate-500">We don't offer software. We deliver a complete ecosystem.</p>
-                <h3 className="text-2xl md:text-3xl lg:text-4xl font-black font-cairo text-slate-800">نحن لا نقدم مجرد برنامج. نحن نقدم منظومة متكاملة.</h3>
+                <p className="text-xl md:text-2xl lg:text-3xl font-bold text-slate-500">{language === 'ar' ? 'نحن لا نقدم مجرد برنامج. نحن نقدم منظومة متكاملة.' : "We don't offer software. We deliver a complete ecosystem."}</p>
               </div>
             </motion.div>
 
@@ -341,31 +334,25 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
             </motion.div>
 
             <motion.div variants={fadeLeft} className="lg:w-1/2 text-right">
-              <h2 className="text-3xl md:text-5xl lg:text-6xl font-black font-cairo text-slate-800 mb-4 md:mb-8 lg:mb-10 tracking-tighter">تطبيق الهاتف | <span className="text-brand-blue tracking-normal">Mobile Application</span></h2>
+              <h2 className="text-3xl md:text-5xl lg:text-6xl font-black font-cairo text-slate-800 mb-4 md:mb-8 lg:mb-10 tracking-tighter">{language === 'ar' ? 'تطبيق الهاتف' : 'Mobile Application'}</h2>
 
               <div className="flex flex-col md:flex-row gap-3 md:gap-5 lg:gap-6 mb-6 md:mb-10 lg:mb-12 justify-end">
                 <div className="bg-gradient-to-br from-brand-blue to-blue-700 text-white p-5 md:p-8 lg:p-10 rounded-[1.5rem] md:rounded-[2.5rem] lg:rounded-[3rem] flex-1 text-right shadow-xl">
                   <div className="flex gap-2 mb-2 md:mb-4 justify-end"><div className="w-2 h-2 md:w-3 md:h-3 bg-white rounded-full"/><div className="w-2 h-2 md:w-3 md:h-3 bg-white rounded-full opacity-30"/></div>
-                  <h4 className="text-xl md:text-2xl lg:text-3xl font-black font-cairo mb-1 md:mb-2">Fully branded mobile app</h4>
-                  <p className="text-base md:text-lg lg:text-xl font-bold opacity-80">(iOS & Android)</p>
-                </div>
-                <div className="bg-gradient-to-br from-brand-green to-emerald-700 text-white p-5 md:p-8 lg:p-10 rounded-[1.5rem] md:rounded-[2.5rem] lg:rounded-[3rem] flex-1 text-right shadow-xl">
-                  <div className="flex gap-2 mb-2 md:mb-4 justify-end"><div className="w-2 h-2 md:w-3 md:h-3 bg-white rounded-full"/><div className="w-2 h-2 md:w-3 md:h-3 bg-white rounded-full opacity-30"/></div>
-                  <h4 className="text-xl md:text-2xl lg:text-3xl font-black font-cairo mb-1 md:mb-2">تطبيق جوال متكامل</h4>
-                  <p className="text-base md:text-lg lg:text-xl font-bold opacity-80">(أندرويد و iOS)</p>
+                  <h4 className="text-xl md:text-2xl lg:text-3xl font-black font-cairo mb-1 md:mb-2">{language === 'ar' ? 'تطبيق جوال متكامل' : 'Fully branded mobile app'}</h4>
+                  <p className="text-base md:text-lg lg:text-xl font-bold opacity-80">{language === 'ar' ? '(أندرويد و iOS)' : '(iOS & Android)'}</p>
                 </div>
               </div>
 
               <ul className="grid grid-cols-2 gap-3 md:gap-6 lg:gap-8 text-base md:text-xl lg:text-2xl font-black text-slate-600 mb-8 md:mb-12 lg:mb-16">
-                <li className="flex items-center gap-2 md:gap-4 justify-end group">Attendance | الحضور <CheckCircle2 size={18} className="md:size-6 text-brand-green group-hover:scale-125 transition-transform"/></li>
-                <li className="flex items-center gap-2 md:gap-4 justify-end group">Homework | الواجبات <CheckCircle2 size={18} className="md:size-6 text-brand-green group-hover:scale-125 transition-transform"/></li>
-                <li className="flex items-center gap-2 md:gap-4 justify-end group">Fees | الرسوم <CheckCircle2 size={18} className="md:size-6 text-brand-green group-hover:scale-125 transition-transform"/></li>
-                <li className="flex items-center gap-2 md:gap-4 justify-end group">Notifications | الإشعارات <CheckCircle2 size={18} className="md:size-6 text-brand-green group-hover:scale-125 transition-transform"/></li>
+                <li className="flex items-center gap-2 md:gap-4 justify-end group">{language === 'ar' ? 'الحضور' : 'Attendance'} <CheckCircle2 size={18} className="md:size-6 text-brand-green group-hover:scale-125 transition-transform"/></li>
+                <li className="flex items-center gap-2 md:gap-4 justify-end group">{language === 'ar' ? 'الواجبات' : 'Homework'} <CheckCircle2 size={18} className="md:size-6 text-brand-green group-hover:scale-125 transition-transform"/></li>
+                <li className="flex items-center gap-2 md:gap-4 justify-end group">{language === 'ar' ? 'الرسوم' : 'Fees'} <CheckCircle2 size={18} className="md:size-6 text-brand-green group-hover:scale-125 transition-transform"/></li>
+                <li className="flex items-center gap-2 md:gap-4 justify-end group">{language === 'ar' ? 'الإشعارات' : 'Notifications'} <CheckCircle2 size={18} className="md:size-6 text-brand-green group-hover:scale-125 transition-transform"/></li>
               </ul>
 
               <div className="bg-gradient-to-r from-slate-100 to-slate-50 p-5 md:p-8 lg:p-10 rounded-[1.5rem] md:rounded-[2.5rem] lg:rounded-[3rem] text-center shadow-inner">
-                <p className="text-xl md:text-2xl lg:text-3xl font-black font-cairo text-slate-800">متصل دائماً... في أي وقت ومن أي مكان</p>
-                <p className="text-base md:text-lg lg:text-xl font-bold text-slate-400 mt-1 md:mt-2 uppercase font-poppins">Always connected. Anytime. Anywhere</p>
+                <p className="text-xl md:text-2xl lg:text-3xl font-black font-cairo text-slate-800">{language === 'ar' ? 'متصل دائماً... في أي وقت ومن أي مكان' : 'Always connected. Anytime. Anywhere'}</p>
               </div>
             </motion.div>
           </motion.div>
@@ -393,18 +380,16 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
             >
               <motion.div variants={fadeLeft} className="text-right space-y-6 md:space-y-10 lg:space-y-12">
                 <div>
-                  <h2 className="text-4xl md:text-5xl lg:text-7xl font-black font-cairo text-slate-900 mb-2 md:mb-4">Real System. <span className="text-brand-blue">Real Results</span></h2>
-                  <h3 className="text-3xl md:text-4xl lg:text-5xl font-black font-cairo text-slate-500">نظام حقيقي يعمل الآن</h3>
+                  <h2 className="text-4xl md:text-5xl lg:text-7xl font-black font-cairo text-slate-900 mb-2 md:mb-4">{language === 'ar' ? <>نظام حقيقي. <span className="text-brand-blue">نتائج حقيقية</span></> : <>Real System. <span className="text-brand-blue">Real Results</span></>}</h2>
                 </div>
 
                 <div className="bg-gradient-to-r from-brand-blue/10 to-brand-blue/5 p-3 md:p-4 rounded-full w-fit pr-5 md:pr-8 ml-auto flex items-center gap-2 md:gap-4 border border-brand-blue/20 backdrop-blur-sm">
-                  <span className="text-lg md:text-xl lg:text-2xl font-black text-brand-blue font-cairo">Live System</span>
+                  <span className="text-lg md:text-xl lg:text-2xl font-black text-brand-blue font-cairo">{language === 'ar' ? 'نظام يعمل الآن' : 'Live System'}</span>
                   <div className="flex gap-2"><div className="w-2 h-2 md:w-3 md:h-3 bg-brand-blue rounded-full animate-pulse"/><div className="w-2 h-2 md:w-3 md:h-3 bg-brand-blue rounded-full opacity-30"/></div>
                 </div>
 
                 <div className="space-y-4 md:space-y-6 lg:space-y-8">
-                  <p className="text-xl md:text-2xl lg:text-3xl font-bold text-slate-400 italic">"Fully operational system currently in use <br/> Real-time dashboard for school management"</p>
-                  <h4 className="text-2xl md:text-3xl lg:text-4xl font-black font-cairo text-slate-800">نظام يعمل فعلياً على أرض الواقع <br/> لوحة تحكم فورية لإدارة المدرسة</h4>
+                  <p className="text-xl md:text-2xl lg:text-3xl font-bold text-slate-400 italic">{language === 'ar' ? '"نظام يعمل فعلياً على أرض الواقع - لوحة تحكم فورية لإدارة المدرسة"' : '"Fully operational system currently in use - Real-time dashboard for school management"'}</p>
                 </div>
               </motion.div>
 
@@ -429,7 +414,7 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
             transition={{ duration: 0.5 }}
             className="text-center mb-8 md:mb-12 lg:mb-20"
           >
-            <h2 className="text-3xl md:text-5xl lg:text-6xl font-black font-cairo text-slate-900 mb-3 md:mb-4 tracking-tighter">System Modules... مكونات النظام</h2>
+            <h2 className="text-3xl md:text-5xl lg:text-6xl font-black font-cairo text-slate-900 mb-3 md:mb-4 tracking-tighter">{language === 'ar' ? 'مكونات النظام' : 'System Modules'}</h2>
             <div className="h-1 md:h-2 w-20 md:w-32 bg-gradient-to-r from-brand-green to-emerald-400 mx-auto rounded-full" />
           </motion.div>
 
@@ -441,10 +426,10 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-10"
           >
             {[
-              { t: 'Administration | الإدارة', color: 'bg-blue-500', icon: Layout },
-              { t: 'Finance | النظام المالي', color: 'bg-emerald-500', icon: Receipt },
-              { t: 'Academics | الأكاديمي', color: 'bg-blue-500', icon: GraduationCap },
-              { t: 'Communication | التواصل', color: 'bg-emerald-500', icon: Phone },
+              { tEn: 'Administration', tAr: 'الإدارة', color: 'bg-blue-500', icon: Layout },
+              { tEn: 'Finance', tAr: 'النظام المالي', color: 'bg-emerald-500', icon: Receipt },
+              { tEn: 'Academics', tAr: 'الأكاديمي', color: 'bg-blue-500', icon: GraduationCap },
+              { tEn: 'Communication', tAr: 'التواصل', color: 'bg-emerald-500', icon: Phone },
             ].map((m, i) => (
               <motion.div 
                 key={i} 
@@ -458,7 +443,7 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
                   <m.icon size={60} className="md:size-24 lg:size-[150px]" />
                 </div>
                 <div className="flex gap-2 justify-end mb-4 md:mb-8 lg:mb-10"><div className="w-2 h-2 md:w-3 md:h-3 bg-white rounded-full"/><div className="w-2 h-2 md:w-3 md:h-3 bg-white rounded-full opacity-30"/></div>
-                <h4 className="text-xl md:text-2xl lg:text-3xl font-black font-cairo text-right leading-tight relative z-10">{m.t}</h4>
+                <h4 className="text-xl md:text-2xl lg:text-3xl font-black font-cairo text-right leading-tight relative z-10">{language === 'ar' ? m.tAr : m.tEn}</h4>
               </motion.div>
             ))}
           </motion.div>
@@ -477,25 +462,18 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
           >
             <motion.div variants={fadeLeft} className="text-right space-y-5 md:space-y-8 lg:space-y-10">
               <div className="bg-gradient-to-r from-brand-blue to-blue-600 p-3 md:p-4 lg:p-5 rounded-full w-fit pr-6 md:pr-8 lg:pr-10 ml-auto flex items-center gap-3 md:gap-4 lg:gap-5 shadow-lg">
-                <h3 className="text-xl md:text-2xl lg:text-3xl font-black text-white font-cairo">Administration | الإدارة</h3>
+                <h3 className="text-xl md:text-2xl lg:text-3xl font-black text-white font-cairo">{language === 'ar' ? 'الإدارة' : 'Administration'}</h3>
                 <div className="flex gap-2"><div className="w-2 h-2 md:w-3 md:h-3 bg-white rounded-full"/><div className="w-2 h-2 md:w-3 md:h-3 bg-white rounded-full opacity-30"/></div>
               </div>
 
               <ul className="text-lg md:text-xl lg:text-2xl font-bold text-slate-500 space-y-2 md:space-y-3 lg:space-y-4">
-                <li className="hover:text-slate-700 transition-colors">• Full student lifecycle management</li>
-                <li className="hover:text-slate-700 transition-colors">• Staff & payroll management</li>
-                <li className="hover:text-slate-700 transition-colors">• Digital records</li>
-              </ul>
-
-              <ul className="text-xl md:text-2xl lg:text-3xl font-black font-cairo text-slate-800 space-y-2 md:space-y-3 lg:space-y-4">
-                <li className="hover:text-brand-blue transition-colors">• إدارة كاملة لدورة حياة الطالب</li>
-                <li className="hover:text-brand-blue transition-colors">• إدارة الموظفين والرواتب</li>
-                <li className="hover:text-brand-blue transition-colors">• سجلات رقمية متكاملة</li>
+                <li className="hover:text-slate-700 transition-colors">• {language === 'ar' ? 'إدارة كاملة لدورة حياة الطالب' : 'Full student lifecycle management'}</li>
+                <li className="hover:text-slate-700 transition-colors">• {language === 'ar' ? 'إدارة الموظفين والرواتب' : 'Staff & payroll management'}</li>
+                <li className="hover:text-slate-700 transition-colors">• {language === 'ar' ? 'سجلات رقمية متكاملة' : 'Digital records'}</li>
               </ul>
 
               <div className="bg-gradient-to-r from-slate-900 to-slate-800 p-6 md:p-8 lg:p-10 rounded-[2rem] md:rounded-[2.5rem] lg:rounded-[3rem] text-center text-white shadow-xl">
-                <p className="text-xl md:text-2xl lg:text-3xl font-black">Reduce workload by up to 40% !</p>
-                <p className="text-2xl md:text-3xl lg:text-4xl font-black font-cairo mt-1 md:mt-2 text-brand-green">تقليل الجهد الإداري حتى 40%!</p>
+                <p className="text-xl md:text-2xl lg:text-3xl font-black">{language === 'ar' ? 'تقليل الجهد الإداري حتى 40%!' : 'Reduce workload by up to 40%!'}</p>
               </div>
             </motion.div>
 
@@ -530,21 +508,21 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
               <ResponsiveContainer width="100%" height="80%">
                 <RePieChart>
                   <Pie
-                    data={financeData}
+                    data={getFinanceData(language)}
                     innerRadius={50}
                     outerRadius={80}
                     paddingAngle={5}
                     dataKey="value"
                   >
-                    {financeData.map((entry, index) => (
+                    {getFinanceData(language).map((entry: any, index: number) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
+                    <Tooltip contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }} />
                   </Pie>
-                  <Tooltip contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }} />
                 </RePieChart>
-              </ResponsiveContainer>
-              <div className="flex gap-3 md:gap-5 lg:gap-8 mt-2 md:mt-3 lg:mt-4 flex-wrap justify-center">
-                {financeData.map(f => (
+                </ResponsiveContainer>
+                <div className="flex gap-3 md:gap-5 lg:gap-8 mt-2 md:mt-3 lg:mt-4 flex-wrap justify-center">
+                  {getFinanceData(language).map(f => (
                   <div key={f.name} className="flex items-center gap-1 md:gap-2">
                     <div className="w-3 h-3 md:w-4 md:h-4 rounded-full" style={{ background: f.color }} />
                     <span className="text-xs md:text-sm lg:text-base font-bold">{f.name} {f.value}%</span>
@@ -555,25 +533,18 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
 
             <motion.div variants={fadeLeft} className="order-1 lg:order-2 text-right space-y-6 md:space-y-10 lg:space-y-12">
               <div className="bg-gradient-to-r from-brand-green to-emerald-600 p-3 md:p-4 lg:p-5 rounded-full w-fit pr-6 md:pr-8 lg:pr-10 ml-auto flex items-center gap-3 md:gap-4 lg:gap-5 shadow-lg">
-                <h3 className="text-xl md:text-2xl lg:text-3xl font-black text-white font-cairo">Finance | النظام المالي</h3>
+                <h3 className="text-xl md:text-2xl lg:text-3xl font-black text-white font-cairo">{language === 'ar' ? 'النظام المالي' : 'Finance'}</h3>
                 <div className="flex gap-2"><div className="w-2 h-2 md:w-3 md:h-3 bg-white rounded-full"/><div className="w-2 h-2 md:w-3 md:h-3 bg-white rounded-full opacity-30"/></div>
               </div>
 
               <ul className="text-lg md:text-xl lg:text-2xl font-bold text-white/70 space-y-2 md:space-y-3 lg:space-y-4">
-                <li className="hover:text-white transition-colors">• Automated fee collection</li>
-                <li className="hover:text-white transition-colors">• Real-time financial dashboards</li>
-                <li className="hover:text-white transition-colors">• Expense tracking</li>
-              </ul>
-
-              <ul className="text-xl md:text-2xl lg:text-3xl font-black font-cairo text-white space-y-2 md:space-y-3 lg:space-y-4">
-                <li className="hover:text-brand-green transition-colors">• تحصيل الرسوم تلقائياً</li>
-                <li className="hover:text-brand-green transition-colors">• لوحات مالية لحظية</li>
-                <li className="hover:text-brand-green transition-colors">• تتبع المصروفات</li>
+                <li className="hover:text-white transition-colors">• {language === 'ar' ? 'تحصيل الرسوم تلقائياً' : 'Automated fee collection'}</li>
+                <li className="hover:text-white transition-colors">• {language === 'ar' ? 'لوحات مالية لحظية' : 'Real-time financial dashboards'}</li>
+                <li className="hover:text-white transition-colors">• {language === 'ar' ? 'تتبع المصروفات' : 'Expense tracking'}</li>
               </ul>
 
               <div className="bg-gradient-to-r from-brand-blue to-blue-600 p-6 md:p-8 lg:p-10 rounded-[2rem] md:rounded-[2.5rem] lg:rounded-[3rem] text-center text-white shadow-2xl shadow-brand-blue/40">
-                <p className="text-xl md:text-2xl lg:text-3xl font-black">Full financial transparency !</p>
-                <p className="text-2xl md:text-3xl lg:text-4xl font-black font-cairo mt-1 md:mt-2">شفافية مالية كاملة !</p>
+                <p className="text-xl md:text-2xl lg:text-3xl font-black">{language === 'ar' ? 'شفافية مالية كاملة !' : 'Full financial transparency !'}</p>
               </div>
             </motion.div>
           </motion.div>
@@ -592,36 +563,29 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
           >
             <motion.div variants={fadeLeft} className="text-right space-y-5 md:space-y-8 lg:space-y-10">
               <div className="bg-gradient-to-r from-brand-blue to-blue-600 p-3 md:p-4 lg:p-5 rounded-full w-fit pr-6 md:pr-8 lg:pr-10 ml-auto flex items-center gap-3 md:gap-4 lg:gap-5 shadow-lg">
-                <h3 className="text-xl md:text-2xl lg:text-3xl font-black text-white font-cairo">Academics | الأكاديمي</h3>
+                <h3 className="text-xl md:text-2xl lg:text-3xl font-black text-white font-cairo">{language === 'ar' ? 'الأكاديمي' : 'Academics'}</h3>
                 <div className="flex gap-2"><div className="w-2 h-2 md:w-3 md:h-3 bg-white rounded-full"/><div className="w-2 h-2 md:w-3 md:h-3 bg-white rounded-full opacity-30"/></div>
               </div>
 
               <ul className="text-lg md:text-xl lg:text-2xl font-bold text-slate-500 space-y-2 md:space-y-3 lg:space-y-4">
-                <li className="hover:text-slate-700 transition-colors">• Lesson planning</li>
-                <li className="hover:text-slate-700 transition-colors">• Online exams</li>
-                <li className="hover:text-slate-700 transition-colors">• Performance analytics</li>
-              </ul>
-
-              <ul className="text-xl md:text-2xl lg:text-3xl font-black font-cairo text-slate-800 space-y-2 md:space-y-3 lg:space-y-4">
-                <li className="hover:text-brand-blue transition-colors">• تخطيط الدروس</li>
-                <li className="hover:text-brand-blue transition-colors">• اختبارات إلكترونية</li>
-                <li className="hover:text-brand-blue transition-colors">• تحليل الأداء</li>
+                <li className="hover:text-slate-700 transition-colors">• {language === 'ar' ? 'تخطيط الدروس' : 'Lesson planning'}</li>
+                <li className="hover:text-slate-700 transition-colors">• {language === 'ar' ? 'اختبارات إلكترونية' : 'Online exams'}</li>
+                <li className="hover:text-slate-700 transition-colors">• {language === 'ar' ? 'تحليل الأداء' : 'Performance analytics'}</li>
               </ul>
 
               <div className="bg-gradient-to-r from-slate-900 to-slate-800 p-6 md:p-10 lg:p-12 rounded-[2rem] md:rounded-[3rem] lg:rounded-[3.5rem] text-center text-white shadow-xl">
-                <p className="text-lg md:text-xl lg:text-2xl font-bold mb-1 md:mb-2">Transform learning into measurable, data-driven excellence</p>
-                <p className="text-2xl md:text-3xl lg:text-4xl font-black font-cairo text-brand-green">تحويل التعليم إلى تميز قابل للقياس قائم على البيانات</p>
+                <p className="text-lg md:text-xl lg:text-2xl font-bold mb-1 md:mb-2">{language === 'ar' ? 'تحويل التعليم إلى تميز قابل للقياس قائم على البيانات' : 'Transform learning into measurable, data-driven excellence'}</p>
               </div>
             </motion.div>
 
             <motion.div variants={fadeRight} className="bg-gradient-to-br from-slate-50 to-white p-5 md:p-8 lg:p-10 rounded-[2rem] md:rounded-[3rem] lg:rounded-[4rem] h-[300px] md:h-[450px] lg:h-[600px] flex flex-col items-center shadow-inner border border-slate-100">
               <h4 className="text-lg md:text-xl lg:text-2xl font-black mb-4 md:mb-6 lg:mb-10 text-slate-800 font-poppins">Student Performance</h4>
               <ResponsiveContainer width="100%" height="80%">
-                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={academicData}>
+                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={getAcademicData(language)}>
                   <PolarGrid stroke="#E2E8F0" />
                   <PolarAngleAxis dataKey="subject" tick={{ fontWeight: 'bold', fontSize: 12 }} />
                   <PolarRadiusAxis tick={false} axisLine={false} />
-                  <Radar name="Student A" dataKey="A" stroke="#3ABEF9" fill="#3ABEF9" fillOpacity={0.6} />
+                  <Radar name={language === 'ar' ? 'طالب' : 'Student A'} dataKey="A" stroke="#3ABEF9" fill="#3ABEF9" fillOpacity={0.6} />
                 </RadarChart>
               </ResponsiveContainer>
             </motion.div>
@@ -640,9 +604,9 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
             className="bg-gradient-to-br from-brand-green to-emerald-700 rounded-[2rem] md:rounded-[4rem] lg:rounded-[5rem] shadow-2xl p-6 md:p-12 lg:p-16 grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 lg:gap-20 items-center text-white"
           >
             <motion.div variants={fadeRight} className="order-2 lg:order-1 bg-gradient-to-br from-white to-slate-50 p-5 md:p-8 lg:p-10 rounded-[2rem] md:rounded-[3rem] lg:rounded-[4rem] h-[300px] md:h-[450px] lg:h-[600px] flex flex-col items-center text-slate-900 justify-center border border-slate-100">
-              <h4 className="text-lg md:text-xl lg:text-2xl font-black mb-6 md:mb-10 lg:mb-16 text-slate-800 font-poppins">Communication Network</h4>
+              <h4 className="text-lg md:text-xl lg:text-2xl font-black mb-6 md:mb-10 lg:mb-16 text-slate-800 font-poppins">{language === 'ar' ? 'شبكة التواصل' : 'Communication Network'}</h4>
               <div className="relative w-48 h-48 md:w-64 md:h-64 lg:w-80 lg:h-80 flex items-center justify-center scale-75 md:scale-90 lg:scale-100 origin-center">
-                <div className="w-20 h-20 md:w-28 md:h-28 lg:w-32 lg:h-32 bg-gradient-to-br from-brand-blue to-blue-600 rounded-full flex items-center justify-center text-white font-black text-sm md:text-xl lg:text-2xl z-20 shadow-2xl">School</div>
+                <div className="w-20 h-20 md:w-28 md:h-28 lg:w-32 lg:h-32 bg-gradient-to-br from-brand-blue to-blue-600 rounded-full flex items-center justify-center text-white font-black text-sm md:text-xl lg:text-2xl z-20 shadow-2xl">{language === 'ar' ? 'المدرسة' : 'School'}</div>
                 <div className="absolute top-0 right-0 w-14 h-14 md:w-20 md:h-20 lg:w-24 lg:h-24 bg-white rounded-2xl flex flex-col items-center justify-center text-slate-400 gap-1 md:gap-2 shadow-lg hover:scale-110 transition-transform"><Smartphone size={14} className="md:size-5 text-brand-blue" /><span className="text-[10px] md:text-xs lg:text-sm">Mobile</span></div>
                 <div className="absolute top-0 left-0 w-14 h-14 md:w-20 md:h-20 lg:w-24 lg:h-24 bg-white rounded-2xl flex flex-col items-center justify-center text-slate-400 gap-1 md:gap-2 shadow-lg hover:scale-110 transition-transform"><MessageSquare size={14} className="md:size-5 text-brand-green" /><span className="text-[10px] md:text-xs lg:text-sm">WhatsApp</span></div>
                 <div className="absolute bottom-0 right-0 w-14 h-14 md:w-20 md:h-20 lg:w-24 lg:h-24 bg-white rounded-2xl flex flex-col items-center justify-center text-slate-400 gap-1 md:gap-2 shadow-lg hover:scale-110 transition-transform"><Mail size={14} className="md:size-5 text-red-500" /><span className="text-[10px] md:text-xs lg:text-sm">Email</span></div>
@@ -654,25 +618,18 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
 
             <motion.div variants={fadeLeft} className="order-1 lg:order-2 text-right space-y-6 md:space-y-10 lg:space-y-12">
               <div className="bg-white/20 p-3 md:p-4 lg:p-5 rounded-full w-fit pr-6 md:pr-8 lg:pr-10 ml-auto flex items-center gap-3 md:gap-4 lg:gap-5 backdrop-blur-xl shadow-lg">
-                <h3 className="text-xl md:text-2xl lg:text-3xl font-black text-white font-cairo">Communication | التواصل</h3>
+                <h3 className="text-xl md:text-2xl lg:text-3xl font-black text-white font-cairo">{language === 'ar' ? 'التواصل' : 'Communication'}</h3>
                 <div className="flex gap-2"><div className="w-2 h-2 md:w-3 md:h-3 bg-white rounded-full"/><div className="w-2 h-2 md:w-3 md:h-3 bg-white rounded-full opacity-30"/></div>
               </div>
 
               <ul className="text-lg md:text-xl lg:text-2xl font-bold text-white/80 space-y-2 md:space-y-3 lg:space-y-4">
-                <li className="hover:text-white transition-colors">• Parent mobile application</li>
-                <li className="hover:text-white transition-colors">• Real-time notifications</li>
-                <li className="hover:text-white transition-colors">• SMS & WhatsApp integration</li>
-              </ul>
-
-              <ul className="text-xl md:text-2xl lg:text-3xl font-black font-cairo text-white space-y-2 md:space-y-3 lg:space-y-4">
-                <li className="hover:text-brand-green transition-colors">• تطبيق لأولياء الأمور</li>
-                <li className="hover:text-brand-green transition-colors">• إشعارات فورية</li>
-                <li className="hover:text-brand-green transition-colors">• تكامل مع واتساب والرسائل</li>
+                <li className="hover:text-white transition-colors">• {language === 'ar' ? 'تطبيق لأولياء الأمور' : 'Parent mobile application'}</li>
+                <li className="hover:text-white transition-colors">• {language === 'ar' ? 'إشعارات فورية' : 'Real-time notifications'}</li>
+                <li className="hover:text-white transition-colors">• {language === 'ar' ? 'تكامل مع واتساب والرسائل' : 'SMS & WhatsApp integration'}</li>
               </ul>
 
               <div className="bg-slate-900/40 p-6 md:p-10 lg:p-12 rounded-[2rem] md:rounded-[3rem] lg:rounded-[3.5rem] text-center text-white border-2 md:border-4 border-white/20 backdrop-blur-sm shadow-xl">
-                <p className="text-xl md:text-2xl lg:text-3xl font-black italic">Stronger engagement, better trust !</p>
-                <p className="text-3xl md:text-4xl lg:text-5xl font-black font-cairo mt-2 md:mt-4">تواصل أقوى وثقة أكبر!</p>
+                <p className="text-xl md:text-2xl lg:text-3xl font-black italic">{language === 'ar' ? 'تواصل أقوى وثقة أكبر!' : 'Stronger engagement, better trust!'}</p>
               </div>
             </motion.div>
           </motion.div>
@@ -699,30 +656,21 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
               className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 lg:gap-20 items-center relative z-10"
             >
               <motion.div variants={fadeLeft} className="text-right space-y-6 md:space-y-10 lg:space-y-12">
-                <h2 className="text-3xl md:text-5xl lg:text-6xl font-black font-cairo text-slate-900 uppercase">ما بعد النظام | <span className="text-brand-blue tracking-tighter">BEYOND SOFTWARE</span></h2>
+                <h2 className="text-3xl md:text-5xl lg:text-6xl font-black font-cairo text-slate-900 uppercase">{language === 'ar' ? 'ما بعد النظام' : 'BEYOND SOFTWARE'}</h2>
 
                 <div className="flex flex-col sm:flex-row gap-4 md:gap-5 lg:gap-6 justify-end">
                   <div className="bg-gradient-to-br from-brand-blue to-blue-700 p-5 md:p-6 lg:p-8 rounded-[2rem] md:rounded-[2.5rem] lg:rounded-[3rem] text-white flex-1 text-right shadow-2xl">
                     <div className="flex gap-2 mb-2 md:mb-4 justify-end"><div className="w-2 h-2 md:w-3 md:h-3 bg-white rounded-full"/><div className="w-2 h-2 md:w-3 md:h-3 bg-white rounded-full opacity-30"/></div>
                     <ul className="space-y-2 md:space-y-3 lg:space-y-4 text-base md:text-lg lg:text-xl font-bold">
-                      <li>• Website development</li>
-                      <li>• Social media management</li>
-                      <li>• Digital marketing campaigns</li>
-                    </ul>
-                  </div>
-                  <div className="bg-gradient-to-br from-brand-green to-emerald-700 p-5 md:p-6 lg:p-8 rounded-[2rem] md:rounded-[2.5rem] lg:rounded-[3rem] text-white flex-1 text-right shadow-2xl">
-                    <div className="flex gap-2 mb-2 md:mb-4 justify-end"><div className="w-2 h-2 md:w-3 md:h-3 bg-white rounded-full"/><div className="w-2 h-2 md:w-3 md:h-3 bg-white rounded-full opacity-30"/></div>
-                    <ul className="space-y-2 md:space-y-3 lg:space-y-4 text-lg md:text-xl lg:text-2xl font-black font-cairo">
-                      <li>• تصميم موقع المدرسة</li>
-                      <li>• إدارة وسائل التواصل الاجتماعي</li>
-                      <li>• حملات تسويقية رقمية</li>
+                      <li>• {language === 'ar' ? 'تصميم موقع المدرسة' : 'Website development'}</li>
+                      <li>• {language === 'ar' ? 'إدارة وسائل التواصل الاجتماعي' : 'Social media management'}</li>
+                      <li>• {language === 'ar' ? 'حملات تسويقية رقمية' : 'Digital marketing campaigns'}</li>
                     </ul>
                   </div>
                 </div>
 
                 <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 p-6 md:p-10 lg:p-12 rounded-[2rem] md:rounded-[3.5rem] lg:rounded-[4rem] text-center text-white shadow-2xl">
-                  <p className="text-2xl md:text-3xl lg:text-4xl font-bold font-poppins mb-1 md:mb-2 italic">We <span className="text-brand-green">grow</span> your school!</p>
-                  <p className="text-3xl md:text-4xl lg:text-5xl font-black font-cairo text-brand-blue">نساعد مدرستك على النمو!</p>
+                  <p className="text-2xl md:text-3xl lg:text-4xl font-bold font-poppins mb-1 md:mb-2 italic">{language === 'ar' ? 'نساعد مدرستك على النمو!' : 'We grow your school!'}</p>
                 </div>
               </motion.div>
 
@@ -756,8 +704,7 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
               <div className="absolute -top-10 -right-10 bg-brand-blue/20 w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 rounded-full blur-3xl" />
               <h2 className="text-[5rem] md:text-[8rem] lg:text-[12rem] font-black font-cairo absolute -top-16 md:-top-24 lg:-top-32 -left-4 md:-left-8 lg:-left-10 opacity-5 -z-0 select-none leading-none">IMPACT</h2>
               <div className="relative z-10">
-                <h2 className="text-5xl md:text-6xl lg:text-8xl font-black font-cairo mb-2 md:mb-3 lg:mb-4 text-right">The Impact!</h2>
-                <h3 className="text-4xl md:text-5xl lg:text-6xl font-black font-cairo mb-6 md:mb-8 lg:mb-12 text-brand-green text-right">النتائج !</h3>
+                <h2 className="text-5xl md:text-6xl lg:text-8xl font-black font-cairo mb-2 md:mb-3 lg:mb-4 text-right">{language === 'ar' ? 'النتائج!' : 'The Impact!'}</h2>
 
                 <div className="space-y-4 md:space-y-6 lg:space-y-10">
                   {[
@@ -775,9 +722,8 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
                       className="flex flex-col items-end gap-1 md:gap-2 group/item"
                     >
                       <p className="text-base md:text-xl lg:text-2xl font-bold flex items-center gap-2 md:gap-4 transition-all group-hover/item:text-brand-blue group-hover/item:translate-x-[-10px]">
-                          {impact.en} <div className="w-3 h-0.5 md:w-4 md:h-0.5 bg-brand-green"/>
+                          {language === 'ar' ? impact.ar : impact.en} <div className="w-3 h-0.5 md:w-4 md:h-0.5 bg-brand-green"/>
                       </p>
-                      <p className="text-lg md:text-2xl lg:text-3xl font-black font-cairo text-white/60 group-hover/item:text-white transition-colors">{impact.ar}</p>
                     </motion.div>
                   ))}
                 </div>
@@ -795,13 +741,13 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
                   >
                     <Users size={60} className="md:size-24 lg:size-[120px] text-brand-blue" />
                   </motion.div>
-                  <h4 className="text-3xl md:text-4xl lg:text-5xl font-black font-cairo text-slate-800">شريككم في النجاح</h4>
+                  <h4 className="text-3xl md:text-4xl lg:text-5xl font-black font-cairo text-slate-800">{language === 'ar' ? 'شريككم في النجاح' : 'Your Partner in Success'}</h4>
                   <div className="h-1 md:h-2 w-20 md:w-32 bg-gradient-to-r from-brand-green to-emerald-400 mx-auto rounded-full" />
                 </div>
               </div>
               <div className="absolute -bottom-4 -right-4 md:-bottom-8 md:-right-8 lg:-bottom-10 lg:-right-10 bg-gradient-to-br from-slate-900 to-slate-800 p-4 md:p-8 lg:p-10 rounded-[1.5rem] md:rounded-[2.5rem] lg:rounded-[3rem] shadow-2xl text-white transform -rotate-3 hover:rotate-0 transition-transform duration-500">
                 <TrendingUp size={24} className="md:size-8 lg:size-12 text-brand-green mb-2 md:mb-4" />
-                <p className="text-sm md:text-lg lg:text-2xl font-black">Efficiency <br/> Boost</p>
+                <p className="text-sm md:text-lg lg:text-2xl font-black">{language === 'ar' ? 'رفع الكفاءة' : 'Efficiency Boost'}</p>
               </div>
             </motion.div>
           </motion.div>
@@ -818,7 +764,7 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
             transition={{ duration: 0.5 }}
             className="bg-slate-100/50 border-4 md:border-6 lg:border-8 border-slate-200 rounded-[2rem] md:rounded-[4rem] lg:rounded-[5rem] p-6 md:p-12 lg:p-16 text-center"
           >
-            <h2 className="text-4xl md:text-6xl lg:text-8xl font-black font-cairo text-slate-900 mb-10 md:mb-16 lg:mb-20 tracking-tighter">التنفيذ | Implementation</h2>
+            <h2 className="text-4xl md:text-6xl lg:text-8xl font-black font-cairo text-slate-900 mb-10 md:mb-16 lg:mb-20 tracking-tighter">{language === 'ar' ? 'التنفيذ' : 'Implementation'}</h2>
 
             <motion.div 
               variants={stagger}
@@ -840,8 +786,7 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
                   <div className={`${item.color} w-20 h-20 md:w-28 md:h-28 lg:w-32 lg:h-32 text-white rounded-full flex items-center justify-center shadow-2xl mb-4 md:mb-6 lg:mb-8 group-hover:scale-110 group-hover:rotate-6 transition-all`}>
                     <item.icon size={28} className="md:size-10 lg:size-[50px]" />
                   </div>
-                  <h4 className="text-xl md:text-2xl lg:text-3xl font-black font-cairo mb-2 md:mb-3 lg:mb-4 leading-tight">{item.tAr}</h4>
-                  <p className="text-sm md:text-lg lg:text-xl font-bold text-slate-400 font-poppins">{item.tEn}</p>
+                  <h4 className="text-xl md:text-2xl lg:text-3xl font-black font-cairo mb-2 md:mb-3 lg:mb-4 leading-tight">{language === 'ar' ? item.tAr : item.tEn}</h4>
                 </motion.div>
               ))}
             </motion.div>
@@ -854,8 +799,7 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
               className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 p-6 md:p-10 lg:p-12 rounded-[2rem] md:rounded-[3.5rem] lg:rounded-[4rem] text-center text-white relative group"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-brand-green/10 via-transparent to-transparent transform -skew-x-12 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-              <h3 className="text-3xl md:text-4xl lg:text-5xl font-black font-cairo text-brand-green mb-2 md:mb-3 lg:mb-4 relative z-10">بدون أي تعقيد</h3>
-              <p className="text-xl md:text-2xl lg:text-3xl font-black font-poppins uppercase tracking-widest relative z-10">Zero disruption</p>
+              <h3 className="text-3xl md:text-4xl lg:text-5xl font-black font-cairo text-brand-green mb-2 md:mb-3 lg:mb-4 relative z-10">{language === 'ar' ? 'بدون أي تعقيد' : 'Zero disruption'}</h3>
             </motion.div>
           </motion.div>
         </div>
@@ -876,8 +820,7 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
                 <div className="relative text-black text-center space-y-6 md:space-y-10 lg:space-y-12">
                   <div className="text-[6rem] md:text-[9rem] lg:text-[12rem] font-black opacity-10 select-none leading-none">?</div>
                   <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 space-y-2 md:space-y-3 lg:space-y-4">
-                    <h2 className="text-5xl md:text-7xl lg:text-9xl font-black font-cairo group-hover:scale-105 transition-transform">Why US</h2>
-                    <h2 className="text-4xl md:text-5xl lg:text-7xl font-black font-cairo text-brand-blue group-hover:scale-105 transition-transform">لماذا نحن ؟</h2>
+                    <h2 className="text-5xl md:text-7xl lg:text-9xl font-black font-cairo group-hover:scale-105 transition-transform">{language === 'ar' ? 'لماذا نحن؟' : 'Why US'}</h2>
                   </div>
                 </div>
               </div>
@@ -888,19 +831,10 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
                 <div className="bg-gradient-to-br from-brand-green to-emerald-700 p-5 md:p-8 lg:p-10 rounded-[2rem] md:rounded-[3rem] lg:rounded-[3.5rem] text-white shadow-2xl">
                   <div className="flex gap-2 mb-3 md:mb-5 lg:mb-6 justify-end"><div className="w-2 h-2 md:w-3 md:h-3 bg-white rounded-full"/><div className="w-2 h-2 md:w-3 md:h-3 bg-white rounded-full opacity-30"/></div>
                   <ul className="text-lg md:text-xl lg:text-2xl font-bold space-y-2 md:space-y-3 lg:space-y-4">
-                    <li>• All-in-one solution</li>
-                    <li>• Localized for Saudi market</li>
-                    <li>• Bilingual support</li>
-                    <li>• Cost-efficient</li>
-                  </ul>
-                </div>
-                <div className="bg-gradient-to-br from-brand-blue to-blue-700 p-5 md:p-8 lg:p-10 rounded-[2rem] md:rounded-[3rem] lg:rounded-[3.5rem] text-white shadow-2xl">
-                  <div className="flex gap-2 mb-3 md:mb-5 lg:mb-6 justify-end"><div className="w-2 h-2 md:w-3 md:h-3 bg-white rounded-full"/><div className="w-2 h-2 md:w-3 md:h-3 bg-white rounded-full opacity-30"/></div>
-                  <ul className="text-xl md:text-2xl lg:text-3xl font-black font-cairo space-y-2 md:space-y-3 lg:space-y-4">
-                    <li>• حل متكامل في منصة واحدة</li>
-                    <li>• مخصص للسوق السعودي</li>
-                    <li>• دعم عربي وإنجليزي</li>
-                    <li>• توفير في التكاليف</li>
+                    <li>• {language === 'ar' ? 'حل متكامل في منصة واحدة' : 'All-in-one solution'}</li>
+                    <li>• {language === 'ar' ? 'مخصص للسوق السعودي' : 'Localized for Saudi market'}</li>
+                    <li>• {language === 'ar' ? 'دعم عربي وإنجليزي' : 'Bilingual support'}</li>
+                    <li>• {language === 'ar' ? 'توفير في التكاليف' : 'Cost-efficient'}</li>
                   </ul>
                 </div>
               </div>
@@ -919,7 +853,7 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
             transition={{ duration: 0.5 }}
             className="text-center mb-10 md:mb-16 lg:mb-24"
           >
-            <h2 className="text-4xl md:text-5xl lg:text-7xl font-black font-cairo text-slate-900 mb-3 md:mb-4 tracking-tighter">Business Model... نموذج العمل</h2>
+            <h2 className="text-4xl md:text-5xl lg:text-7xl font-black font-cairo text-slate-900 mb-3 md:mb-4 tracking-tighter">{language === 'ar' ? 'نموذج العمل' : 'Business Model'}</h2>
             <div className="h-1 md:h-2 w-28 md:w-48 bg-gradient-to-r from-brand-green to-emerald-400 mx-auto rounded-full" />
           </motion.div>
 
@@ -946,8 +880,7 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
                 >
                   <div className="flex gap-2"><div className="w-2 h-2 md:w-3 md:h-3 bg-white rounded-full"/><div className="w-2 h-2 md:w-3 md:h-3 bg-white rounded-full opacity-30"/></div>
                   <div className="text-center md:text-right">
-                    <p className="text-lg md:text-xl lg:text-2xl font-bold font-poppins mb-1 md:mb-2">{item.en}</p>
-                    <h4 className="text-2xl md:text-3xl lg:text-4xl font-black font-cairo">{item.ar}</h4>
+                    <h4 className="text-lg md:text-xl lg:text-2xl font-bold font-poppins mb-1 md:mb-2">{language === 'ar' ? item.ar : item.en}</h4>
                   </div>
                 </motion.div>
               ))}
@@ -980,10 +913,8 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
               transition={{ duration: 0.5 }}
             >
               <h2 className="text-4xl md:text-5xl lg:text-7xl font-black font-cairo text-slate-800 mb-4 md:mb-6 lg:mb-8 leading-[1.1]">
-                TRANSFORM YOUR SCHOOL INTO A <br /> 
-                <span className="text-brand-blue uppercase">Smart Institution</span>
+                {language === 'ar' ? <>حوّل مدرستك إلى <br /><span className="text-brand-blue uppercase">مدرسة ذكية</span></> : <>TRANSFORM YOUR SCHOOL INTO A <br /><span className="text-brand-blue uppercase">Smart Institution</span></>}
               </h2>
-              <h3 className="text-3xl md:text-4xl lg:text-6xl font-black font-cairo text-slate-900 mb-8 md:mb-12 lg:mb-16 underline decoration-brand-green decoration-[6px] md:decoration-[10px] lg:decoration-[12px] underline-offset-4 md:underline-offset-6 lg:underline-offset-8">حوّل مدرستك إلى مدرسة ذكية</h3>
             </motion.div>
 
             <motion.div 
@@ -994,8 +925,7 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
               className="space-y-6 md:space-y-10 lg:space-y-12"
             >
               <div className="text-center md:text-right">
-                <p className="text-xl md:text-2xl lg:text-3xl font-bold font-poppins text-slate-400 mb-1 md:mb-2">Schedule a demo today!</p>
-                <h4 className="text-3xl md:text-4xl lg:text-5xl font-black font-cairo text-brand-green">احجز عرضاً توضيحياً اليوم!</h4>
+                <p className="text-xl md:text-2xl lg:text-3xl font-bold font-poppins text-slate-400 mb-1 md:mb-2">{language === 'ar' ? 'احجز عرضاً توضيحياً اليوم!' : 'Schedule a demo today!'}</p>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4 md:gap-8 lg:gap-12 justify-end items-center">
@@ -1003,14 +933,14 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
                   onClick={onSwitchToProfile}
                   className="text-lg md:text-xl lg:text-2xl font-black font-cairo text-slate-400 hover:text-brand-blue transition-colors flex items-center gap-2 md:gap-4 group order-2 sm:order-1"
                 >
-                  <ChevronLeft size={20} className="md:size-6 lg:size-8 group-hover:-translate-x-2 transition-transform" /> العودة للبروفايل
+                  <ChevronLeft size={20} className="md:size-6 lg:size-8 group-hover:-translate-x-2 transition-transform" /> {language === 'ar' ? 'العودة للبروفايل' : 'Back to Profile'}
                 </button>
                 <motion.button 
                   whileHover={{ scale: 1.05, boxShadow: '0 20px 40px -10px rgba(58,190,249,0.5)' }}
                   whileTap={{ scale: 0.95 }}
                   className="bg-gradient-to-r from-brand-blue to-blue-600 text-white px-8 md:px-12 lg:px-16 py-5 md:py-6 lg:py-8 rounded-[2rem] md:rounded-[2.5rem] lg:rounded-[3rem] text-xl md:text-2xl lg:text-3xl font-black shadow-2xl transition-all order-1 sm:order-2 w-full sm:w-auto"
                 >
-                  احجز العرض الآن
+                  {language === 'ar' ? 'احجز العرض الآن' : 'Book a Demo Now'}
                 </motion.button>
               </div>
             </motion.div>
@@ -1037,24 +967,7 @@ export const EcosystemView: React.FC<EcosystemViewProps> = ({ onSwitchToProfile 
         </div>
       </section>
 
-      {/* Footer Branding Area */}
-      <footer className="py-6 md:py-10 lg:py-12 bg-slate-50 border-t border-slate-100 mt-10 md:mt-16 lg:mt-20">
-        <div className={s.container}>
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 md:gap-6 lg:gap-8">
-            <div className="flex items-center gap-2 md:gap-3 lg:gap-4">
-              <div className="w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-brand-blue to-blue-600 rounded-xl flex items-center justify-center text-white font-black text-lg md:text-xl lg:text-2xl shadow-lg">E</div>
-              <span className="text-lg md:text-xl lg:text-2xl font-black font-cairo">ايوان التـعلـم <span className="text-brand-blue">| الجيل القادم</span></span>
-            </div>
-            <div className="flex gap-4 md:gap-6 lg:gap-8 text-slate-400 font-bold font-poppins uppercase tracking-widest text-xs md:text-sm">
-              <span className="hover:text-brand-blue transition-colors">ERP</span>
-              <span className="hover:text-brand-green transition-colors">LMS</span>
-              <span className="hover:text-brand-blue transition-colors">MOBILE</span>
-              <span className="hover:text-brand-blue transition-colors">WEB</span>
-            </div>
-            <div className="text-slate-300 font-bold text-xs md:text-sm">© 2024 EWAN GENIUSES. ALL RIGHTS RESERVED.</div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

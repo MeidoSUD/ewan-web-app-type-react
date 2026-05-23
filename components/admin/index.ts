@@ -14,3 +14,5 @@ export * from './BookingsTab';
 export * from './DisputesTab';
 export * from './CoursesTab';
 export * from './AdminSessionsTab';
+
+export * from './TermsTab';

@@ -677,3 +677,32 @@ export interface AppConfig {
   android_version: AppVersion;
   maintenance_mode: MaintenanceMode;
 }
+
+// --- Terms & Conditions ---
+
+export interface TermsConditions {
+  id: number;
+  title_en: string;
+  title_ar: string;
+  content_en: string;
+  content_ar: string;
+  type: 'terms' | 'conditions' | 'privacy_policy';
+  version: number;
+  status: boolean;
+  role_id?: number | null;
+  is_deleted?: boolean;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string | null;
+}
+
+export interface TermsConditionsPayload {
+  title_en: string;
+  title_ar: string;
+  content_en: string;
+  content_ar: string;
+  type: 'terms' | 'conditions' | 'privacy_policy';
+  status?: boolean;
+  role_id?: number | null;
+  version?: number;
+}

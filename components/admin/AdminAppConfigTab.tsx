@@ -212,6 +212,7 @@ export const AdminAppConfigTab: React.FC = () => {
                 {language === 'ar' ? 'رقم الإصدار الجديد' : 'New Version Number'}
               </label>
               <Input
+                label=""
                 type="text"
                 placeholder="e.g., 1.2.0"
                 value={iosVersion}
@@ -302,6 +303,7 @@ export const AdminAppConfigTab: React.FC = () => {
                 {language === 'ar' ? 'رقم الإصدار الجديد' : 'New Version Number'}
               </label>
               <Input
+                label=""
                 type="text"
                 placeholder="e.g., 1.2.0"
                 value={androidVersion}
@@ -426,6 +428,7 @@ export const AdminAppConfigTab: React.FC = () => {
               {language === 'ar' ? 'الوقت المتوقع للانتهاء' : 'Estimated End Time'}
             </label>
             <Input
+              label=""
               type="datetime-local"
               value={estimatedEndTime}
               onChange={(e) => setEstimatedEndTime(e.target.value)}
@@ -440,7 +443,7 @@ export const AdminAppConfigTab: React.FC = () => {
             <Button
               onClick={handleToggleMaintenance}
               disabled={updating}
-              variant={maintenanceEnabled ? 'primary' : 'default'}
+              variant={maintenanceEnabled ? 'primary' : 'outline'}
               className={`w-full ${
                 maintenanceEnabled
                   ? 'bg-yellow-600 hover:bg-yellow-700'

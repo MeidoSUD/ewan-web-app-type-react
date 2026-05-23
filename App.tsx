@@ -12,6 +12,9 @@ import { StudentDashboardScreen } from './components/StudentDashboardScreen';
 import { AdminDashboardScreen } from './components/AdminDashboardScreen';
 import { HomePage } from './components/website/HomePage';
 import { ProfileView as EProfilePage } from './components/website/EProfilePage';
+import { ServicePage } from './components/website/ServicePage';
+import { AboutPage } from './components/website/AboutPage';
+import { ContactPage } from './components/website/ContactPage';
 import { EwanLandingPage } from './pages/EwanLandingPage';
 import { EcosystemView } from './components/EcosystemView/EcosystemView';
 import { WebsiteNavbar } from './components/website/WebsiteNavbar';
@@ -22,7 +25,7 @@ import { useFcm } from './hooks/useFcm';
 const USER_DATA_KEY = 'user_session_data';
 
 const AppContent = () => {
-  const [currentScreen, setCurrentScreen] = useState<'website' | 'login' | 'register' | 'dashboard' | 'e_profile' | 'ewan_landing' | 'ewan_school'>('website');
+  const [currentScreen, setCurrentScreen] = useState<'website' | 'login' | 'register' | 'dashboard' | 'e_profile' | 'ewan_landing' | 'ewan_school' | 'services' | 'about' | 'contact'>('website');
   const [userData, setUserData] = useState<AuthResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [authError, setAuthError] = useState<string | null>(null);
@@ -283,18 +286,22 @@ const AppContent = () => {
 
   return (
     <div className="min-h-screen bg-background font-sans text-text">
-      {(currentScreen === 'website' || currentScreen === 'e_profile' || currentScreen === 'ewan_landing' || currentScreen === 'ewan_school') && (
+      {(currentScreen === 'website' || currentScreen === 'e_profile' || currentScreen === 'ewan_landing' || currentScreen === 'ewan_school' || currentScreen === 'services' || currentScreen === 'about' || currentScreen === 'contact') && (
         <WebsiteNavbar 
           onLoginClick={() => setCurrentScreen('login')} 
           onRegisterClick={() => setCurrentScreen('register')}
           onPageChange={(page) => setCurrentScreen(page as any)}
+          currentPage={currentScreen}
         />
       )}
       
-      {currentScreen === 'website' && <div className="pt-20"><HomePage onLoginClick={() => setCurrentScreen('login')} onRegisterClick={() => setCurrentScreen('register')} /></div>}
+      {currentScreen === 'website' && <div className="pt-20"><HomePage onLoginClick={() => setCurrentScreen('login')} onRegisterClick={() => setCurrentScreen('register')} onPageChange={(page) => setCurrentScreen(page as any)} /></div>}
       {currentScreen === 'e_profile' && <div className="pt-20"><EProfilePage /></div>}
       {currentScreen === 'ewan_landing' && <EwanLandingPage />}
       {currentScreen === 'ewan_school' && <EcosystemView onSwitchToProfile={() => setCurrentScreen('e_profile')} />}
+      {currentScreen === 'services' && <div className="pt-20"><ServicePage /></div>}
+      {currentScreen === 'about' && <div className="pt-20"><AboutPage /></div>}
+      {currentScreen === 'contact' && <div className="pt-20"><ContactPage /></div>}
 
       {currentScreen === 'login' && (
         <div className="flex items-center justify-center min-h-screen p-4 bg-slate-50 relative">

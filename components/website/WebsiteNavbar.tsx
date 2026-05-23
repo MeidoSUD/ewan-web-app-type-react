@@ -1,41 +1,50 @@
-
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Button } from '../ui/Button';
 import { Logo } from '../Logo';
-import { Menu, X, Globe } from 'lucide-react';
+import { Menu, X, Globe, ChevronDown } from 'lucide-react';
 
 interface WebsiteNavbarProps {
   onLoginClick: () => void;
   onRegisterClick: () => void;
   onPageChange: (page: string) => void;
+  currentPage: string;
 }
 
-export const WebsiteNavbar: React.FC<WebsiteNavbarProps> = ({ onLoginClick, onRegisterClick, onPageChange }) => {
+export const WebsiteNavbar: React.FC<WebsiteNavbarProps> = ({ onLoginClick, onRegisterClick, onPageChange, currentPage }) => {
   const { t, language, setLanguage } = useLanguage();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const navLinks = [
-    { id: 'home', label: language === 'ar' ? 'الرئيسية' : 'Home', href: 'website' },
-    { id: 'eprofile', label: language === 'ar' ? 'ملف التعريف' : 'E-Profile', href: 'e_profile' },
-    { id: 'school', label: language === 'ar' ? 'نظام المدرسة' : 'Smart School', href: 'ewan_school' },
-    { id: 'services', label: language === 'ar' ? 'خدماتنا' : 'Services', href: '#services' },
-    { id: 'about', label: language === 'ar' ? 'من نحن' : 'About Us', href: '#about' },
-    { id: 'contact', label: language === 'ar' ? 'اتصل بنا' : 'Contact', href: '#contact' },
-  ];
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setOpenDropdown(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleNavClick = (href: string) => {
     setIsMenuOpen(false);
-    if (href.startsWith('#')) {
-      const element = document.querySelector(href === '#' ? 'body' : href);
-      if (element) {
-          element.scrollIntoView({ behavior: 'smooth' });
-      }
-    } else {
-      onPageChange(href);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    setOpenDropdown(null);
+    onPageChange(href);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const products = [
+    { id: 'eprofile', label: language === 'ar' ? 'تطبيق Ewan' : 'Ewan App', href: 'e_profile', desc: language === 'ar' ? 'للطلاب والمعلمين' : 'For Students & Teachers' },
+    { id: 'school', label: language === 'ar' ? 'المدرسة الذكية' : 'Smart School', href: 'ewan_school', desc: language === 'ar' ? 'للمؤسسات التعليمية' : 'For Schools & Institutes' },
+  ];
+
+  const pageLinks = [
+    { id: 'home', label: language === 'ar' ? 'الرئيسية' : 'Home', href: 'website', desc: language === 'ar' ? 'الصفحة الرئيسية' : 'Back to homepage' },
+    { id: 'services', label: language === 'ar' ? 'خدماتنا' : 'Services', href: 'services', desc: language === 'ar' ? 'ماذا نقدم' : 'What we offer' },
+    { id: 'about', label: language === 'ar' ? 'من نحن' : 'About Us', href: 'about', desc: language === 'ar' ? 'تعرف علينا' : 'Learn about us' },
+    { id: 'contact', label: language === 'ar' ? 'اتصل بنا' : 'Contact', href: 'contact', desc: language === 'ar' ? 'تواصل معنا' : 'Get in touch' },
+  ];
 
   return (
     <nav className="fixed w-full z-50 bg-white/95 backdrop-blur-sm border-b border-slate-100 transition-all">
@@ -44,18 +53,59 @@ export const WebsiteNavbar: React.FC<WebsiteNavbarProps> = ({ onLoginClick, onRe
           
           {/* Logo */}
           <div className="flex-shrink-0 cursor-pointer" onClick={() => handleNavClick('website')}>
-            <Logo className="scale-75" />
+            <Logo />
           </div>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center space-x-8 rtl:space-x-reverse">
-            {navLinks.map((link) => (
+          <div className="hidden md:flex items-center space-x-1 rtl:space-x-reverse" ref={dropdownRef}>
+            {/* Products Dropdown */}
+            <div className="relative">
+              <button
+                onMouseEnter={() => setOpenDropdown('products')}
+                onClick={() => setOpenDropdown(openDropdown === 'products' ? null : 'products')}
+                className={`flex items-center gap-1 px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                  openDropdown === 'products' || currentPage === 'e_profile' || currentPage === 'ewan_school'
+                    ? 'text-primary bg-blue-50' 
+                    : 'text-slate-600 hover:text-primary hover:bg-slate-50'
+                }`}
+              >
+                {language === 'ar' ? 'المنتجات' : 'Products'}
+                <ChevronDown size={14} className={`transition-transform ${openDropdown === 'products' ? 'rotate-180' : ''}`} />
+              </button>
+              {openDropdown === 'products' && (
+                <div 
+                  onMouseLeave={() => setOpenDropdown(null)}
+                  className="absolute top-full right-0 mt-1 w-64 bg-white rounded-xl shadow-xl border border-slate-100 py-3 animate-fade-in z-50"
+                >
+                  {products.map((p) => (
+                    <button
+                      key={p.id}
+                      onClick={() => handleNavClick(p.href)}
+                      className={`w-full text-right px-5 py-3 hover:bg-slate-50 transition-colors flex flex-col group ${
+                        currentPage === p.href ? 'bg-blue-50' : ''
+                      }`}
+                    >
+                      <span className="font-bold text-slate-900 group-hover:text-primary transition-colors">{p.label}</span>
+                      <span className="text-xs text-slate-400">{p.desc}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Page Links */}
+            {pageLinks.map((link) => (
               <button
                 key={link.id}
                 onClick={() => handleNavClick(link.href)}
-                className="text-slate-600 hover:text-primary font-medium transition-colors"
+                className={`relative px-4 py-2 text-sm font-medium rounded-lg transition-all group ${
+                  currentPage === link.href ? 'text-primary bg-blue-50' : 'text-slate-600 hover:text-primary hover:bg-slate-50'
+                }`}
               >
                 {link.label}
+                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity text-[10px] text-primary whitespace-nowrap">
+                  {link.desc}
+                </span>
               </button>
             ))}
           </div>
@@ -91,7 +141,25 @@ export const WebsiteNavbar: React.FC<WebsiteNavbarProps> = ({ onLoginClick, onRe
       {isMenuOpen && (
         <div className="md:hidden bg-white border-b border-slate-100 animate-fade-in">
           <div className="px-4 pt-2 pb-6 space-y-4">
-            {navLinks.map((link) => (
+            {/* Products Section */}
+            <div className="px-3">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">{language === 'ar' ? 'المنتجات' : 'Products'}</p>
+              {products.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => handleNavClick(p.href)}
+                  className={`w-full flex justify-between items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors ${
+                    currentPage === p.href ? 'bg-blue-50 text-primary' : 'text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <span className="text-xs text-slate-400">{p.desc}</span>
+                  <span>{p.label}</span>
+                </button>
+              ))}
+            </div>
+            <div className="border-t border-slate-100" />
+            {/* Page Links */}
+            {pageLinks.map((link) => (
               <button
                 key={link.id}
                 onClick={() => handleNavClick(link.href)}
