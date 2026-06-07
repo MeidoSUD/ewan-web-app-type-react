@@ -73,9 +73,9 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, setActive
             icon: Settings,
             children: [
                 { id: 'ads', label: t.adsManagement, icon: Monitor },
+                { id: 'terms', label: language === 'ar' ? 'الشروط والأحكام' : 'Terms & Conditions', icon: FileText },
                 { id: 'appConfig', label: language === 'ar' ? 'إعدادات التطبيق' : 'App Config', icon: Cog },
                 { id: 'settings', label: language === 'ar' ? 'الإعدادات' : 'Settings', icon: Settings },
-                { id: 'terms', label: language === 'ar' ? 'الشروط والأحكام' : 'Terms & Conditions', icon: FileText },
             ]
         }
     ];
