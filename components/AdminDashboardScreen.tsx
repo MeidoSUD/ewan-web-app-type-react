@@ -50,8 +50,6 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({ data
         return <AdsTab />;
       case 'terms':
         return <TermsTab />;
-      case 'terms':
-        return <TermsTab />;
       case 'appConfig':
         return <AdminAppConfigTab />;
       case 'settings':
