@@ -93,6 +93,8 @@ export interface Withdrawal {
 
 export interface WalletResponse {
   balance: number;
+  pending_balance: number;
+  total_balance?: number;
   currency?: string;
   payouts?: {
     data: Withdrawal[];
@@ -705,4 +707,79 @@ export interface TermsConditionsPayload {
   status?: boolean;
   role_id?: number | null;
   version?: number;
+}
+
+export interface ApiAnalyticsStats {
+  total_requests: number;
+  today_requests: number;
+  this_week_requests: number;
+  this_month_requests: number;
+  most_popular_endpoint: ApiStatistic | null;
+  least_popular_endpoint: ApiStatistic | null;
+  successful_requests: number;
+  failed_requests: number;
+  client_errors: number;
+  server_errors: number;
+  average_response_time_ms: number | null;
+  fastest_endpoint: ApiStatistic | null;
+  slowest_endpoint: ApiStatistic | null;
+  highest_memory_usage_kb: ApiStatistic | null;
+  android_usage: number;
+  ios_usage: number;
+  web_usage: number;
+  other_platform_usage: number;
+  authenticated_count: number;
+  guest_count: number;
+}
+
+export interface ApiStatistic {
+  id: number;
+  endpoint: string;
+  uri: string;
+  method: string;
+  module: string | null;
+  date: string;
+  hits: number;
+  authenticated_hits: number;
+  guest_hits: number;
+  success_hits: number;
+  client_error_hits: number;
+  server_error_hits: number;
+  total_response_time: number;
+  min_response_time: number;
+  max_response_time: number;
+  total_memory_usage: number;
+  max_memory_usage: number;
+  web_hits: number;
+  android_hits: number;
+  ios_hits: number;
+  other_hits: number;
+  last_status_code: number | null;
+  last_hit_at: string | null;
+  average_response_time: number | null;
+  success_rate: number | null;
+  failure_rate: number | null;
+  average_memory_usage: number | null;
+}
+
+export interface SystemLogEntry {
+  id: number;
+  level: string;
+  type: string | null;
+  title: string;
+  message: string;
+  file: string | null;
+  line: number | null;
+  trace: string | null;
+  url: string | null;
+  method: string | null;
+  ip: string | null;
+  user_agent: string | null;
+  user_id: number | null;
+  context: any;
+  hash: string;
+  occurrences: number;
+  last_occurred_at: string;
+  created_at: string;
+  updated_at: string;
 }

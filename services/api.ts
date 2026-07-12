@@ -4,8 +4,8 @@
 // =====================================================
 
 
-// const PRODUCTION_URL = "http://localhost:8000/api";
-const PRODUCTION_URL = "https://portal.ewan-geniuses.com/api";
+const PRODUCTION_URL = "http://localhost:8000/api";
+// const PRODUCTION_URL = "https://portal.ewan-geniuses.com/api";
 
 const URL_STORAGE_KEY = 'api_base_url';
 
@@ -89,7 +89,7 @@ import {
   AdminUser, AdminTeacher, AdminBooking, AdminDispute, PayoutRequest, Service,
   Ad, AdPayload, AdminService, AdminOrder, TeacherApplication, PlatformPercentage,
   RevenueAnalytics, CalculatorResults, AppConfig, AppVersion, MaintenanceMode,
-  TermsConditions, TermsConditionsPayload
+  TermsConditions, TermsConditionsPayload,   SystemLogEntry, ApiAnalyticsStats, ApiStatistic
 } from '../types';
 
 export type {
@@ -100,7 +100,7 @@ export type {
   AdminUser, AdminTeacher, AdminBooking, AdminDispute, PayoutRequest, Service,
   Ad, AdPayload, AdminService, AdminOrder, TeacherApplication, PlatformPercentage,
   RevenueAnalytics, CalculatorResults, AppConfig, AppVersion, MaintenanceMode,
-  TermsConditions, TermsConditionsPayload
+  TermsConditions, TermsConditionsPayload, SystemLogEntry, ApiAnalyticsStats, ApiStatistic
 };
 
 export const AUTH_SESSION_EXPIRED = 'auth:session-expired';
@@ -422,7 +422,7 @@ export const adminService = {
   getSettingsByGroup: (group: string) => fetchWithAuth(`/admin/settings/${group}`),
   updateSetting: (id: number, data: any) => fetchWithAuth(`/admin/settings/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   createSetting: (data: any) => fetchWithAuth('/admin/settings', { method: 'POST', body: JSON.stringify(data) }),
-  bulkUpdateSettings: (settings: { id: number; value: string }[]) => 
+  bulkUpdateSettings: (settings: { id: number; value: string }[]) =>
     fetchWithAuth('/admin/settings/bulk', { method: 'PUT', body: JSON.stringify({ settings }) }),
 
   // Services Management
@@ -430,18 +430,18 @@ export const adminService = {
     const query = new URLSearchParams(filters).toString();
     return fetchWithAuth(`/admin/services${query ? `?${query}` : ''}`).then(extractArray);
   },
-  createService: (data: any) => fetchWithAuth('/admin/services', { 
-    method: 'POST', 
-    body: data instanceof FormData ? data : JSON.stringify(data) 
+  createService: (data: any) => fetchWithAuth('/admin/services', {
+    method: 'POST',
+    body: data instanceof FormData ? data : JSON.stringify(data)
   }),
   updateService: (id: number, data: any) => {
     if (data instanceof FormData) {
       data.append('_method', 'PUT');
       return fetchWithAuth(`/admin/services/${id}`, { method: 'POST', body: data });
     }
-    return fetchWithAuth(`/admin/services/${id}`, { 
-      method: 'PUT', 
-      body: JSON.stringify(data) 
+    return fetchWithAuth(`/admin/services/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
     });
   },
   deleteService: (id: number) => fetchWithAuth(`/admin/services/${id}`, { method: 'DELETE' }),
@@ -452,9 +452,9 @@ export const adminService = {
     return fetchWithAuth(`/admin/orders${query ? `?${query}` : ''}`).then(extractArray);
   },
   getOrderApplications: (orderId: number) => fetchWithAuth(`/admin/orders/${orderId}/applications`),
-  assignTeacher: (orderId: number, data: { teacher_id: number; reason?: string }) => 
+  assignTeacher: (orderId: number, data: { teacher_id: number; reason?: string }) =>
     fetchWithAuth(`/admin/orders/${orderId}/assign`, { method: 'POST', body: JSON.stringify(data) }),
-  updateOrderStatus: (orderId: number, data: { status: string; notes?: string }) => 
+  updateOrderStatus: (orderId: number, data: { status: string; notes?: string }) =>
     fetchWithAuth(`/admin/orders/${orderId}/status`, { method: 'PUT', body: JSON.stringify(data) }),
 
   // Revenue & Percentage
@@ -463,7 +463,7 @@ export const adminService = {
     const query = new URLSearchParams(filters).toString();
     return fetchWithAuth(`/admin/revenue/history${query ? `?${query}` : ''}`).then(extractArray);
   },
-  updatePercentage: (data: { value: number; effective_date: string; description?: string }) => 
+  updatePercentage: (data: { value: number; effective_date: string; description?: string }) =>
     fetchWithAuth('/admin/revenue/percentage', { method: 'POST', body: JSON.stringify(data) }),
   getRevenueAnalytics: (filters: any = {}) => {
     const query = new URLSearchParams(filters).toString();
@@ -477,19 +477,19 @@ export const adminService = {
 
   // App Config Management
   getAppConfig: () => fetchWithAuth('/admin/app-config/settings'),
-  updateAppVersion: (data: { platform: 'ios' | 'android'; version: string; force_update: boolean; release_notes?: string }) => 
+  updateAppVersion: (data: { platform: 'ios' | 'android'; version: string; force_update: boolean; release_notes?: string }) =>
     fetchWithAuth('/admin/app-config/version', { method: 'PUT', body: JSON.stringify(data) }),
-  toggleMaintenanceMode: (data: { enabled: boolean; message?: string; estimated_end_time?: string }) => 
+  toggleMaintenanceMode: (data: { enabled: boolean; message?: string; estimated_end_time?: string }) =>
     fetchWithAuth('/admin/app-config/maintenance', { method: 'PUT', body: JSON.stringify(data) }),
-    
+
   // Sessions Management
   getSessions: (filters: any = {}) => {
     const query = new URLSearchParams(filters).toString();
     return fetchWithAuth(`/admin/sessions${query ? `?${query}` : ''}`).then(extractArray);
   },
-  updateSessionDate: (id: number, data: { session_date: string; start_time?: string; end_time?: string }) => 
+  updateSessionDate: (id: number, data: { session_date: string; start_time?: string; end_time?: string }) =>
     fetchWithAuth(`/admin/sessions/${id}/reschedule`, { method: 'PUT', body: JSON.stringify(data) }),
-  getUserSessions: (userId: number, role: 'teacher' | 'student') => 
+  getUserSessions: (userId: number, role: 'teacher' | 'student') =>
     fetchWithAuth(`/admin/users/${userId}/sessions?role=${role}`).then(extractArray),
 
   // Terms & Conditions
@@ -508,6 +508,23 @@ export const adminService = {
     fetchWithAuth(`/admin/terms-conditions/${id}/restore`, { method: 'POST' }),
   getLatestTermsByType: (type: string) =>
     fetchWithAuth(`/admin/terms-conditions/type/${type}`),
+
+  // API Analytics
+  getApiAnalytics: (): Promise<{ data: ApiAnalyticsStats }> =>
+    fetchWithAuth('/admin/analytics'),
+  getApiAnalyticsRecords: (params: Record<string, string | number> = {}) => {
+    const query = new URLSearchParams(params as any).toString();
+    return fetchWithAuth(`/admin/analytics/records${query ? `?${query}` : ''}`);
+  },
+
+  // System Logs
+  getSystemLogs: (params: Record<string, string | number> = {}) => {
+    const query = new URLSearchParams(params as any).toString();
+    return fetchWithAuth(`/admin/system-logs${query ? `?${query}` : ''}`);
+  },
+  getSystemLog: (id: number) => fetchWithAuth(`/admin/system-logs/${id}`),
+  deleteSystemLog: (id: number) => fetchWithAuth(`/admin/system-logs/${id}`, { method: 'DELETE' }),
+  clearSystemLogs: () => fetchWithAuth('/admin/system-logs', { method: 'DELETE' }),
 };
 
 export const adsService = {
@@ -517,20 +534,20 @@ export const adsService = {
 export const settingsService = {
   // Get all settings
   getAll: () => fetchWithAuth('/settings'),
-  
+
   // Get settings by group (e.g., 'app', 'contact')
   getByGroup: (group: string) => fetchWithAuth(`/settings/${group}`),
-  
+
   // Update a single setting
-  update: (id: number, data: { key: string; value: string; type?: string; group?: string; description?: string }) => 
+  update: (id: number, data: { key: string; value: string; type?: string; group?: string; description?: string }) =>
     fetchWithAuth(`/settings/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-  
+
   // Create a new setting
-  create: (data: { key: string; value: string; type: string; group: string; description?: string }) => 
+  create: (data: { key: string; value: string; type: string; group: string; description?: string }) =>
     fetchWithAuth('/settings', { method: 'POST', body: JSON.stringify(data) }),
-  
+
   // Bulk update settings
-  bulkUpdate: (settings: { id: number; value: string }[]) => 
+  bulkUpdate: (settings: { id: number; value: string }[]) =>
     fetchWithAuth('/settings/bulk', { method: 'PUT', body: JSON.stringify({ settings }) }),
 };
 

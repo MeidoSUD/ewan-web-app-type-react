@@ -163,6 +163,8 @@ export const WalletTab: React.FC<WalletTabProps> = ({ user }) => {
   }
 
   const displayBalance = walletData?.balance ?? user?.current_balance ?? 0;
+  const displayPendingBalance = walletData?.pending_balance ?? 0;
+  const displayTotalBalance = walletData?.total_balance ?? Number(displayBalance) + Number(displayPendingBalance);
   
   // FIX: Access withdrawals.data based on API JSON structure provided
   // Structure: { balance: ..., withdrawals: { data: [...], current_page: ... } }
@@ -180,10 +182,26 @@ export const WalletTab: React.FC<WalletTabProps> = ({ user }) => {
             <Wallet size={120} />
           </div>
           <div className="relative z-10">
-            <p className="text-slate-400 font-medium mb-2">{t.balance}</p>
-            <h2 className="text-4xl font-bold mb-6">
-              {Number(displayBalance).toFixed(2)} <span className="text-lg font-normal text-slate-400">{t.sar}</span>
-            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
+              <div>
+                <p className="text-slate-400 font-medium text-sm mb-1">{language === 'ar' ? 'الرصيد الكلي' : 'Total Balance'}</p>
+                <h2 className="text-3xl font-bold">
+                  {Number(displayTotalBalance).toFixed(2)} <span className="text-base font-normal text-slate-400">{t.sar}</span>
+                </h2>
+              </div>
+              <div>
+                <p className="text-slate-400 font-medium text-sm mb-1">{language === 'ar' ? 'الرصيد المتاح' : 'Available Balance'}</p>
+                <h3 className="text-2xl font-bold">
+                  {Number(displayBalance).toFixed(2)} <span className="text-sm font-normal text-slate-400">{t.sar}</span>
+                </h3>
+              </div>
+              <div>
+                <p className="text-slate-400 font-medium text-sm mb-1">{language === 'ar' ? 'الرصيد المعلق' : 'Pending Balance'}</p>
+                <h3 className="text-2xl font-bold text-yellow-300">
+                  {Number(displayPendingBalance).toFixed(2)} <span className="text-sm font-normal text-slate-400">{t.sar}</span>
+                </h3>
+              </div>
+            </div>
             <div className="flex gap-3">
               <Button onClick={() => setShowWithdraw(true)} className="bg-primary hover:bg-primary/90 text-white border-0">
                 <ArrowUpRight size={18} className="mr-2" /> {t.requestPayout}

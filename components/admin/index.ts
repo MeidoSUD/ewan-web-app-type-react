@@ -15,5 +15,5 @@ export * from './DisputesTab';
 export * from './CoursesTab';
 export * from './AdminSessionsTab';
 export * from './TermsTab';
-
-export * from './TermsTab';
+export * from './SystemLogsTab';
+export * from './ApiAnalyticsTab';
