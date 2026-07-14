@@ -17,3 +17,4 @@ export * from './AdminSessionsTab';
 export * from './TermsTab';
 export * from './SystemLogsTab';
 export * from './ApiAnalyticsTab';
+export * from './ActivityRecordsTab';

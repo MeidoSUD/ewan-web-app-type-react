@@ -783,3 +783,38 @@ export interface SystemLogEntry {
   created_at: string;
   updated_at: string;
 }
+
+export interface ActivityRecordStats {
+  total: number;
+  today: number;
+  this_week: number;
+  this_month: number;
+  unique_users: number;
+  unique_teachers: number;
+  categories: number;
+}
+
+export interface ActivityRecord {
+  id: number;
+  title: string;
+  category: string | null;
+  user_id: number | null;
+  booking_id: number | null;
+  service_id: number | null;
+  subject_id: number | null;
+  teacher_id: number | null;
+  language_id: number | null;
+  course_id: number | null;
+  session_type: string | null;
+  sessions_count: number | null;
+  data: any;
+  user?: { id: number; first_name: string; last_name: string };
+  teacher?: { id: number; first_name: string; last_name: string };
+  booking?: { id: number; booking_reference: string };
+  service?: { id: number; name_en: string; name_ar: string };
+  subject?: { id: number; name_en: string; name_ar: string };
+  language?: { id: number; name_en: string; name_ar: string };
+  course?: { id: number; name_en: string; name_ar: string };
+  created_at: string;
+  updated_at: string;
+}

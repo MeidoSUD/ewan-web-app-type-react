@@ -317,6 +317,9 @@ export const TRANSLATIONS: Record<'en' | 'ar', Translations> = {
     details: "Details",
     view: "View",
     teacherProfile: "Teacher Profile",
+    // Activity Records
+    activityRecords: "Activity Records",
+    activityRecordsDesc: "Track all events and actions in the system",
     // API Analytics
     apiAnalytics: "API Analytics",
     apiAnalyticsDesc: "Monitor API usage and performance",
@@ -652,6 +655,9 @@ export const TRANSLATIONS: Record<'en' | 'ar', Translations> = {
     adUpdatedSuccess: "تم تحديث الإعلان بنجاح!",
     adDeletedSuccess: "تم حذف الإعلان بنجاح!",
     confirmDeleteAd: "هل أنت متأكد من حذف هذا الإعلان؟",
+    // Activity Records
+    activityRecords: "سجلات النشاطات",
+    activityRecordsDesc: "تتبع جميع الأحداث والإجراءات في النظام",
     // API Analytics
     apiAnalytics: "تحليلات API",
     apiAnalyticsDesc: "مراقبة استخدام وأداء API",

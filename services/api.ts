@@ -89,7 +89,7 @@ import {
   AdminUser, AdminTeacher, AdminBooking, AdminDispute, PayoutRequest, Service,
   Ad, AdPayload, AdminService, AdminOrder, TeacherApplication, PlatformPercentage,
   RevenueAnalytics, CalculatorResults, AppConfig, AppVersion, MaintenanceMode,
-  TermsConditions, TermsConditionsPayload,   SystemLogEntry, ApiAnalyticsStats, ApiStatistic
+  TermsConditions, TermsConditionsPayload, SystemLogEntry, ApiAnalyticsStats, ApiStatistic, ActivityRecord, ActivityRecordStats
 } from '../types';
 
 export type {
@@ -100,7 +100,7 @@ export type {
   AdminUser, AdminTeacher, AdminBooking, AdminDispute, PayoutRequest, Service,
   Ad, AdPayload, AdminService, AdminOrder, TeacherApplication, PlatformPercentage,
   RevenueAnalytics, CalculatorResults, AppConfig, AppVersion, MaintenanceMode,
-  TermsConditions, TermsConditionsPayload, SystemLogEntry, ApiAnalyticsStats, ApiStatistic
+  TermsConditions, TermsConditionsPayload, SystemLogEntry, ApiAnalyticsStats, ApiStatistic, ActivityRecord, ActivityRecordStats
 };
 
 export const AUTH_SESSION_EXPIRED = 'auth:session-expired';
@@ -525,6 +525,20 @@ export const adminService = {
   getSystemLog: (id: number) => fetchWithAuth(`/admin/system-logs/${id}`),
   deleteSystemLog: (id: number) => fetchWithAuth(`/admin/system-logs/${id}`, { method: 'DELETE' }),
   clearSystemLogs: () => fetchWithAuth('/admin/system-logs', { method: 'DELETE' }),
+
+  // Activity Records
+  getActivityRecordsStats: () => fetchWithAuth('/admin/activity-records/stats'),
+  getActivityRecords: (params: Record<string, string | number> = {}) => {
+    const query = new URLSearchParams(params as any).toString();
+    return fetchWithAuth(`/admin/activity-records${query ? `?${query}` : ''}`);
+  },
+  getActivityRecord: (id: number) => fetchWithAuth(`/admin/activity-records/${id}`),
+  createActivityRecord: (data: Record<string, any>) =>
+    fetchWithAuth('/admin/activity-records', { method: 'POST', body: JSON.stringify(data) }),
+  updateActivityRecord: (id: number, data: Record<string, any>) =>
+    fetchWithAuth(`/admin/activity-records/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteActivityRecord: (id: number) => fetchWithAuth(`/admin/activity-records/${id}`, { method: 'DELETE' }),
+  clearActivityRecords: () => fetchWithAuth('/admin/activity-records', { method: 'DELETE' }),
 };
 
 export const adsService = {
