@@ -89,7 +89,7 @@ import {
   AdminUser, AdminTeacher, AdminBooking, AdminDispute, PayoutRequest, Service,
   Ad, AdPayload, AdminService, AdminOrder, TeacherApplication, PlatformPercentage,
   RevenueAnalytics, CalculatorResults, AppConfig, AppVersion, MaintenanceMode,
-  TermsConditions, TermsConditionsPayload, SystemLogEntry, ApiAnalyticsStats, ApiStatistic, ActivityRecord, ActivityRecordStats
+  TermsConditions, TermsConditionsPayload, SystemLogEntry, ApiAnalyticsStats, ApiStatistic,   ActivityRecord, ActivityRecordStats, ActivityRecordGroupedStats
 } from '../types';
 
 export type {
@@ -100,7 +100,7 @@ export type {
   AdminUser, AdminTeacher, AdminBooking, AdminDispute, PayoutRequest, Service,
   Ad, AdPayload, AdminService, AdminOrder, TeacherApplication, PlatformPercentage,
   RevenueAnalytics, CalculatorResults, AppConfig, AppVersion, MaintenanceMode,
-  TermsConditions, TermsConditionsPayload, SystemLogEntry, ApiAnalyticsStats, ApiStatistic, ActivityRecord, ActivityRecordStats
+  TermsConditions, TermsConditionsPayload, SystemLogEntry, ApiAnalyticsStats, ApiStatistic,   ActivityRecord, ActivityRecordStats, ActivityRecordGroupedStats
 };
 
 export const AUTH_SESSION_EXPIRED = 'auth:session-expired';
@@ -528,6 +528,7 @@ export const adminService = {
 
   // Activity Records
   getActivityRecordsStats: () => fetchWithAuth('/admin/activity-records/stats'),
+  getActivityRecordsGroupedStats: () => fetchWithAuth('/admin/activity-records/grouped-stats'),
   getActivityRecords: (params: Record<string, string | number> = {}) => {
     const query = new URLSearchParams(params as any).toString();
     return fetchWithAuth(`/admin/activity-records${query ? `?${query}` : ''}`);

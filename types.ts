@@ -784,6 +784,23 @@ export interface SystemLogEntry {
   updated_at: string;
 }
 
+export interface ActivityRecordGroupedItem {
+  id?: number;
+  name: string;
+  name_ar?: string;
+  total: number;
+}
+
+export interface ActivityRecordGroupedStats {
+  users: ActivityRecordGroupedItem[];
+  services: ActivityRecordGroupedItem[];
+  subjects: ActivityRecordGroupedItem[];
+  teachers: ActivityRecordGroupedItem[];
+  languages: ActivityRecordGroupedItem[];
+  courses: ActivityRecordGroupedItem[];
+  session_types: ActivityRecordGroupedItem[];
+}
+
 export interface ActivityRecordStats {
   total: number;
   today: number;
